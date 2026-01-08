@@ -1,11 +1,11 @@
 [
   {
     "content": "Phase 1 POC: Research best practices (ledger, auth, storage, PDF)",
-    "status": "in_progress"
+    "status": "completed"
   },
   {
     "content": "Phase 1 POC: Implement double-entry ledger engine with invariants",
-    "status": "pending"
+    "status": "in_progress"
   },
   {
     "content": "Phase 1 POC: Implement idempotency store and middleware",
