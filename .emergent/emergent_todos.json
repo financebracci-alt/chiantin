@@ -1,43 +1,15 @@
 [
   {
-    "content": "Phase 1 POC: Research best practices (ledger, auth, storage, PDF)",
-    "status": "completed"
-  },
-  {
-    "content": "Phase 1 POC: Implement double-entry ledger engine with invariants",
-    "status": "completed"
-  },
-  {
-    "content": "Phase 1 POC: Implement idempotency store and middleware",
-    "status": "completed"
-  },
-  {
-    "content": "Phase 1 POC: Implement S3 adapter interface with LocalS3 fallback",
-    "status": "completed"
-  },
-  {
-    "content": "Phase 1 POC: Implement JWT and TOTP auth primitives",
-    "status": "completed"
-  },
-  {
-    "content": "Phase 1 POC: Create comprehensive test script (test_core_atlas.py)",
-    "status": "completed"
-  },
-  {
-    "content": "Phase 1 POC: Run tests and fix until all pass",
-    "status": "completed"
-  },
-  {
-    "content": "Phase 1 POC: All user stories validated and working",
+    "content": "Phase 1 POC: All tests passed - Core proven and working",
     "status": "completed"
   },
   {
     "content": "Phase 2: Get design guidelines from design_agent",
-    "status": "in_progress"
+    "status": "completed"
   },
   {
     "content": "Phase 2: Backend implementation (auth, KYC, ledger, admin)",
-    "status": "pending"
+    "status": "in_progress"
   },
   {
     "content": "Phase 2: Frontend implementation (customer + admin portals)",
