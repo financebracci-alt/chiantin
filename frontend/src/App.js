@@ -140,6 +140,93 @@ function LoginPage() {
   );
 }
 
+// Transactions Page
+function TransactionsPage() {
+  const { accountId } = useParams();
+  const { user, logout } = useAuth();
+  const navigate = useNavigate();
+  const [account, setAccount] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetchAccount();
+  }, [accountId]);
+
+  const fetchAccount = async () => {
+    try {
+      const response = await api.get('/accounts');
+      const acc = response.data.find(a => a.id === accountId);
+      setAccount(acc);
+    } catch (err) {
+      console.error('Failed to fetch account:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const formatAmount = (cents) => {
+    return `€${(cents / 100).toFixed(2)}`;
+  };
+
+  return (
+    <div className="min-h-screen bg-gray-50">
+      <header className="bg-white shadow-sm">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between items-center py-4">
+            <div className="flex items-center space-x-4">
+              <button
+                onClick={() => navigate('/dashboard')}
+                className="text-gray-600 hover:text-gray-900"
+              >
+                ← Back
+              </button>
+              <h1 className="text-2xl font-bold" style={{ fontFamily: 'Space Grotesk' }}>
+                {APP_NAME}
+              </h1>
+            </div>
+            <button onClick={logout} className="text-sm text-gray-600 hover:text-gray-900">
+              Logout
+            </button>
+          </div>
+        </div>
+      </header>
+
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {loading ? (
+          <div className="text-center">Loading...</div>
+        ) : account ? (
+          <div className="space-y-6">
+            {/* Account Summary */}
+            <div className="bg-white rounded-lg shadow p-6">
+              <div className="flex justify-between items-start">
+                <div>
+                  <p className="text-sm text-gray-600">Account</p>
+                  <p className="text-lg font-semibold font-mono">{account.account_number}</p>
+                  <p className="text-sm text-gray-600 mt-2">IBAN</p>
+                  <p className="font-mono">{account.iban}</p>
+                </div>
+                <div className="text-right">
+                  <p className="text-sm text-gray-600">Current Balance</p>
+                  <p className="text-3xl font-bold" style={{ color: 'hsl(162, 85%, 27%)' }}>
+                    {formatAmount(account.balance)}
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* Transactions */}
+            <TransactionsList accountId={accountId} />
+          </div>
+        ) : (
+          <div className="bg-white rounded-lg shadow p-8 text-center">
+            <p className="text-gray-600">Account not found</p>
+          </div>
+        )}
+      </main>
+    </div>
+  );
+}
+
 // KYC Page
 function KYCPage() {
   const { user, logout } = useAuth();
