@@ -5,6 +5,10 @@
   },
   {
     "content": "Phase 5: Transaction details modal with ledger entries",
+    "status": "completed"
+  },
+  {
+    "content": "Phase 5: Transaction reversal backend API",
     "status": "in_progress"
   },
   {

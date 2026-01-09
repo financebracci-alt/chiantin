@@ -711,6 +711,14 @@ function App() {
             }
           />
           <Route
+            path="/accounts/:accountId/transactions"
+            element={
+              <ProtectedRoute>
+                <TransactionsPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
             path="/kyc"
             element={
               <ProtectedRoute>
