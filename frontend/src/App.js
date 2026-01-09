@@ -651,30 +651,118 @@ function AdminDashboard() {
 
   const formatAmount = (cents) => `€${(cents / 100).toFixed(2)}`;
 
+  const renderContent = () => {
+    switch(activeSection) {
+      case 'overview':
+        return <AnalyticsDashboard />;
+      case 'users':
+        return (
+          <div className="space-y-6">
+            {selectedUser ? (
+              <div className="space-y-6">
+                <div className="card p-6">
+                  <div className="flex justify-between items-start mb-4">
+                    <h2 className="text-lg font-semibold">User Details</h2>
+                    <div className="flex space-x-2">
+                      {selectedUser.user.status === 'ACTIVE' ? (
+                        <button
+                          onClick={() => {
+                            if (window.confirm('Disable this user?')) {
+                              api.patch(`/admin/users/${selectedUser.user.id}/status`, { status: 'DISABLED' })
+                                .then(() => { toast.success('User disabled'); viewUserDetails(selectedUser.user.id); })
+                                .catch(() => toast.error('Failed'));
+                            }
+                          }}
+                          className="px-3 py-1 text-sm border border-red-600 text-red-600 rounded hover:bg-red-50"
+                        >Disable</button>
+                      ) : (
+                        <button
+                          onClick={() => {
+                            api.patch(`/admin/users/${selectedUser.user.id}/status`, { status: 'ACTIVE' })
+                              .then(() => { toast.success('User enabled'); viewUserDetails(selectedUser.user.id); })
+                              .catch(() => toast.error('Failed'));
+                          }}
+                          className="px-3 py-1 text-sm border border-green-600 text-green-600 rounded hover:bg-green-50"
+                        >Enable</button>
+                      )}
+                    </div>
+                  </div>
+                  <dl className="grid grid-cols-2 gap-4">
+                    <div><dt className="text-sm text-gray-600">Name</dt><dd className="font-medium">{selectedUser.user.first_name} {selectedUser.user.last_name}</dd></div>
+                    <div><dt className="text-sm text-gray-600">Email</dt><dd className="font-medium">{selectedUser.user.email}</dd></div>
+                    <div><dt className="text-sm text-gray-600">Status</dt><dd className="font-medium">{selectedUser.user.status}</dd></div>
+                    <div><dt className="text-sm text-gray-600">KYC</dt><dd className="font-medium">{selectedUser.kyc_status || 'Not submitted'}</dd></div>
+                  </dl>
+                </div>
+                {selectedUser.accounts.length > 0 && (
+                  <div className="card p-6">
+                    <h3 className="font-semibold mb-4">Accounts</h3>
+                    {selectedUser.accounts.map(acc => (
+                      <div key={acc.id} className="border rounded p-4 mb-4">
+                        <div className="flex justify-between">
+                          <div><p className="font-mono text-sm">{acc.iban}</p></div>
+                          <div><p className="text-xl font-bold">{formatAmount(acc.balance)}</p></div>
+                        </div>
+                        <EnhancedLedgerTools account={acc} onSuccess={() => viewUserDetails(selectedUser.user.id)} />
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            ) : (
+              <AdminUsersTable users={filteredUsers} loading={loading} onSelectUser={viewUserDetails} selectedUser={selectedUser} />
+            )}
+          </div>
+        );
+      case 'kyc':
+        return <AdminKYCReview />;
+      case 'support':
+        return <SupportTickets isAdmin={true} />;
+      case 'audit':
+        return <AuditLogViewer />;
+      default:
+        return <div className="card p-8 text-center"><p>Section under construction</p></div>;
+    }
+  };
+
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <header className="bg-white shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center py-4">
-            <h1 className="text-2xl font-bold" style={{ fontFamily: 'Space Grotesk' }}>
-              {APP_NAME} Admin
-            </h1>
-            <div className="flex items-center space-x-4">
-              <span className="text-sm text-gray-600 font-medium">
-                {user?.role}
-              </span>
-              <button
-                onClick={logout}
-                className="text-sm text-gray-600 hover:text-gray-900"
-                data-testid="logout-button"
-              >
-                Logout
-              </button>
-            </div>
+    <div className="flex min-h-screen">
+      <AdminSidebar activeSection={activeSection} onSectionChange={setActiveSection} user={user} logout={logout} />
+      <div className="admin-content">
+        <div className="header-bar border-b border-gray-200">
+          <div className="px-8 h-full flex justify-between items-center">
+            <h2 className="text-lg font-semibold">{activeSection.charAt(0).toUpperCase() + activeSection.slice(1)}</h2>
+            <span className="badge badge-info">{user?.role}</span>
           </div>
         </div>
-      </header>
+        <div className="p-8">
+          {activeSection === 'users' && (
+            <div className="mb-6 card p-4">
+              <div className="grid grid-cols-3 gap-4">
+                <input type="text" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} placeholder="Search..." className="input-field" data-testid="user-search" />
+                <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)} className="input-field">
+                  <option value="all">All Status</option>
+                  <option value="ACTIVE">Active</option>
+                  <option value="PENDING">Pending</option>
+                  <option value="DISABLED">Disabled</option>
+                </select>
+                <select value={roleFilter} onChange={(e) => setRoleFilter(e.target.value)} className="input-field">
+                  <option value="all">All Roles</option>
+                  <option value="CUSTOMER">Customer</option>
+                  <option value="ADMIN">Admin</option>
+                </select>
+              </div>
+            </div>
+          )}
+          {renderContent()}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// Profile Page
+function ProfilePage() {
 
       {/* Tab Navigation */}
       <div className="border-b border-gray-200 bg-white">
