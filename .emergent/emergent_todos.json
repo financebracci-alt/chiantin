@@ -1,6 +1,26 @@
 [
   {
-    "content": "FINAL: Testing complete - All features verified",
+    "content": "BUG FIX: JSX compilation error fixed",
     "status": "completed"
+  },
+  {
+    "content": "FEATURE: Add transaction categorization",
+    "status": "in_progress"
+  },
+  {
+    "content": "FEATURE: Add scheduled payments",
+    "status": "pending"
+  },
+  {
+    "content": "FEATURE: Add spending insights with charts",
+    "status": "pending"
+  },
+  {
+    "content": "FEATURE: Add beneficiary management",
+    "status": "pending"
+  },
+  {
+    "content": "Final: Complete testing",
+    "status": "pending"
   }
 ]
