@@ -81,7 +81,12 @@ export function KYCApplication() {
       setDocuments(prev => ({ ...prev, [docType]: file.name }));
       fetchApplication(); // Refresh to get updated documents
     } catch (err) {
-      setError(`Failed to upload ${docType}: ${err.response?.data?.detail || err.message}`);
+      const errorMsg = err.response?.data?.detail 
+        ? (typeof err.response.data.detail === 'string' 
+            ? err.response.data.detail 
+            : JSON.stringify(err.response.data.detail))
+        : err.message;
+      setError(`Failed to upload ${docType}: ${errorMsg}`);
     } finally {
       setUploadingDoc(null);
     }
@@ -101,7 +106,12 @@ export function KYCApplication() {
       alert('KYC application submitted successfully! Our team will review it shortly.');
       fetchApplication();
     } catch (err) {
-      setError(err.response?.data?.detail || 'Failed to submit KYC application');
+      const errorMsg = err.response?.data?.detail 
+        ? (typeof err.response.data.detail === 'string' 
+            ? err.response.data.detail 
+            : 'Validation error - please check all fields')
+        : 'Failed to submit KYC application';
+      setError(errorMsg);
     } finally {
       setLoading(false);
     }

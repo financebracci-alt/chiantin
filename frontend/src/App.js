@@ -410,11 +410,25 @@ function CustomerDashboard() {
             Accounts
           </button>
           <button
+            onClick={() => navigate('/kyc')}
+            className="tab-inactive"
+            data-testid="kyc-tab"
+          >
+            KYC
+          </button>
+          <button
             onClick={() => navigate('/security')}
             className="tab-inactive"
             data-testid="security-tab"
           >
             Security
+          </button>
+          <button
+            onClick={() => navigate('/support')}
+            className="tab-inactive"
+            data-testid="support-tab"
+          >
+            Support
           </button>
         </nav>
       </div>
