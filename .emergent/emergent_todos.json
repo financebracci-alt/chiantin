@@ -1,22 +1,18 @@
 [
   {
-    "content": "UI REFACTOR: Customer dashboard replaced with professional version",
+    "content": "UI REFACTOR: Login & signup pages updated to professional style",
     "status": "completed"
   },
   {
-    "content": "UI REFACTOR: Update login/signup pages - solid white, red accents",
+    "content": "UI REFACTOR: Build professional admin sidebar layout",
     "status": "in_progress"
-  },
-  {
-    "content": "UI REFACTOR: Admin sidebar layout",
-    "status": "pending"
   },
   {
     "content": "UI REFACTOR: Mobile bottom tabs",
     "status": "pending"
   },
   {
-    "content": "Final: Test refactored UI",
+    "content": "Final: Test all refactored UI",
     "status": "pending"
   }
 ]

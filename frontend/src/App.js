@@ -64,7 +64,7 @@ function AuthProvider({ children }) {
   );
 }
 
-// Signup Page
+// Signup Page - Professional Style
 function SignupPage() {
   const [formData, setFormData] = useState({
     email: '',
@@ -78,6 +78,7 @@ function SignupPage() {
   const [loading, setLoading] = useState(false);
   const { signup } = useAuth();
   const navigate = useNavigate();
+  const toast = useToast();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -103,7 +104,7 @@ function SignupPage() {
         last_name: formData.last_name,
         phone: formData.phone || undefined
       });
-      alert('Account created successfully! You can now login.');
+      toast.success('Account created successfully! You can now login.');
       navigate('/login');
     } catch (err) {
       setError(err.response?.data?.detail || 'Signup failed');
@@ -113,124 +114,125 @@ function SignupPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center hero-gradient">
-      <div className="max-w-md w-full space-y-8 p-8 bg-white/95 backdrop-blur rounded-xl shadow-blue border border-blue-100">
-        <div className="blue-corner">
-          <h2 className="text-3xl font-bold text-center text-gradient-blue" style={{ fontFamily: 'Space Grotesk' }}>
-            {APP_NAME}
-          </h2>
-          <p className="mt-2 text-center text-gray-600">Create your account</p>
+    <div className="min-h-screen bg-white flex items-center justify-center p-4">
+      <div className="w-full max-w-md">
+        <div className="text-center mb-8">
+          <h1 className="text-3xl font-semibold text-gray-900 mb-2">{APP_NAME}</h1>
+          <p className="text-sm text-gray-600">Create your account</p>
         </div>
-        <form onSubmit={handleSubmit} className="mt-8 space-y-4">
-          {error && (
-            <div className="bg-red-50 border border-red-200 text-red-800 rounded-lg p-3 text-sm">
-              {error}
+        
+        <div className="card p-8">
+          <form onSubmit={handleSubmit} className="space-y-5">
+            {error && (
+              <div className="bg-red-50 border border-red-200 text-red-800 rounded-lg p-3 text-sm">
+                {error}
+              </div>
+            )}
+            
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">First Name</label>
+                <input
+                  type="text"
+                  value={formData.first_name}
+                  onChange={(e) => setFormData({ ...formData, first_name: e.target.value })}
+                  required
+                  className="input-field"
+                  data-testid="signup-first-name"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Last Name</label>
+                <input
+                  type="text"
+                  value={formData.last_name}
+                  onChange={(e) => setFormData({ ...formData, last_name: e.target.value })}
+                  required
+                  className="input-field"
+                  data-testid="signup-last-name"
+                />
+              </div>
             </div>
-          )}
-          
-          <div className="grid grid-cols-2 gap-4">
+
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">First Name</label>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Email</label>
               <input
-                type="text"
-                value={formData.first_name}
-                onChange={(e) => setFormData({ ...formData, first_name: e.target.value })}
+                type="email"
+                value={formData.email}
+                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                 required
-                className="input-enhanced w-full"
-                data-testid="signup-first-name"
+                className="input-field"
+                data-testid="signup-email"
               />
             </div>
+
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Last Name</label>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Phone (Optional)</label>
               <input
-                type="text"
-                value={formData.last_name}
-                onChange={(e) => setFormData({ ...formData, last_name: e.target.value })}
-                required
-                className="input-enhanced w-full"
-                data-testid="signup-last-name"
+                type="tel"
+                value={formData.phone}
+                onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                className="input-field"
+                placeholder="+49 123 456 7890"
+                data-testid="signup-phone"
               />
             </div>
-          </div>
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Email</label>
-            <input
-              type="email"
-              value={formData.email}
-              onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-              required
-              className="input-enhanced w-full"
-              data-testid="signup-email"
-            />
-          </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Password</label>
+              <input
+                type="password"
+                value={formData.password}
+                onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                required
+                className="input-field"
+                placeholder="Minimum 8 characters"
+                data-testid="signup-password"
+              />
+            </div>
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Phone (Optional)</label>
-            <input
-              type="tel"
-              value={formData.phone}
-              onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-              className="input-enhanced w-full"
-              placeholder="+49 123 456 7890"
-              data-testid="signup-phone"
-            />
-          </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Confirm Password</label>
+              <input
+                type="password"
+                value={formData.confirmPassword}
+                onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
+                required
+                className="input-field"
+                data-testid="signup-confirm-password"
+              />
+            </div>
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Password</label>
-            <input
-              type="password"
-              value={formData.password}
-              onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-              required
-              className="input-enhanced w-full"
-              placeholder="Minimum 8 characters"
-              data-testid="signup-password"
-            />
-          </div>
+            <button
+              type="submit"
+              disabled={loading}
+              className="w-full btn-primary"
+              data-testid="signup-button"
+            >
+              {loading ? 'Creating Account...' : 'Create Account'}
+            </button>
+          </form>
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Confirm Password</label>
-            <input
-              type="password"
-              value={formData.confirmPassword}
-              onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
-              required
-              className="input-enhanced w-full"
-              data-testid="signup-confirm-password"
-            />
-          </div>
-
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full btn-primary btn-glow"
-            data-testid="signup-button"
-          >
-            {loading ? 'Creating Account...' : 'Create Account'}
-          </button>
-
-          <div className="text-center pt-4 border-t border-gray-200">
+          <div className="mt-6 pt-6 border-t border-gray-200 text-center">
             <p className="text-sm text-gray-600">
               Already have an account?{' '}
               <button
                 type="button"
                 onClick={() => navigate('/login')}
-                className="text-blue-600 hover:text-blue-700 font-medium"
+                className="font-medium text-red-600 hover:text-red-700"
                 data-testid="goto-login"
               >
                 Sign in
               </button>
             </p>
           </div>
-        </form>
+        </div>
       </div>
     </div>
   );
 }
 
-// Login Page
+// Login Page - Professional Style
 function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
