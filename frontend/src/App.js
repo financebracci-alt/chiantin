@@ -553,6 +553,17 @@ function AdminDashboard() {
           >
             KYC Review
           </button>
+          <button
+            onClick={() => setActiveTab('audit')}
+            className={`py-4 px-1 border-b-2 font-medium text-sm ${
+              activeTab === 'audit'
+                ? 'border-blue-600 text-blue-600'
+                : 'border-transparent text-gray-500 hover:text-gray-700'
+            }`}
+            data-testid="admin-audit-tab"
+          >
+            Audit Logs
+          </button>
         </nav>
       </div>
 
@@ -666,8 +677,10 @@ function AdminDashboard() {
             )}
           </div>
         </div>
-        ) : (
+        ) : activeTab === 'kyc' ? (
           <AdminKYCReview />
+        ) : (
+          <AuditLogViewer />
         )}
       </main>
     </div>
