@@ -261,6 +261,94 @@ class AtlasBankingAPITester:
             return True
         return False
 
+    def test_add_beneficiary(self):
+        """Test adding a beneficiary"""
+        success, response = self.run_test(
+            "Add Beneficiary",
+            "POST",
+            "/api/v1/beneficiaries",
+            200,
+            data={
+                "recipient_email": "admin@atlas.local",
+                "recipient_name": "Admin User",
+                "nickname": "Admin"
+            },
+            token=self.customer_token,
+            description="Add a saved recipient"
+        )
+        if success:
+            print(f"   ✓ Beneficiary added: {response.get('id', 'N/A')}")
+            return True
+        return False
+
+    def test_get_beneficiaries(self):
+        """Test getting beneficiaries"""
+        success, response = self.run_test(
+            "Get Beneficiaries",
+            "GET",
+            "/api/v1/beneficiaries",
+            200,
+            token=self.customer_token,
+            description="Fetch saved recipients"
+        )
+        if success:
+            print(f"   ✓ Found {len(response) if isinstance(response, list) else 0} beneficiary(ies)")
+            return True
+        return False
+
+    def test_create_scheduled_payment(self):
+        """Test creating a scheduled payment"""
+        from datetime import date
+        success, response = self.run_test(
+            "Create Scheduled Payment",
+            "POST",
+            "/api/v1/scheduled-payments",
+            200,
+            data={
+                "recipient_email": "admin@atlas.local",
+                "amount": 500,
+                "reason": "Monthly subscription",
+                "frequency": "MONTHLY",
+                "start_date": date.today().isoformat()
+            },
+            token=self.customer_token,
+            description="Create recurring payment"
+        )
+        if success:
+            print(f"   ✓ Scheduled payment created: {response.get('id', 'N/A')}")
+            return True
+        return False
+
+    def test_get_scheduled_payments(self):
+        """Test getting scheduled payments"""
+        success, response = self.run_test(
+            "Get Scheduled Payments",
+            "GET",
+            "/api/v1/scheduled-payments",
+            200,
+            token=self.customer_token,
+            description="Fetch scheduled payments"
+        )
+        if success:
+            print(f"   ✓ Found {len(response) if isinstance(response, list) else 0} scheduled payment(s)")
+            return True
+        return False
+
+    def test_get_spending_insights(self):
+        """Test getting spending insights"""
+        success, response = self.run_test(
+            "Get Spending Insights",
+            "GET",
+            "/api/v1/insights/spending?days=30",
+            200,
+            token=self.customer_token,
+            description="Fetch spending breakdown by category"
+        )
+        if success:
+            print(f"   ✓ Spending categories: {list(response.keys()) if isinstance(response, dict) else 'N/A'}")
+            return True
+        return False
+
 
 def main():
     print("=" * 70)
