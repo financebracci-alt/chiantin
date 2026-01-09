@@ -4,6 +4,7 @@ import './App.css';
 import api from './api';
 import { APP_NAME } from './config';
 import { SecuritySettings } from './components/Security';
+import { KYCApplication } from './components/KYC';
 
 // Auth Context
 const AuthContext = React.createContext(null);
