@@ -3,9 +3,11 @@
 from fastapi import FastAPI, Depends, HTTPException, status, UploadFile, File, Request, Response
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
+from fastapi.responses import StreamingResponse
 from motor.motor_asyncio import AsyncIOMotorDatabase
 from contextlib import asynccontextmanager
 from typing import Optional, List
+from io import BytesIO
 import jwt
 import logging
 
@@ -15,6 +17,7 @@ from services.auth_service import AuthService
 from services.kyc_service import KYCService
 from services.banking_service import BankingService
 from services.ledger_service import LedgerEngine
+from services.statement_service import StatementService
 from schemas.users import UserCreate, UserLogin, TokenResponse, UserResponse, MFASetupResponse, MFAVerifyRequest
 from schemas.kyc import KYCSubmitRequest, KYCReviewRequest, DocumentType
 from schemas.banking import AccountResponse
@@ -350,6 +353,44 @@ async def get_transactions(
     ledger_engine = LedgerEngine(db)
     transactions = await ledger_engine.get_transactions(account_doc["ledger_account_id"])
     return [txn.model_dump() for txn in transactions]
+
+
+@app.get("/api/v1/accounts/{account_id}/statement/{year}/{month}")
+async def download_statement(
+    account_id: str,
+    year: int,
+    month: int,
+    current_user: dict = Depends(get_current_user),
+    db: AsyncIOMotorDatabase = Depends(get_database)
+):
+    """Download monthly statement PDF."""
+    # Verify account belongs to user
+    account_doc = await db.bank_accounts.find_one({"_id": account_id})
+    if not account_doc:
+        raise HTTPException(status_code=404, detail="Account not found")
+    
+    if account_doc["user_id"] != current_user["id"] and current_user["role"] not in ["ADMIN", "SUPER_ADMIN"]:
+        raise HTTPException(status_code=403, detail="Access denied")
+    
+    # Generate statement
+    ledger_engine = LedgerEngine(db)
+    statement_service = StatementService(db, ledger_engine)
+    
+    pdf_bytes = await statement_service.generate_monthly_statement(
+        user_id=account_doc["user_id"],
+        account_id=account_id,
+        year=year,
+        month=month
+    )
+    
+    # Return as downloadable PDF
+    return StreamingResponse(
+        BytesIO(pdf_bytes),
+        media_type="application/pdf",
+        headers={
+            "Content-Disposition": f"attachment; filename=statement_{year}_{month:02d}.pdf"
+        }
+    )
 
 
 # ==================== ADMIN LEDGER TOOLS ====================
