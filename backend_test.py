@@ -555,6 +555,126 @@ class APITester:
             self.log_test("Statement Download", False, str(e))
             return False
 
+    def test_create_support_ticket(self):
+        """Test create support ticket"""
+        if not self.customer_token:
+            self.log_test("Create Support Ticket", False, "No customer token available")
+            return False
+        
+        try:
+            response = requests.post(
+                f"{BASE_URL}/tickets/create",
+                headers={"Authorization": f"Bearer {self.customer_token}"},
+                json={
+                    "subject": "Test ticket from automated testing",
+                    "description": "This is a test ticket created during automated testing."
+                },
+                timeout=10
+            )
+            if response.status_code == 200:
+                data = response.json()
+                if "id" in data and "subject" in data and "status" in data:
+                    self.log_test("Create Support Ticket", True)
+                    print(f"   Ticket ID: {data['id']}")
+                    print(f"   Status: {data['status']}")
+                    self.test_ticket_id = data['id']
+                    return True
+                else:
+                    self.log_test("Create Support Ticket", False, "Missing ticket data")
+                    return False
+            else:
+                self.log_test("Create Support Ticket", False, f"Status {response.status_code}: {response.text}")
+                return False
+        except Exception as e:
+            self.log_test("Create Support Ticket", False, str(e))
+            return False
+
+    def test_get_customer_tickets(self):
+        """Test get customer tickets"""
+        if not self.customer_token:
+            self.log_test("Get Customer Tickets", False, "No customer token available")
+            return False
+        
+        try:
+            response = requests.get(
+                f"{BASE_URL}/tickets",
+                headers={"Authorization": f"Bearer {self.customer_token}"},
+                timeout=10
+            )
+            if response.status_code == 200:
+                data = response.json()
+                if isinstance(data, list):
+                    self.log_test("Get Customer Tickets", True)
+                    print(f"   Found {len(data)} ticket(s)")
+                    return True
+                else:
+                    self.log_test("Get Customer Tickets", False, "Response is not a list")
+                    return False
+            else:
+                self.log_test("Get Customer Tickets", False, f"Status {response.status_code}")
+                return False
+        except Exception as e:
+            self.log_test("Get Customer Tickets", False, str(e))
+            return False
+
+    def test_get_notifications(self):
+        """Test get notifications"""
+        if not self.customer_token:
+            self.log_test("Get Notifications", False, "No customer token available")
+            return False
+        
+        try:
+            response = requests.get(
+                f"{BASE_URL}/notifications",
+                headers={"Authorization": f"Bearer {self.customer_token}"},
+                timeout=10
+            )
+            if response.status_code == 200:
+                data = response.json()
+                if isinstance(data, list):
+                    self.log_test("Get Notifications", True)
+                    print(f"   Found {len(data)} notification(s)")
+                    unread = sum(1 for n in data if not n.get('read', False))
+                    print(f"   Unread: {unread}")
+                    return True
+                else:
+                    self.log_test("Get Notifications", False, "Response is not a list")
+                    return False
+            else:
+                self.log_test("Get Notifications", False, f"Status {response.status_code}")
+                return False
+        except Exception as e:
+            self.log_test("Get Notifications", False, str(e))
+            return False
+
+    def test_admin_get_all_tickets(self):
+        """Test admin get all tickets"""
+        if not self.admin_token:
+            self.log_test("Admin Get All Tickets", False, "No admin token available")
+            return False
+        
+        try:
+            response = requests.get(
+                f"{BASE_URL}/admin/tickets",
+                headers={"Authorization": f"Bearer {self.admin_token}"},
+                timeout=10
+            )
+            if response.status_code == 200:
+                data = response.json()
+                if isinstance(data, list):
+                    self.log_test("Admin Get All Tickets", True)
+                    print(f"   Found {len(data)} ticket(s)")
+                    return True
+                else:
+                    self.log_test("Admin Get All Tickets", False, "Response is not a list")
+                    return False
+            else:
+                self.log_test("Admin Get All Tickets", False, f"Status {response.status_code}")
+                return False
+        except Exception as e:
+            self.log_test("Admin Get All Tickets", False, str(e))
+            return False
+
     def run_all_tests(self):
         """Run all backend tests"""
         print("\n" + "="*60)
