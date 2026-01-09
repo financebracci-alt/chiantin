@@ -4,7 +4,7 @@ from pydantic import BaseModel, Field
 from datetime import datetime, date
 from typing import Optional
 from enum import Enum
-from bson import ObjectId
+import uuid
 
 
 class TransactionCategory(str, Enum):
@@ -27,7 +27,7 @@ class RecurringFrequency(str, Enum):
 
 
 class ScheduledPayment(BaseModel):
-    id: str = Field(default_factory=lambda: str(ObjectId()), alias="_id")
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()), alias="_id")
     user_id: str
     
     recipient_email: str
@@ -58,7 +58,7 @@ class CreateScheduledPayment(BaseModel):
 
 
 class Beneficiary(BaseModel):
-    id: str = Field(default_factory=lambda: str(ObjectId()), alias="_id")
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()), alias="_id")
     user_id: str
     
     recipient_name: str
