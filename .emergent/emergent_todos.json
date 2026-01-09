@@ -1,19 +1,11 @@
 [
   {
-    "content": "Phase 3: Security & MFA features complete",
-    "status": "completed"
-  },
-  {
-    "content": "Phase 4: Complete KYC submission UI with document upload",
-    "status": "completed"
-  },
-  {
-    "content": "Phase 4: Admin document viewer and approval workflow",
+    "content": "Phase 4: Admin KYC review interface - viewing applications",
     "status": "in_progress"
   },
   {
-    "content": "Phase 4: KYC status tracking for customers",
-    "status": "completed"
+    "content": "Phase 4: Admin KYC approval/rejection workflow",
+    "status": "pending"
   },
   {
     "content": "Phase 5: Transaction details modal with ledger entries",
