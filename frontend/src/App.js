@@ -559,6 +559,62 @@ function CustomerDashboard() {
   );
 }
 
+// Admin Users Table Component
+function AdminUsersTable({ users, loading, onSelectUser, selectedUser }) {
+  if (loading) {
+    return <div className="card p-8 text-center">Loading users...</div>;
+  }
+
+  if (users.length === 0) {
+    return <div className="card p-8 text-center">No users found</div>;
+  }
+
+  return (
+    <div className="card">
+      <table className="w-full">
+        <thead className="bg-gray-50 border-b">
+          <tr>
+            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Name</th>
+            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Email</th>
+            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Role</th>
+            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
+            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Created</th>
+          </tr>
+        </thead>
+        <tbody className="divide-y divide-gray-200">
+          {users.map(user => (
+            <tr 
+              key={user.id} 
+              onClick={() => onSelectUser(user.id)}
+              className="hover:bg-gray-50 cursor-pointer"
+            >
+              <td className="px-6 py-4 whitespace-nowrap">
+                <div className="text-sm font-medium text-gray-900">
+                  {user.first_name} {user.last_name}
+                </div>
+              </td>
+              <td className="px-6 py-4 whitespace-nowrap">
+                <div className="text-sm text-gray-600">{user.email}</div>
+              </td>
+              <td className="px-6 py-4 whitespace-nowrap">
+                <span className="badge badge-info">{user.role}</span>
+              </td>
+              <td className="px-6 py-4 whitespace-nowrap">
+                <span className={`badge ${user.status === 'ACTIVE' ? 'badge-success' : 'badge-gray'}`}>
+                  {user.status}
+                </span>
+              </td>
+              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
+                {new Date(user.created_at).toLocaleDateString()}
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
+}
+
 // Admin Dashboard - Professional with Sidebar
 function AdminDashboard() {
   const { user, logout } = useAuth();
