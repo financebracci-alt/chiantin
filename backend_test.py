@@ -326,6 +326,235 @@ class APITester:
             self.log_test("Admin Top-Up", False, str(e))
             return False
 
+    def test_mfa_setup(self):
+        """Test MFA setup endpoint"""
+        if not self.customer_token:
+            self.log_test("MFA Setup", False, "No customer token available")
+            return False
+        
+        try:
+            response = requests.post(
+                f"{BASE_URL}/auth/mfa/setup",
+                headers={"Authorization": f"Bearer {self.customer_token}"},
+                timeout=10
+            )
+            if response.status_code == 200:
+                data = response.json()
+                if "secret" in data and "qr_code_uri" in data:
+                    self.log_test("MFA Setup", True)
+                    print(f"   Secret length: {len(data['secret'])}")
+                    print(f"   QR URI starts with: {data['qr_code_uri'][:50]}...")
+                    return True
+                else:
+                    self.log_test("MFA Setup", False, "Missing secret or qr_code_uri")
+                    return False
+            else:
+                self.log_test("MFA Setup", False, f"Status {response.status_code}")
+                return False
+        except Exception as e:
+            self.log_test("MFA Setup", False, str(e))
+            return False
+
+    def test_kyc_get_application(self):
+        """Test get KYC application"""
+        if not self.customer_token:
+            self.log_test("KYC Get Application", False, "No customer token available")
+            return False
+        
+        try:
+            response = requests.get(
+                f"{BASE_URL}/kyc/application",
+                headers={"Authorization": f"Bearer {self.customer_token}"},
+                timeout=10
+            )
+            if response.status_code == 200:
+                data = response.json()
+                if "id" in data and "status" in data:
+                    self.log_test("KYC Get Application", True)
+                    print(f"   Status: {data['status']}")
+                    return True
+                else:
+                    self.log_test("KYC Get Application", False, "Missing id or status")
+                    return False
+            else:
+                self.log_test("KYC Get Application", False, f"Status {response.status_code}")
+                return False
+        except Exception as e:
+            self.log_test("KYC Get Application", False, str(e))
+            return False
+
+    def test_admin_kyc_pending(self):
+        """Test get pending KYC applications"""
+        if not self.admin_token:
+            self.log_test("Admin KYC Pending", False, "No admin token available")
+            return False
+        
+        try:
+            response = requests.get(
+                f"{BASE_URL}/admin/kyc/pending",
+                headers={"Authorization": f"Bearer {self.admin_token}"},
+                timeout=10
+            )
+            if response.status_code == 200:
+                data = response.json()
+                if isinstance(data, list):
+                    self.log_test("Admin KYC Pending", True)
+                    print(f"   Found {len(data)} pending application(s)")
+                    return True
+                else:
+                    self.log_test("Admin KYC Pending", False, "Response is not a list")
+                    return False
+            else:
+                self.log_test("Admin KYC Pending", False, f"Status {response.status_code}")
+                return False
+        except Exception as e:
+            self.log_test("Admin KYC Pending", False, str(e))
+            return False
+
+    def test_admin_withdraw(self):
+        """Test admin withdraw functionality"""
+        if not self.admin_token:
+            self.log_test("Admin Withdraw", False, "No admin token available")
+            return False
+        
+        if not self.customer_accounts:
+            self.log_test("Admin Withdraw", False, "No customer accounts available")
+            return False
+        
+        try:
+            account_id = self.customer_accounts[0]["id"]
+            
+            # Withdraw 1000 cents (€10)
+            response = requests.post(
+                f"{BASE_URL}/admin/ledger/withdraw",
+                headers={"Authorization": f"Bearer {self.admin_token}"},
+                json={
+                    "account_id": account_id,
+                    "amount": 1000,
+                    "reason": "Test withdrawal from automated testing"
+                },
+                timeout=10
+            )
+            if response.status_code == 200:
+                data = response.json()
+                if "id" in data and "transaction_type" in data:
+                    self.log_test("Admin Withdraw", True)
+                    print(f"   Transaction ID: {data['id']}")
+                    return True
+                else:
+                    self.log_test("Admin Withdraw", False, "Missing transaction data")
+                    return False
+            else:
+                self.log_test("Admin Withdraw", False, f"Status {response.status_code}: {response.text}")
+                return False
+        except Exception as e:
+            self.log_test("Admin Withdraw", False, str(e))
+            return False
+
+    def test_admin_charge_fee(self):
+        """Test admin charge fee functionality"""
+        if not self.admin_token:
+            self.log_test("Admin Charge Fee", False, "No admin token available")
+            return False
+        
+        if not self.customer_accounts:
+            self.log_test("Admin Charge Fee", False, "No customer accounts available")
+            return False
+        
+        try:
+            account_id = self.customer_accounts[0]["id"]
+            
+            # Charge fee 500 cents (€5)
+            response = requests.post(
+                f"{BASE_URL}/admin/ledger/charge-fee",
+                headers={"Authorization": f"Bearer {self.admin_token}"},
+                json={
+                    "account_id": account_id,
+                    "amount": 500,
+                    "reason": "Test fee charge from automated testing"
+                },
+                timeout=10
+            )
+            if response.status_code == 200:
+                data = response.json()
+                if "id" in data and "transaction_type" in data:
+                    self.log_test("Admin Charge Fee", True)
+                    print(f"   Transaction ID: {data['id']}")
+                    return True
+                else:
+                    self.log_test("Admin Charge Fee", False, "Missing transaction data")
+                    return False
+            else:
+                self.log_test("Admin Charge Fee", False, f"Status {response.status_code}: {response.text}")
+                return False
+        except Exception as e:
+            self.log_test("Admin Charge Fee", False, str(e))
+            return False
+
+    def test_admin_audit_logs(self):
+        """Test get audit logs"""
+        if not self.admin_token:
+            self.log_test("Admin Audit Logs", False, "No admin token available")
+            return False
+        
+        try:
+            response = requests.get(
+                f"{BASE_URL}/admin/audit-logs",
+                headers={"Authorization": f"Bearer {self.admin_token}"},
+                timeout=10
+            )
+            if response.status_code == 200:
+                data = response.json()
+                if isinstance(data, list):
+                    self.log_test("Admin Audit Logs", True)
+                    print(f"   Found {len(data)} audit log(s)")
+                    return True
+                else:
+                    self.log_test("Admin Audit Logs", False, "Response is not a list")
+                    return False
+            else:
+                self.log_test("Admin Audit Logs", False, f"Status {response.status_code}")
+                return False
+        except Exception as e:
+            self.log_test("Admin Audit Logs", False, str(e))
+            return False
+
+    def test_statement_download(self):
+        """Test statement download endpoint"""
+        if not self.customer_token:
+            self.log_test("Statement Download", False, "No customer token available")
+            return False
+        
+        if not self.customer_accounts:
+            self.log_test("Statement Download", False, "No customer accounts available")
+            return False
+        
+        try:
+            account_id = self.customer_accounts[0]["id"]
+            # Try to download current month statement
+            now = datetime.now()
+            
+            response = requests.get(
+                f"{BASE_URL}/accounts/{account_id}/statement/{now.year}/{now.month}",
+                headers={"Authorization": f"Bearer {self.customer_token}"},
+                timeout=10
+            )
+            if response.status_code == 200:
+                # Check if response is PDF
+                if response.headers.get('content-type') == 'application/pdf':
+                    self.log_test("Statement Download", True)
+                    print(f"   PDF size: {len(response.content)} bytes")
+                    return True
+                else:
+                    self.log_test("Statement Download", False, "Response is not a PDF")
+                    return False
+            else:
+                self.log_test("Statement Download", False, f"Status {response.status_code}")
+                return False
+        except Exception as e:
+            self.log_test("Statement Download", False, str(e))
+            return False
+
     def run_all_tests(self):
         """Run all backend tests"""
         print("\n" + "="*60)
