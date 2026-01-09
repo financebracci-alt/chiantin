@@ -30,6 +30,7 @@ class APITester:
         self.admin_user = None
         self.customer_accounts = []
         self.admin_users = []
+        self.test_ticket_id = None
 
     def log_test(self, name, success, message=""):
         """Log test result"""
