@@ -1,30 +1,26 @@
 [
   {
-    "content": "UI REFACTOR: Login page updated - solid white, red accent",
+    "content": "UI REFACTOR: Admin sidebar integrated with professional layout",
     "status": "completed"
   },
   {
-    "content": "UI REFACTOR: Build professional admin sidebar component",
-    "status": "in_progress"
+    "content": "UI REFACTOR: Admin users rebuilt as professional table",
+    "status": "completed"
   },
   {
-    "content": "UI REFACTOR: Rebuild admin user management as table",
-    "status": "pending"
+    "content": "UI REFACTOR: Update remaining customer pages",
+    "status": "in_progress"
   },
   {
     "content": "UI REFACTOR: Mobile bottom tabs",
     "status": "pending"
   },
   {
-    "content": "FEATURE: Complete missing backend APIs",
+    "content": "FEATURE: Missing backend APIs",
     "status": "pending"
   },
   {
-    "content": "FEATURE: Customer P2P transfers",
-    "status": "pending"
-  },
-  {
-    "content": "FEATURE: Analytics dashboard",
+    "content": "FEATURE: P2P transfers",
     "status": "pending"
   },
   {

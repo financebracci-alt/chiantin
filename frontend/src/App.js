@@ -15,6 +15,7 @@ import { NotificationBell } from './components/Notifications';
 import { CustomerProfile } from './components/Profile';
 import { ToastProvider, useToast } from './components/Toast';
 import { ProfessionalDashboard } from './components/ProfessionalDashboard';
+import { AdminSidebar, AdminLayout } from './components/AdminLayout';
 
 // Auth Context
 const AuthContext = React.createContext(null);
@@ -552,11 +553,11 @@ function CustomerDashboard() {
   );
 }
 
-// Admin Dashboard
+// Admin Dashboard - Professional with Sidebar
 function AdminDashboard() {
   const { user, logout } = useAuth();
   const toast = useToast();
-  const [activeTab, setActiveTab] = useState('users'); // users, kyc, support, audit
+  const [activeSection, setActiveSection] = useState('users');
   const [users, setUsers] = useState([]);
   const [filteredUsers, setFilteredUsers] = useState([]);
   const [selectedUser, setSelectedUser] = useState(null);
@@ -564,7 +565,6 @@ function AdminDashboard() {
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [roleFilter, setRoleFilter] = useState('all');
-  const navigate = useNavigate();
 
   useEffect(() => {
     fetchUsers();
