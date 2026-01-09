@@ -1,14 +1,26 @@
 [
   {
-    "content": "Phases 3-8: All features implemented successfully",
-    "status": "completed"
+    "content": "Design Enhancement: Add light blue accents and visual elements",
+    "status": "in_progress"
   },
   {
-    "content": "Final: Comprehensive end-to-end testing complete",
-    "status": "completed"
+    "content": "Feature: Support ticket system (customer + admin)",
+    "status": "pending"
   },
   {
-    "content": "Final: Update documentation with all new features",
-    "status": "completed"
+    "content": "Feature: Notifications center",
+    "status": "pending"
+  },
+  {
+    "content": "Feature: Advanced admin controls",
+    "status": "pending"
+  },
+  {
+    "content": "Feature: Enhanced user search",
+    "status": "pending"
+  },
+  {
+    "content": "Testing: All enhanced features",
+    "status": "pending"
   }
 ]
