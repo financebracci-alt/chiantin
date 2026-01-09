@@ -1033,8 +1033,9 @@ function ProfilePage() {
         ) : (
           <AuditLogViewer />
         )}
-      </main>
+      </div>
     </div>
+  </div>
   );
 }
 
