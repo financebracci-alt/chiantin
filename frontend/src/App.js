@@ -13,6 +13,7 @@ import { StatementDownload } from './components/Statements';
 import { SupportTickets } from './components/Support';
 import { NotificationBell } from './components/Notifications';
 import { CustomerProfile } from './components/Profile';
+import { ToastProvider, useToast } from './components/Toast';
 
 // Auth Context
 const AuthContext = React.createContext(null);
@@ -1163,8 +1164,9 @@ function ProtectedRoute({ children, adminOnly = false }) {
 function App() {
   return (
     <Router>
-      <AuthProvider>
-        <Routes>
+      <ToastProvider>
+        <AuthProvider>
+          <Routes>
           <Route path="/login" element={<LoginPage />} />
           <Route path="/signup" element={<SignupPage />} />
           <Route
@@ -1226,6 +1228,7 @@ function App() {
           <Route path="/" element={<Navigate to="/login" replace />} />
         </Routes>
       </AuthProvider>
+      </ToastProvider>
     </Router>
   );
 }
