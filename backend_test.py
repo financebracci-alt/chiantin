@@ -558,7 +558,7 @@ class APITester:
     def run_all_tests(self):
         """Run all backend tests"""
         print("\n" + "="*60)
-        print("PROJECT ATLAS - BACKEND API TESTING")
+        print("PROJECT ATLAS - BACKEND API TESTING (ITERATION 2)")
         print("="*60 + "\n")
         
         print("🔍 Testing Backend APIs...\n")
@@ -577,6 +577,18 @@ class APITester:
                 self.test_customer_get_transactions()
         print()
         
+        # MFA tests
+        print("--- MFA Features ---")
+        if self.customer_token:
+            self.test_mfa_setup()
+        print()
+        
+        # KYC tests
+        print("--- KYC Features ---")
+        if self.customer_token:
+            self.test_kyc_get_application()
+        print()
+        
         # Admin tests
         print("--- Admin Authentication & Management ---")
         if self.test_admin_login():
@@ -585,10 +597,30 @@ class APITester:
                 self.test_admin_get_user_details()
         print()
         
+        # Admin KYC
+        print("--- Admin KYC Review ---")
+        if self.admin_token:
+            self.test_admin_kyc_pending()
+        print()
+        
         # Admin ledger operations
         print("--- Admin Ledger Operations ---")
         if self.admin_token and self.customer_accounts:
             self.test_admin_top_up()
+            self.test_admin_withdraw()
+            self.test_admin_charge_fee()
+        print()
+        
+        # Admin audit logs
+        print("--- Admin Audit Logs ---")
+        if self.admin_token:
+            self.test_admin_audit_logs()
+        print()
+        
+        # Statement download
+        print("--- Statement Download ---")
+        if self.customer_token and self.customer_accounts:
+            self.test_statement_download()
         print()
         
         # Summary
