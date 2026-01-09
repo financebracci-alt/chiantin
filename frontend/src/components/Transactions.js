@@ -124,11 +124,100 @@ export function TransactionsList({ accountId, isAdmin = false }) {
 
   return (
     <div className="space-y-4">
-      <h3 className="text-lg font-semibold">Transaction History</h3>
+      <div className="flex justify-between items-center">
+        <h3 className="text-lg font-semibold">Transaction History</h3>
+        {filteredTransactions.length > 0 && (
+          <button
+            onClick={exportToCSV}
+            className="px-4 py-2 border border-gray-300 rounded-md hover:bg-gray-50 text-sm"
+            data-testid="export-csv"
+          >
+            Export CSV
+          </button>
+        )}
+      </div>
+
+      {/* Filters */}
+      <div className="bg-white rounded-lg shadow p-4">
+        <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Type</label>
+            <select
+              value={filters.type}
+              onChange={(e) => setFilters({ ...filters, type: e.target.value })}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
+              data-testid="filter-type"
+            >
+              <option value="all">All Types</option>
+              <option value="TOP_UP">Top Up</option>
+              <option value="WITHDRAW">Withdraw</option>
+              <option value="FEE">Fee</option>
+              <option value="TRANSFER">Transfer</option>
+              <option value="REVERSAL">Reversal</option>
+            </select>
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Status</label>
+            <select
+              value={filters.status}
+              onChange={(e) => setFilters({ ...filters, status: e.target.value })}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
+              data-testid="filter-status"
+            >
+              <option value="all">All Status</option>
+              <option value="POSTED">Posted</option>
+              <option value="REVERSED">Reversed</option>
+              <option value="PENDING">Pending</option>
+            </select>
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">From Date</label>
+            <input
+              type="date"
+              value={filters.dateFrom}
+              onChange={(e) => setFilters({ ...filters, dateFrom: e.target.value })}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
+              data-testid="filter-date-from"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">To Date</label>
+            <input
+              type="date"
+              value={filters.dateTo}
+              onChange={(e) => setFilters({ ...filters, dateTo: e.target.value })}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
+              data-testid="filter-date-to"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Search</label>
+            <input
+              type="text"
+              value={filters.search}
+              onChange={(e) => setFilters({ ...filters, search: e.target.value })}
+              placeholder="ID or reason..."
+              className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
+              data-testid="filter-search"
+            />
+          </div>
+        </div>
+        {(filters.type !== 'all' || filters.status !== 'all' || filters.dateFrom || filters.dateTo || filters.search) && (
+          <button
+            onClick={() => setFilters({ type: 'all', status: 'all', dateFrom: '', dateTo: '', search: '' })}
+            className="mt-3 text-sm text-blue-600 hover:text-blue-700"
+            data-testid="clear-filters"
+          >
+            Clear all filters
+          </button>
+        )}
+      </div>
       
-      {transactions.length === 0 ? (
+      {filteredTransactions.length === 0 ? (
         <div className="bg-white rounded-lg shadow p-8 text-center">
-          <p className="text-gray-600">No transactions yet</p>
+          <p className="text-gray-600">
+            {transactions.length === 0 ? 'No transactions yet' : 'No transactions match your filters'}
+          </p>
         </div>
       ) : (
         <div className="bg-white rounded-lg shadow divide-y">
