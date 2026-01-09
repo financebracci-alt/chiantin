@@ -12,12 +12,12 @@
     "status": "completed"
   },
   {
-    "content": "Phase 8: PWA service worker and manifest",
-    "status": "in_progress"
+    "content": "Phase 8: PWA service worker and manifest complete",
+    "status": "completed"
   },
   {
-    "content": "Phase 8: Push notifications setup",
-    "status": "pending"
+    "content": "Final: Add statement download to customer UI",
+    "status": "in_progress"
   },
   {
     "content": "Final: Comprehensive testing of all new features",
