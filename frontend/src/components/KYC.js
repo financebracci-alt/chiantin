@@ -65,6 +65,50 @@ export function KYCApplication() {
     }));
   };
 
+  const validateStep1 = () => {
+    const required = ['full_name', 'date_of_birth', 'nationality', 'country', 'street_address', 'city', 'postal_code', 'tax_residency'];
+    const missing = required.filter(field => !formData[field] || formData[field].trim() === '');
+    
+    if (missing.length > 0) {
+      setError(`Please fill in all required fields: ${missing.join(', ').replace(/_/g, ' ')}`);
+      return false;
+    }
+    
+    setError('');
+    return true;
+  };
+
+  const validateStep2 = () => {
+    // Check if at least passport and proof of address are uploaded
+    const hasPassport = application?.documents?.find(d => d.document_type === 'PASSPORT') || documents.PASSPORT;
+    const hasProofOfAddress = application?.documents?.find(d => d.document_type === 'PROOF_OF_ADDRESS') || documents.PROOF_OF_ADDRESS;
+    
+    if (!hasPassport) {
+      setError('Please upload your Passport or ID Card');
+      return false;
+    }
+    
+    if (!hasProofOfAddress) {
+      setError('Please upload Proof of Address');
+      return false;
+    }
+    
+    setError('');
+    return true;
+  };
+
+  const goToStep2 = () => {
+    if (validateStep1()) {
+      setStep(2);
+    }
+  };
+
+  const goToStep3 = () => {
+    if (validateStep2()) {
+      setStep(3);
+    }
+  };
+
   const handleFileUpload = async (docType, file) => {
     if (!file) return;
 
@@ -307,8 +351,9 @@ export function KYCApplication() {
           </div>
           <div className="mt-6 flex justify-end">
             <button
-              onClick={() => setStep(2)}
-              className="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+              type="button"
+              onClick={goToStep2}
+              className="btn-primary btn-glow"
               data-testid="kyc-next-step1"
             >
               Next: Upload Documents
@@ -334,14 +379,16 @@ export function KYCApplication() {
           </div>
           <div className="mt-6 flex justify-between">
             <button
+              type="button"
               onClick={() => setStep(1)}
-              className="px-6 py-2 border border-gray-300 rounded-md hover:bg-gray-50"
+              className="px-6 py-2 border border-gray-300 rounded-lg hover:bg-gray-50"
             >
               Back
             </button>
             <button
-              onClick={() => setStep(3)}
-              className="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
+              type="button"
+              onClick={goToStep3}
+              className="btn-primary btn-glow"
               data-testid="kyc-next-step2"
             >
               Next: Review & Submit
