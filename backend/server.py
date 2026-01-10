@@ -1272,122 +1272,122 @@ async def create_transfer(
     """Submit transfer - instant success, no waiting."""
     workflows = BankingWorkflowsService(db)
     transfer = await workflows.create_transfer(current_user["id"], data)
-    return {"ok": True, "data": transfer.model_dump(), "message": \"Transfer successful\"}
+    return {"ok": True, "data": transfer.model_dump(), "message": "Transfer successful"}
 
 
-@app.get(\"/api/v1/transfers\")
+@app.get("/api/v1/transfers")
 async def get_transfers(
     current_user: dict = Depends(get_current_user),
     db: AsyncIOMotorDatabase = Depends(get_database)
 ):
-    \"\"\"Get user's transfers.\"\"\"
+    "Get user's transfers."
     workflows = BankingWorkflowsService(db)
-    transfers = await workflows.get_user_transfers(current_user[\"id\"])
-    return {\"ok\": True, \"data\": [t.model_dump() for t in transfers]}
+    transfers = await workflows.get_user_transfers(current_user["id"])
+    return {"ok": True, "data": [t.model_dump() for t in transfers]}
 
 
-@app.get(\"/api/v1/transfers/{transfer_id}\")
+@app.get(/api/v1/transfers/{transfer_id})
 async def get_transfer_detail(
     transfer_id: str,
     current_user: dict = Depends(get_current_user),
     db: AsyncIOMotorDatabase = Depends(get_database)
 ):
-    \"\"\"Get transfer details.\"\"\"
+    Get transfer details.
     workflows = BankingWorkflowsService(db)
-    transfer = await workflows.get_transfer(transfer_id, current_user[\"id\"])
+    transfer = await workflows.get_transfer(transfer_id, current_user[id])
     if not transfer:
-        raise HTTPException(status_code=404, detail=\"Transfer not found\")
-    return {\"ok\": True, \"data\": transfer.model_dump()}
+        raise HTTPException(status_code=404, detail=Transfer not found)
+    return {ok: True, data: transfer.model_dump()}
 
 
 # ==================== ADMIN - CARD REQUESTS ====================
 
-@app.get(\"/api/v1/admin/card-requests\")
+@app.get(/api/v1/admin/card-requests)
 async def admin_get_card_requests(
-    status: str = \"PENDING\",
+    status: str = PENDING,
     current_user: dict = Depends(require_admin),
     db: AsyncIOMotorDatabase = Depends(get_database)
 ):
-    \"\"\"Admin: Get card requests by status.\"\"\"
+    Admin: Get card requests by status.
     workflows = BankingWorkflowsService(db)
     requests = await workflows.get_pending_card_requests()
-    return {\"ok\": True, \"data\": [r.model_dump() for r in requests]}
+    return {ok: True, data: [r.model_dump() for r in requests]}
 
 
-@app.post(\"/api/v1/admin/card-requests/{request_id}/fulfill\")
+@app.post(/api/v1/admin/card-requests/{request_id}/fulfill)
 async def admin_fulfill_card_request(
     request_id: str,
     card_data: FulfillCardRequest,
     current_user: dict = Depends(require_admin),
     db: AsyncIOMotorDatabase = Depends(get_database)
 ):
-    \"\"\"Admin fulfills card request.\"\"\"
+    Admin fulfills card request.
     workflows = BankingWorkflowsService(db)
-    card = await workflows.fulfill_card_request(request_id, current_user[\"id\"], card_data)
-    return {\"ok\": True, \"data\": card.model_dump()}
+    card = await workflows.fulfill_card_request(request_id, current_user[id], card_data)
+    return {ok: True, data: card.model_dump()}
 
 
-@app.post(\"/api/v1/admin/card-requests/{request_id}/reject\")
+@app.post(/api/v1/admin/card-requests/{request_id}/reject)
 async def admin_reject_card_request(
     request_id: str,
     reason: str,
     current_user: dict = Depends(require_admin),
     db: AsyncIOMotorDatabase = Depends(get_database)
 ):
-    \"\"\"Admin rejects card request.\"\"\"
+    Admin rejects card request.
     if not reason:
-        raise HTTPException(status_code=400, detail=\"Reject reason is required\")
+        raise HTTPException(status_code=400, detail=Reject reason is required)
     workflows = BankingWorkflowsService(db)
-    await workflows.reject_card_request(request_id, current_user[\"id\"], reason)
-    return {\"ok\": True}
+    await workflows.reject_card_request(request_id, current_user[id], reason)
+    return {ok: True}
 
 
 # ==================== ADMIN - TRANSFERS ====================
 
-@app.get(\"/api/v1/admin/transfers\")
+@app.get(/api/v1/admin/transfers)
 async def admin_get_transfers(
     status: str = None,
     current_user: dict = Depends(require_admin),
     db: AsyncIOMotorDatabase = Depends(get_database)
 ):
-    \"\"\"Admin: Get transfers by status.\"\"\"
+    Admin: Get transfers by status.
     workflows = BankingWorkflowsService(db)
     transfers = await workflows.get_admin_transfers(status)
-    return {\"ok\": True, \"data\": [t.model_dump() for t in transfers]}
+    return {ok: True, data: [t.model_dump() for t in transfers]}
 
 
-@app.post(\"/api/v1/admin/transfers/{transfer_id}/approve\")
+@app.post(/api/v1/admin/transfers/{transfer_id}/approve)
 async def admin_approve_transfer(
     transfer_id: str,
     current_user: dict = Depends(require_admin),
     db: AsyncIOMotorDatabase = Depends(get_database)
 ):
-    \"\"\"Admin approves transfer.\"\"\"
+    Admin approves transfer.
     workflows = BankingWorkflowsService(db)
-    await workflows.approve_transfer(transfer_id, current_user[\"id\"])
-    return {\"ok\": True, \"message\": \"Transfer approved\"}
+    await workflows.approve_transfer(transfer_id, current_user[id])
+    return {ok: True, message: Transfer approved}
 
 
 class RejectTransferRequest(BaseModel):
     reason: str
 
 
-@app.post(\"/api/v1/admin/transfers/{transfer_id}/reject\")
+@app.post(/api/v1/admin/transfers/{transfer_id}/reject)
 async def admin_reject_transfer(
     transfer_id: str,
     data: RejectTransferRequest,
     current_user: dict = Depends(require_admin),
     db: AsyncIOMotorDatabase = Depends(get_database)
 ):
-    \"\"\"Admin rejects transfer.\"\"\"
+    Admin rejects transfer.
     workflows = BankingWorkflowsService(db)
-    await workflows.reject_transfer(transfer_id, current_user[\"id\"], data.reason)
-    return {\"ok\": True, \"message\": \"Transfer rejected\"}
+    await workflows.reject_transfer(transfer_id, current_user[id], data.reason)
+    return {ok: True, message: Transfer rejected}
 
 
 # ==================== ADMIN - ACCOUNT ADJUSTMENTS ====================
 
-@app.post(\"/api/v1/admin/accounts/{account_id}/topup\")
+@app.post(/api/v1/admin/accounts/{account_id}/topup)
 async def admin_topup_account(
     account_id: str,
     amount: int,
@@ -1395,34 +1395,34 @@ async def admin_topup_account(
     current_user: dict = Depends(require_admin),
     db: AsyncIOMotorDatabase = Depends(get_database)
 ):
-    \"\"\"Admin tops up account.\"\"\"
+    Admin tops up account.
     workflows = BankingWorkflowsService(db)
     ledger_engine = LedgerEngine(db)
     
     # Get account to find ledger account
-    account = await db.bank_accounts.find_one({\"_id\": account_id})
+    account = await db.bank_accounts.find_one({_id: account_id})
     if not account:
-        raise HTTPException(status_code=404, detail=\"Account not found\")
+        raise HTTPException(status_code=404, detail=Account not found)
     
     # Use existing ledger top-up (which changes balance)
     await ledger_engine.top_up(
-        user_account_id=account[\"ledger_account_id\"],
+        user_account_id=account[ledger_account_id],
         amount=amount,
-        external_id=f\"admin_topup_{uuid.uuid4()}\",
+        external_id=fadmin_topup_{uuid.uuid4()},
         reason=reason,
-        performed_by=current_user[\"id\"]
+        performed_by=current_user[id]
     )
     
     # Create adjustment record
-    await workflows.topup_account(account_id, current_user[\"id\"], amount, reason)
+    await workflows.topup_account(account_id, current_user[id], amount, reason)
     
     # Get new balance
-    new_balance = await ledger_engine.get_balance(account[\"ledger_account_id\"])
+    new_balance = await ledger_engine.get_balance(account[ledger_account_id])
     
-    return {\"ok\": True, \"message\": \"Top-up successful\", \"new_balance\": new_balance}
+    return {ok: True, message: Top-up successful, new_balance: new_balance}
 
 
-@app.post(\"/api/v1/admin/accounts/{account_id}/withdraw\")
+@app.post(/api/v1/admin/accounts/{account_id}/withdraw)
 async def admin_withdraw_account(
     account_id: str,
     amount: int,
@@ -1430,34 +1430,34 @@ async def admin_withdraw_account(
     current_user: dict = Depends(require_admin),
     db: AsyncIOMotorDatabase = Depends(get_database)
 ):
-    \"\"\"Admin withdraws from account.\"\"\"
+    Admin withdraws from account.
     workflows = BankingWorkflowsService(db)
     ledger_engine = LedgerEngine(db)
     
     # Get account
-    account = await db.bank_accounts.find_one({\"_id\": account_id})
+    account = await db.bank_accounts.find_one({_id: account_id})
     if not account:
-        raise HTTPException(status_code=404, detail=\"Account not found\")
+        raise HTTPException(status_code=404, detail=Account not found)
     
     # Use existing ledger withdraw
     await ledger_engine.withdraw(
-        user_account_id=account[\"ledger_account_id\"],
+        user_account_id=account[ledger_account_id],
         amount=amount,
-        external_id=f\"admin_withdraw_{uuid.uuid4()}\",
+        external_id=fadmin_withdraw_{uuid.uuid4()},
         reason=reason,
-        performed_by=current_user[\"id\"]
+        performed_by=current_user[id]
     )
     
     # Create adjustment record
-    await workflows.withdraw_account(account_id, current_user[\"id\"], amount, reason)
+    await workflows.withdraw_account(account_id, current_user[id], amount, reason)
     
     # Get new balance
-    new_balance = await ledger_engine.get_balance(account[\"ledger_account_id\"])
+    new_balance = await ledger_engine.get_balance(account[ledger_account_id])
     
-    return {\"ok\": True, \"message\": \"Withdrawal successful\", \"new_balance\": new_balance}
+    return {ok: True, message: Withdrawal successful, new_balance: new_balance}
 
 
-@app.get(\"/api/health\")
+@app.get(/api/health)
 async def health_check():
     """Health check endpoint."""
     return {"status": "healthy", "app": settings.APP_NAME}
