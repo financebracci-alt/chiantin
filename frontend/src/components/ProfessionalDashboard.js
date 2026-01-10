@@ -88,14 +88,14 @@ export function ProfessionalDashboard({ user, logout }) {
       {/* Overview Card */}
       <div className="overview-card">
         <div className="overview-label">overview</div>
-        <div className="flex justify-between items-end">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4">
           <div>
-            <div className="balance-large">€{formatAmount(getTotalBalance())}</div>
+            <div className="balance-large text-3xl sm:text-5xl">€{formatAmount(getTotalBalance())}</div>
             <div className="balance-small">Available balance</div>
           </div>
           <button
             onClick={() => accounts[0] && navigate(`/accounts/${accounts[0].id}/transactions`)}
-            className="btn-primary"
+            className="btn-primary w-full sm:w-auto"
             disabled={accounts.length === 0}
             data-testid="view-account-btn"
           >

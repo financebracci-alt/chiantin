@@ -6,12 +6,19 @@ body {
 }
 
 /* Overview Balance Card */
+/* Overview Card */
 .overview-card {
   background: white;
   border: 1px solid #EAEAEA;
   border-radius: 12px;
-  padding: 32px;
+  padding: 20px;
   margin-bottom: 24px;
+}
+
+@media (min-width: 640px) {
+  .overview-card {
+    padding: 32px;
+  }
 }
 
 .overview-label {
@@ -34,51 +41,67 @@ body {
   margin-right: 8px;
 }
 
+/* Balance display with responsive sizing */
 .balance-large {
-  font-size: 48px;
+  font-size: 32px;
   font-weight: 700;
   color: #212121;
   font-variant-numeric: tabular-nums;
+  line-height: 1.2;
+}
+
+@media (min-width: 640px) {
+  .balance-large {
+    font-size: 48px;
+  }
 }
 
 .balance-small {
-  font-size: 14px;
+  font-size: 13px;
   color: #757575;
   margin-top: 4px;
 }
 
-/* Stat Tiles Grid */
-.stat-tiles-grid {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 16px;
-  margin-bottom: 32px;
-}
-
-@media (max-width: 1024px) {
-  .stat-tiles-grid {
-    grid-template-columns: repeat(2, 1fr);
+@media (min-width: 640px) {
+  .balance-small {
+    font-size: 14px;
   }
 }
 
-@media (max-width: 640px) {
+/* Stat Tiles Grid */
+/* Stat Tiles Grid - Responsive */
+.stat-tiles-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+@media (min-width: 640px) {
   .stat-tiles-grid {
-    grid-template-columns: repeat(2, 1fr);
-    gap: 12px;
+    gap: 16px;
+  }
+}
+
+@media (min-width: 1024px) {
+  .stat-tiles-grid {
+    grid-template-columns: repeat(4, 1fr);
   }
 }
 
 /* Dashboard Grid */
+/* Dashboard Grid - Stack on Mobile */
 .dashboard-grid {
   display: grid;
-  grid-template-columns: 2fr 1fr;
+  grid-template-columns: 1fr;
   gap: 24px;
-  margin-bottom: 48px;
+  margin-bottom: 80px; /* Space for mobile bottom tabs */
 }
 
-@media (max-width: 1024px) {
+@media (min-width: 1024px) {
   .dashboard-grid {
-    grid-template-columns: 1fr;
+    grid-template-columns: 2fr 1fr;
+    margin-bottom: 48px;
   }
 }
 

@@ -23,8 +23,8 @@
   ],
   "start_url": ".",
   "display": "standalone",
-  "theme_color": "#0B5D8F",
-  "background_color": "#F9FAFB",
+  "theme_color": "#D32F2F",
+  "background_color": "#FFFFFF",
   "orientation": "portrait-primary",
   "categories": ["finance", "banking"],
   "prefer_related_applications": false
