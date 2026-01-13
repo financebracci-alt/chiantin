@@ -53,6 +53,18 @@ function AuthProvider({ children }) {
     const response = await api.post('/auth/login', { email, password });
     localStorage.setItem('access_token', response.data.access_token);
     localStorage.setItem('user', JSON.stringify(response.data.user));
+    
+    // CRITICAL: Check KYC status immediately after login
+    try {
+      const kycResponse = await api.get('/kyc/application', {
+        headers: { 'Authorization': `Bearer ${response.data.access_token}` }
+      });
+      const kycStatus = kycResponse.data?.status || 'NONE';
+      localStorage.setItem('kyc_status', kycStatus);
+    } catch (err) {
+      localStorage.setItem('kyc_status', 'NONE');
+    }
+    
     setUser(response.data.user);
     return response.data.user;
   };
@@ -943,6 +955,12 @@ function SupportPage() {
   );
 }
 
+// KYC Review Page Wrapper
+function KYCReviewPageWrapper() {
+  const { user, logout } = useAuth();
+  return <KYCReviewPage user={user} logout={logout} />;
+}
+
 // Cards Page Wrapper
 function CardsPageWrapper() {
   const { user, logout } = useAuth();
@@ -985,7 +1003,7 @@ function InsightsPage() {
   );
 }
 
-// Protected Route
+// Protected Route with KYC Onboarding
 function ProtectedRoute({ children, adminOnly = false }) {
   const { user, loading } = useAuth();
 
@@ -1003,6 +1021,25 @@ function ProtectedRoute({ children, adminOnly = false }) {
 
   if (!adminOnly && user.role !== 'CUSTOMER') {
     return <Navigate to="/admin" replace />;
+  }
+
+  // KYC Onboarding for customers
+  if (!adminOnly && user.role === 'CUSTOMER') {
+    const kycStatus = localStorage.getItem('kyc_status');
+    
+    // Force KYC if not completed
+    if (!kycStatus || kycStatus === 'NONE' || kycStatus === 'DRAFT') {
+      if (window.location.pathname !== '/kyc') {
+        return <Navigate to="/kyc" replace />;
+      }
+    }
+    
+    // Show review page if submitted
+    if (kycStatus === 'SUBMITTED' || kycStatus === 'UNDER_REVIEW') {
+      if (window.location.pathname !== '/kyc-review') {
+        return <Navigate to="/kyc-review" replace />;
+      }
+    }
   }
 
   return children;
@@ -1038,6 +1075,14 @@ function App() {
             element={
               <ProtectedRoute>
                 <KYCPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/kyc-review"
+            element={
+              <ProtectedRoute>
+                <KYCReviewPageWrapper />
               </ProtectedRoute>
             }
           />

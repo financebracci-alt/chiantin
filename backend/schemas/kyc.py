@@ -95,3 +95,4 @@ class KYCReviewRequest(BaseModel):
     status: KYCStatus
     review_notes: Optional[str] = None
     rejection_reason: Optional[str] = None
+    assigned_iban: Optional[str] = None  # Admin enters IBAN on approval

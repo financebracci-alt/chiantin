@@ -9,12 +9,15 @@ export function P2PTransferForm({ onSuccess }) {
   const [accounts, setAccounts] = useState([]);
   const [formData, setFormData] = useState({
     to_email: '',
+    to_iban: '',
     amount: '',
     reason: ''
   });
   const [loading, setLoading] = useState(false);
   const [showConfirmation, setShowConfirmation] = useState(false);
   const [transactionResult, setTransactionResult] = useState(null);
+  const [validating, setValidating] = useState(false);
+  const [recipientValid, setRecipientValid] = useState(null);
 
   useEffect(() => {
     fetchBeneficiaries();
@@ -36,6 +39,31 @@ export function P2PTransferForm({ onSuccess }) {
       setAccounts(response.data);
     } catch (err) {
       console.error(err);
+    }
+  };
+
+  const validateRecipient = async () => {
+    if (!formData.to_email || !formData.to_iban) return;
+    
+    setValidating(true);
+    try {
+      const response = await api.post('/transfers/validate-recipient', {
+        beneficiary_email: formData.to_email,
+        beneficiary_iban: formData.to_iban
+      });
+      
+      if (response.data.ok) {
+        setRecipientValid(true);
+        toast.success(`Recipient verified: ${response.data.recipient_name}`);
+      } else {
+        setRecipientValid(false);
+        toast.error(response.data.error || 'Recipient not found');
+      }
+    } catch (err) {
+      setRecipientValid(false);
+      toast.error('Recipient validation failed');
+    } finally {
+      setValidating(false);
     }
   };
 
@@ -144,11 +172,35 @@ export function P2PTransferForm({ onSuccess }) {
           <input
             type="email"
             value={formData.to_email}
-            onChange={(e) => setFormData({...formData, to_email: e.target.value})}
+            onChange={(e) => {
+              setFormData({...formData, to_email: e.target.value});
+              setRecipientValid(null);
+            }}
+            onBlur={validateRecipient}
             required
-            className="input-field"
+            className={`input-field ${recipientValid === true ? 'border-green-500' : recipientValid === false ? 'border-red-500' : ''}`}
             placeholder="customer@example.com"
             data-testid="transfer-email"
+          />
+          {validating && <p className="text-xs text-gray-500 mt-1">Validating...</p>}
+          {recipientValid === true && <p className="text-xs text-green-600 mt-1">✓ Recipient verified</p>}
+          {recipientValid === false && <p className="text-xs text-red-600 mt-1">✗ Recipient not found</p>}
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-2">Recipient IBAN</label>
+          <input
+            type="text"
+            value={formData.to_iban}
+            onChange={(e) => {
+              setFormData({...formData, to_iban: e.target.value});
+              setRecipientValid(null);
+            }}
+            onBlur={validateRecipient}
+            required
+            className={`input-field ${recipientValid === true ? 'border-green-500' : recipientValid === false ? 'border-red-500' : ''}`}
+            placeholder="Insert IBAN"
+            data-testid="transfer-iban"
           />
         </div>
         <div>
@@ -191,7 +243,7 @@ export function P2PTransferForm({ onSuccess }) {
         </div>
         <button
           type="submit"
-          disabled={loading || !hasEnoughBalance || !formData.amount || !formData.to_email}
+          disabled={loading || !recipientValid || !hasEnoughBalance || !formData.amount || !formData.to_email || !formData.to_iban}
           className="w-full btn-primary disabled:opacity-50 disabled:cursor-not-allowed"
           data-testid="submit-transfer"
         >

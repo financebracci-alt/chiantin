@@ -436,16 +436,20 @@ async def create_account(
     db: AsyncIOMotorDatabase = Depends(get_database)
 ):
     """Create a new bank account."""
+    # Get user's KYC status
+    kyc_app = await db.kyc_applications.find_one({"user_id": current_user["id"]})
+    kyc_status = kyc_app["status"] if kyc_app else None
+    
     ledger_engine = LedgerEngine(db)
     banking_service = BankingService(db, ledger_engine)
-    account = await banking_service.create_account(current_user["id"])
+    account = await banking_service.create_account(current_user["id"], kyc_status)
     
     balance = await ledger_engine.get_balance(account.ledger_account_id)
     
     return AccountResponse(
         id=account.id,
         account_number=account.account_number,
-        iban=account.iban,
+        iban=account.iban,  # Will be None if not verified
         currency=account.currency,
         status=account.status,
         balance=balance,

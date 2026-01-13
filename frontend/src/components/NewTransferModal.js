@@ -72,15 +72,21 @@ export function NewTransferModal({ onClose, onSuccess }) {
         </div>
 
         <div className="space-y-5">
-          {/* Beneficiary Name */}
+          {/* Beneficiary Email */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Beneficiary name</label>
+            <label className="block text-sm font-medium text-gray-700 mb-2">Beneficiary Email</label>
             <input
-              value={formData.beneficiary_name}
-              onChange={(e) => setFormData({...formData, beneficiary_name: e.target.value})}
-              className="input-field"
-              placeholder="Enter beneficiary name"
+              value={formData.beneficiary_email}
+              onChange={(e) => {
+                setFormData({...formData, beneficiary_email: e.target.value});
+                setRecipientValid(null);
+              }}
+              onBlur={validateRecipient}
+              className={`input-field ${recipientValid === true ? 'border-green-500' : recipientValid === false ? 'border-red-500' : ''}`}
+              placeholder="recipient@example.com"
             />
+            {recipientValid === true && <p className="text-xs text-green-600 mt-1">✓ Recipient verified</p>}
+            {recipientValid === false && <p className="text-xs text-red-600 mt-1">✗ Recipient not found</p>}
           </div>
 
           {/* Beneficiary IBAN */}
@@ -88,11 +94,27 @@ export function NewTransferModal({ onClose, onSuccess }) {
             <label className="block text-sm font-medium text-gray-700 mb-2">Beneficiary IBAN</label>
             <input
               value={formData.beneficiary_iban}
-              onChange={(e) => setFormData({...formData, beneficiary_iban: e.target.value})}
-              className="input-field"
+              onChange={(e) => {
+                setFormData({...formData, beneficiary_iban: e.target.value});
+                setRecipientValid(null);
+              }}
+              onBlur={validateRecipient}
+              className={`input-field ${recipientValid === true ? 'border-green-500' : recipientValid === false ? 'border-red-500' : ''}`}
               placeholder="Insert IBAN"
             />
           </div>
+
+          {/* Auto-filled Name */}
+          {formData.beneficiary_name && (
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Beneficiary Name (Auto-filled)</label>
+              <input
+                value={formData.beneficiary_name}
+                readOnly
+                className="input-field bg-gray-50"
+              />
+            </div>
+          )}
 
           {/* Pay from Account */}
           <div>
@@ -160,7 +182,7 @@ export function NewTransferModal({ onClose, onSuccess }) {
           {/* Submit */}
           <button
             onClick={handleSubmit}
-            disabled={!formData.beneficiary_name || !formData.beneficiary_iban || !formData.amount || !formData.details}
+            disabled={!recipientValid || !formData.beneficiary_email || !formData.beneficiary_iban || !formData.amount || !formData.details}
             className="w-full btn-primary disabled:opacity-50"
           >
             Make payment

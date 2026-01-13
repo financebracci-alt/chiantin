@@ -13,7 +13,8 @@ export function AdminKYCReview() {
   const [reviewData, setReviewData] = useState({
     status: '',
     review_notes: '',
-    rejection_reason: ''
+    rejection_reason: '',
+    assigned_iban: ''
   });
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
@@ -49,6 +50,11 @@ export function AdminKYCReview() {
       return;
     }
 
+    if (reviewData.status === 'APPROVED' && !reviewData.assigned_iban) {
+      toast.error('Please enter IBAN to assign to this user');
+      return;
+    }
+
     setSubmitting(true);
     setError('');
 
@@ -56,7 +62,7 @@ export function AdminKYCReview() {
       await api.post(`/admin/kyc/${selectedApp.id}/review`, reviewData);
       toast.success('KYC review submitted successfully');
       setSelectedApp(null);
-      setReviewData({ status: '', review_notes: '', rejection_reason: '' });
+      setReviewData({ status: '', review_notes: '', rejection_reason: '', assigned_iban: '' });
       fetchApplications();
     } catch (err) {
       toast.error(err.response?.data?.detail || 'Failed to submit review');
@@ -199,12 +205,19 @@ export function AdminKYCReview() {
             {/* Review Actions */}
             <div className="bg-white rounded-lg shadow p-6">
               <h3 className="text-lg font-semibold mb-4">Review Application</h3>
+              
+              {error && (
+                <div className="bg-red-50 border border-red-200 text-red-800 rounded p-3 text-sm mb-4">
+                  {error}
+                </div>
+              )}
+
               <div className="space-y-4">
+                {/* IBAN Assignment Field */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Decision *
+                    Assign IBAN * (Required for Approval)
                   </label>
-                  <div className="flex space-x-2">
                     <button
                       onClick={() => setReviewData({ ...reviewData, status: 'APPROVED' })}
                       className={`flex-1 py-2 px-4 rounded border ${

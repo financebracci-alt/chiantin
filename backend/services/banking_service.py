@@ -15,7 +15,7 @@ class BankingService:
         self.db = db
         self.ledger = ledger_engine
     
-    async def create_account(self, user_id: str) -> BankAccount:
+    async def create_account(self, user_id: str, kyc_status: str = None) -> BankAccount:
         """Create a new bank account for user."""
         # Check if user already has an account
         existing = await self.db.bank_accounts.find_one({"user_id": user_id})
@@ -28,12 +28,19 @@ class BankingService:
             user_id=user_id
         )
         
+        # Only assign IBAN if KYC is approved
+        iban = None
+        bic = None
+        if kyc_status == 'APPROVED':
+            iban = generate_sandbox_iban()
+            bic = generate_bic()
+        
         # Create bank account
         account = BankAccount(
             user_id=user_id,
             account_number=generate_account_number(),
-            iban=generate_sandbox_iban(),
-            bic=generate_bic(),
+            iban=iban,  # Will be None if not KYC approved
+            bic=bic,
             ledger_account_id=ledger_account.id
         )
         
