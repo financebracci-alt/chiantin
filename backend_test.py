@@ -648,6 +648,228 @@ class APITester:
             self.log_test("Get Notifications", False, str(e))
             return False
 
+    def test_create_card_request(self):
+        """Test create card request"""
+        if not self.customer_token:
+            self.log_test("Create Card Request", False, "No customer token available")
+            return False
+        
+        if not self.customer_accounts:
+            self.log_test("Create Card Request", False, "No customer accounts available")
+            return False
+        
+        try:
+            account_id = self.customer_accounts[0]["id"]
+            response = requests.post(
+                f"{BASE_URL}/card-requests",
+                headers={"Authorization": f"Bearer {self.customer_token}"},
+                json={
+                    "account_id": account_id,
+                    "card_type": "DEBIT_PHYSICAL"
+                },
+                timeout=10
+            )
+            if response.status_code == 200:
+                data = response.json()
+                if data.get("ok") and "data" in data:
+                    self.log_test("Create Card Request", True)
+                    print(f"   Request ID: {data['data'].get('id')}")
+                    print(f"   Card Type: {data['data'].get('card_type')}")
+                    print(f"   Status: {data['data'].get('status')}")
+                    return True
+                else:
+                    self.log_test("Create Card Request", False, "Missing ok or data in response")
+                    return False
+            else:
+                self.log_test("Create Card Request", False, f"Status {response.status_code}: {response.text}")
+                return False
+        except Exception as e:
+            self.log_test("Create Card Request", False, str(e))
+            return False
+
+    def test_get_card_requests(self):
+        """Test get card requests"""
+        if not self.customer_token:
+            self.log_test("Get Card Requests", False, "No customer token available")
+            return False
+        
+        try:
+            response = requests.get(
+                f"{BASE_URL}/card-requests",
+                headers={"Authorization": f"Bearer {self.customer_token}"},
+                timeout=10
+            )
+            if response.status_code == 200:
+                data = response.json()
+                if data.get("ok") and isinstance(data.get("data"), list):
+                    self.log_test("Get Card Requests", True)
+                    print(f"   Found {len(data['data'])} card request(s)")
+                    return True
+                else:
+                    self.log_test("Get Card Requests", False, "Missing ok or data is not a list")
+                    return False
+            else:
+                self.log_test("Get Card Requests", False, f"Status {response.status_code}")
+                return False
+        except Exception as e:
+            self.log_test("Get Card Requests", False, str(e))
+            return False
+
+    def test_get_cards(self):
+        """Test get cards"""
+        if not self.customer_token:
+            self.log_test("Get Cards", False, "No customer token available")
+            return False
+        
+        try:
+            response = requests.get(
+                f"{BASE_URL}/cards",
+                headers={"Authorization": f"Bearer {self.customer_token}"},
+                timeout=10
+            )
+            if response.status_code == 200:
+                data = response.json()
+                if data.get("ok") and isinstance(data.get("data"), list):
+                    self.log_test("Get Cards", True)
+                    print(f"   Found {len(data['data'])} card(s)")
+                    return True
+                else:
+                    self.log_test("Get Cards", False, "Missing ok or data is not a list")
+                    return False
+            else:
+                self.log_test("Get Cards", False, f"Status {response.status_code}")
+                return False
+        except Exception as e:
+            self.log_test("Get Cards", False, str(e))
+            return False
+
+    def test_create_transfer(self):
+        """Test create transfer"""
+        if not self.customer_token:
+            self.log_test("Create Transfer", False, "No customer token available")
+            return False
+        
+        if not self.customer_accounts:
+            self.log_test("Create Transfer", False, "No customer accounts available")
+            return False
+        
+        try:
+            account_id = self.customer_accounts[0]["id"]
+            response = requests.post(
+                f"{BASE_URL}/transfers",
+                headers={"Authorization": f"Bearer {self.customer_token}"},
+                json={
+                    "from_account_id": account_id,
+                    "beneficiary_name": "Test Recipient",
+                    "beneficiary_iban": "DE89370400440532013000",
+                    "amount": 1000,
+                    "currency": "EUR",
+                    "details": "Test transfer from automated testing"
+                },
+                timeout=10
+            )
+            if response.status_code == 200:
+                data = response.json()
+                if data.get("ok") and "data" in data:
+                    self.log_test("Create Transfer", True)
+                    print(f"   Transfer ID: {data['data'].get('id')}")
+                    print(f"   Amount: €{data['data'].get('amount', 0) / 100:.2f}")
+                    print(f"   Status: {data['data'].get('status')}")
+                    return True
+                else:
+                    self.log_test("Create Transfer", False, "Missing ok or data in response")
+                    return False
+            else:
+                self.log_test("Create Transfer", False, f"Status {response.status_code}: {response.text}")
+                return False
+        except Exception as e:
+            self.log_test("Create Transfer", False, str(e))
+            return False
+
+    def test_get_transfers(self):
+        """Test get transfers"""
+        if not self.customer_token:
+            self.log_test("Get Transfers", False, "No customer token available")
+            return False
+        
+        try:
+            response = requests.get(
+                f"{BASE_URL}/transfers",
+                headers={"Authorization": f"Bearer {self.customer_token}"},
+                timeout=10
+            )
+            if response.status_code == 200:
+                data = response.json()
+                if data.get("ok") and isinstance(data.get("data"), list):
+                    self.log_test("Get Transfers", True)
+                    print(f"   Found {len(data['data'])} transfer(s)")
+                    return True
+                else:
+                    self.log_test("Get Transfers", False, "Missing ok or data is not a list")
+                    return False
+            else:
+                self.log_test("Get Transfers", False, f"Status {response.status_code}")
+                return False
+        except Exception as e:
+            self.log_test("Get Transfers", False, str(e))
+            return False
+
+    def test_admin_get_card_requests(self):
+        """Test admin get card requests"""
+        if not self.admin_token:
+            self.log_test("Admin Get Card Requests", False, "No admin token available")
+            return False
+        
+        try:
+            response = requests.get(
+                f"{BASE_URL}/admin/card-requests",
+                headers={"Authorization": f"Bearer {self.admin_token}"},
+                timeout=10
+            )
+            if response.status_code == 200:
+                data = response.json()
+                if data.get("ok") and isinstance(data.get("data"), list):
+                    self.log_test("Admin Get Card Requests", True)
+                    print(f"   Found {len(data['data'])} pending card request(s)")
+                    return True
+                else:
+                    self.log_test("Admin Get Card Requests", False, "Missing ok or data is not a list")
+                    return False
+            else:
+                self.log_test("Admin Get Card Requests", False, f"Status {response.status_code}")
+                return False
+        except Exception as e:
+            self.log_test("Admin Get Card Requests", False, str(e))
+            return False
+
+    def test_admin_get_transfers(self):
+        """Test admin get transfers"""
+        if not self.admin_token:
+            self.log_test("Admin Get Transfers", False, "No admin token available")
+            return False
+        
+        try:
+            response = requests.get(
+                f"{BASE_URL}/admin/transfers",
+                headers={"Authorization": f"Bearer {self.admin_token}"},
+                timeout=10
+            )
+            if response.status_code == 200:
+                data = response.json()
+                if data.get("ok") and isinstance(data.get("data"), list):
+                    self.log_test("Admin Get Transfers", True)
+                    print(f"   Found {len(data['data'])} transfer(s)")
+                    return True
+                else:
+                    self.log_test("Admin Get Transfers", False, "Missing ok or data is not a list")
+                    return False
+            else:
+                self.log_test("Admin Get Transfers", False, f"Status {response.status_code}")
+                return False
+        except Exception as e:
+            self.log_test("Admin Get Transfers", False, str(e))
+            return False
+
     def test_admin_get_all_tickets(self):
         """Test admin get all tickets"""
         if not self.admin_token:
