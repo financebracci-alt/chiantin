@@ -567,7 +567,14 @@ def main():
     tester.test_get_beneficiaries()
     tester.test_create_scheduled_payment()
     tester.test_get_scheduled_payments()
+    
+    print("\n" + "=" * 70)
+    print("SECTION 5: SPENDING INSIGHTS (REAL LEDGER DATA)")
+    print("=" * 70)
+    print("Testing the new feature: Real spending calculation from ledger")
+    
     tester.test_get_spending_insights()
+    tester.test_get_monthly_spending()
     
     print("\n" + "=" * 70)
     print("SECTION 5: ADMIN FEATURES")
