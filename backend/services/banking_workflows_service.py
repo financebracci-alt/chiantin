@@ -395,17 +395,19 @@ class BankingWorkflowsService:
         title: str,
         message: str,
         entity_type: str,
-        entity_id: str
+        entity_id: str,
+        notification_type: str = "ACCOUNT"
     ):
         """Create notification for user."""
         notification = {
             "_id": str(uuid.uuid4()),
             "user_id": user_id,
+            "notification_type": notification_type,
             "title": title,
             "message": message,
             "entity_type": entity_type,
             "entity_id": entity_id,
-            "is_read": False,
+            "read": False,
             "created_at": datetime.utcnow()
         }
         await self.db.notifications.insert_one(notification)
