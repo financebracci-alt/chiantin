@@ -220,8 +220,18 @@ export function ProfessionalDashboard({ user, logout }) {
             <div className="card p-4">
               <div className="flex justify-between mb-3">
                 <span className="text-sm text-gray-600">Total Spending</span>
-                <span className="text-lg font-bold">€850.00</span>
+                <span className="text-lg font-bold" data-testid="monthly-spending-amount">€{formatAmount(monthlySpending.total)}</span>
               </div>
+              {Object.keys(monthlySpending.categories || {}).length > 0 && (
+                <div className="space-y-1 mb-3">
+                  {Object.entries(monthlySpending.categories).slice(0, 3).map(([category, amount]) => (
+                    <div key={category} className="flex justify-between text-xs">
+                      <span className="text-gray-500">{category.replace(/_/g, ' ')}</span>
+                      <span className="text-gray-700">€{formatAmount(amount)}</span>
+                    </div>
+                  ))}
+                </div>
+              )}
               <button onClick={() => navigate('/insights')} className="text-xs text-red-600 hover:text-red-700 font-medium">
                 View full breakdown →
               </button>
