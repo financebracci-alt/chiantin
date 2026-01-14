@@ -43,21 +43,19 @@ export function P2PTransferForm({ onSuccess }) {
   };
 
   const validateRecipient = async () => {
-    if (!formData.to_email || !formData.to_iban) return;
+    if (!formData.to_email) return;
     
     setValidating(true);
     try {
-      const response = await api.post('/transfers/validate-recipient', {
-        beneficiary_email: formData.to_email,
-        beneficiary_iban: formData.to_iban
-      });
-      
-      if (response.data.ok) {
+      // For P2P transfers, we just need to check if the recipient email exists
+      // The backend will validate when the transfer is submitted
+      // For now, just validate email format
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (emailRegex.test(formData.to_email)) {
         setRecipientValid(true);
-        toast.success(`Recipient verified: ${response.data.recipient_name}`);
       } else {
         setRecipientValid(false);
-        toast.error(response.data.error || 'Recipient not found');
+        toast.error('Invalid email format');
       }
     } catch (err) {
       setRecipientValid(false);
