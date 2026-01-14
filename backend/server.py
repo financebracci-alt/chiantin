@@ -172,6 +172,10 @@ async def login(
     if not user:
         raise HTTPException(status_code=401, detail="Invalid credentials")
     
+    # Check if user is disabled
+    if user.status == "DISABLED":
+        raise HTTPException(status_code=403, detail="Account is disabled. Please contact support.")
+    
     # Check MFA
     if user.mfa_enabled:
         if not credentials.totp_token:
