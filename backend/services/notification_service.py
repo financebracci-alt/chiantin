@@ -50,7 +50,21 @@ class NotificationService:
         cursor = self.db.notifications.find(query).sort("created_at", -1).limit(limit)
         notifications = []
         async for doc in cursor:
-            notifications.append(Notification(**serialize_doc(doc)))
+            try:
+                # Ensure required fields exist with defaults
+                serialized = serialize_doc(doc)
+                if "notification_type" not in serialized or serialized["notification_type"] is None:
+                    serialized["notification_type"] = "ACCOUNT"  # Default type
+                if "message" not in serialized:
+                    serialized["message"] = serialized.get("title", "Notification")
+                if "read" not in serialized:
+                    serialized["read"] = serialized.get("is_read", False)
+                
+                notifications.append(Notification(**serialized))
+            except Exception as e:
+                # Skip malformed notifications but log the error
+                print(f"Warning: Skipping malformed notification {doc.get('_id')}: {e}")
+                continue
         
         return notifications
     
