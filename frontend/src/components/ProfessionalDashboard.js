@@ -8,6 +8,7 @@ export function ProfessionalDashboard({ user, logout }) {
   const [accounts, setAccounts] = useState([]);
   const [transactions, setTransactions] = useState([]);
   const [kycStatus, setKycStatus] = useState(null);
+  const [monthlySpending, setMonthlySpending] = useState({ total: 0, categories: {} });
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -16,13 +17,15 @@ export function ProfessionalDashboard({ user, logout }) {
 
   const fetchDashboardData = async () => {
     try {
-      const [accountsRes, kycRes] = await Promise.all([
+      const [accountsRes, kycRes, spendingRes] = await Promise.all([
         api.get('/accounts'),
-        api.get('/kyc/application')
+        api.get('/kyc/application'),
+        api.get('/insights/monthly-spending').catch(() => ({ data: { total: 0, categories: {} } }))
       ]);
       
       setAccounts(accountsRes.data);
       setKycStatus(kycRes.data.status);
+      setMonthlySpending(spendingRes.data);
 
       if (accountsRes.data.length > 0) {
         const txnRes = await api.get(`/accounts/${accountsRes.data[0].id}/transactions`);
