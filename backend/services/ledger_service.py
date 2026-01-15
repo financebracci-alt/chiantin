@@ -236,25 +236,40 @@ class LedgerEngine:
             performed_by=performed_by
         )
     
-    async def get_transactions(self, account_id: str, limit: int = 50) -> List[LedgerTransaction]:
-        """Get transactions for an account."""
-        # Get entries for this account
+    async def get_transactions(self, account_id: str, limit: int = 50) -> List[dict]:
+        """Get transactions for an account with amounts and direction."""
+        # Get entries for this account with amounts
+        entries_by_txn = {}
         entry_cursor = self.db.ledger_entries.find(
             {"account_id": account_id}
         ).sort("created_at", -1).limit(limit)
         
-        txn_ids = set()
         async for entry in entry_cursor:
-            txn_ids.add(entry["transaction_id"])
+            txn_id = entry["transaction_id"]
+            entries_by_txn[txn_id] = {
+                "amount": entry["amount"],
+                "direction": entry["direction"]
+            }
+        
+        if not entries_by_txn:
+            return []
         
         # Get transactions
         txn_cursor = self.db.ledger_transactions.find(
-            {"_id": {"$in": list(txn_ids)}}
+            {"_id": {"$in": list(entries_by_txn.keys())}}
         ).sort("created_at", -1)
         
         txns = []
         async for doc in txn_cursor:
-            txns.append(LedgerTransaction(**serialize_doc(doc)))
+            txn_data = serialize_doc(doc)
+            txn_id = txn_data.get("id")
+            
+            # Add amount and direction from entry
+            if txn_id in entries_by_txn:
+                txn_data["amount"] = entries_by_txn[txn_id]["amount"]
+                txn_data["direction"] = entries_by_txn[txn_id]["direction"]
+            
+            txns.append(txn_data)
         
         return txns
     
