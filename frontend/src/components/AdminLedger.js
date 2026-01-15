@@ -149,12 +149,15 @@ export function EnhancedLedgerTools({ account, onSuccess }) {
     setError('');
 
     try {
+      // Convert euros to cents for the API
+      const amountInCents = Math.round(parseFloat(simpleForm.amount) * 100);
+      
       await api.post('/admin/ledger/charge-fee', {
         account_id: account.id,
-        amount: parseInt(simpleForm.amount),
+        amount: amountInCents,
         reason: simpleForm.reason
       });
-      toast.success(`€${(parseInt(simpleForm.amount) / 100).toFixed(2)} fee charged`);
+      toast.success(`€${parseFloat(simpleForm.amount).toFixed(2)} fee charged`);
       setSimpleForm({ amount: '', reason: '', toAccountId: '' });
       setActiveOperation(null);
       onSuccess && onSuccess();
@@ -175,9 +178,25 @@ export function EnhancedLedgerTools({ account, onSuccess }) {
     setError('');
 
     try {
+      // Convert euros to cents for the API
+      const amountInCents = Math.round(parseFloat(simpleForm.amount) * 100);
+      
       await api.post('/admin/ledger/internal-transfer', {
         from_account_id: account.id,
         to_account_id: simpleForm.toAccountId,
+        amount: amountInCents,
+        reason: simpleForm.reason
+      });
+      toast.success(`€${parseFloat(simpleForm.amount).toFixed(2)} transferred`);
+      setSimpleForm({ amount: '', reason: '', toAccountId: '' });
+      setActiveOperation(null);
+      onSuccess && onSuccess();
+    } catch (err) {
+      toast.error(err.response?.data?.detail || 'Transfer failed');
+    } finally {
+      setLoading(false);
+    }
+  };
         amount: parseInt(simpleForm.amount),
         reason: simpleForm.reason
       });
