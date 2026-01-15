@@ -1316,6 +1316,51 @@ function ProtectedRoute({ children, adminOnly = false }) {
   return children;
 }
 
+// Tax Hold Restricted Route - blocks restricted users from accessing certain pages
+function TaxHoldRestrictedRoute({ children }) {
+  const { user } = useAuth();
+  const navigate = useNavigate();
+  const [taxStatus, setTaxStatus] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const checkTaxStatus = async () => {
+      if (user?.role === 'CUSTOMER') {
+        try {
+          const response = await api.get('/users/me/tax-status');
+          setTaxStatus(response.data);
+          
+          if (response.data.is_blocked) {
+            // Show alert and redirect to dashboard
+            alert(`Account Restricted\n\nYour account has been temporarily restricted due to outstanding tax obligations.\n\nAmount Due: €${response.data.tax_amount_due?.toLocaleString('en-EU', { minimumFractionDigits: 2 })}\n\nReason: ${response.data.reason || 'Outstanding tax obligations'}\n\nTo restore full access to your banking services, please settle the required amount. For assistance, contact our support team at support@projectatlas.eu`);
+            navigate('/dashboard');
+          }
+        } catch (err) {
+          console.error('Failed to check tax status:', err);
+        }
+      }
+      setLoading(false);
+    };
+    
+    checkTaxStatus();
+  }, [user, navigate]);
+
+  if (loading) {
+    return <div className="min-h-screen flex items-center justify-center">
+      <div className="text-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-red-600 mx-auto mb-2"></div>
+        <p className="text-gray-600 text-sm">Checking account status...</p>
+      </div>
+    </div>;
+  }
+
+  if (taxStatus?.is_blocked) {
+    return null; // Will redirect via useEffect
+  }
+
+  return children;
+}
+
 // Main App
 function App() {
   return (
