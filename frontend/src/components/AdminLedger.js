@@ -63,8 +63,11 @@ export function EnhancedLedgerTools({ account, onSuccess }) {
     setError('');
 
     try {
+      // Convert euros to cents for the API
+      const amountInCents = Math.round(parseFloat(creditForm.amount) * 100);
+      
       await api.post(`/admin/accounts/${account.id}/topup`, {
-        amount: parseInt(creditForm.amount),
+        amount: amountInCents,
         display_type: creditForm.display_type,
         sender_name: creditForm.sender_name || null,
         sender_iban: creditForm.sender_iban || null,
@@ -74,7 +77,7 @@ export function EnhancedLedgerTools({ account, onSuccess }) {
         admin_note: creditForm.admin_note || null
       });
       
-      toast.success(`€${(parseInt(creditForm.amount) / 100).toFixed(2)} credited to account`);
+      toast.success(`€${parseFloat(creditForm.amount).toFixed(2)} credited to account`);
       setCreditForm({
         amount: '',
         display_type: 'Bank Transfer',
