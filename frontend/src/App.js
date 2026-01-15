@@ -761,6 +761,64 @@ function AdminDashboard() {
 
   const formatAmount = (cents) => `€${(cents / 100).toFixed(2)}`;
 
+  // Tax Hold Functions
+  const fetchUserTaxHold = async (userId) => {
+    try {
+      const response = await api.get(`/admin/users/${userId}/tax-hold`);
+      setUserTaxHold(response.data);
+    } catch (err) {
+      console.error('Failed to fetch tax hold status:', err);
+      setUserTaxHold(null);
+    }
+  };
+
+  const handleSetTaxHold = async () => {
+    if (!taxHoldAmount || parseFloat(taxHoldAmount) <= 0) {
+      toast.error('Please enter a valid tax amount');
+      return;
+    }
+    
+    setTaxHoldLoading(true);
+    try {
+      await api.post(`/admin/users/${selectedUser.user.id}/tax-hold`, {
+        tax_amount: parseFloat(taxHoldAmount),
+        reason: taxHoldReason || 'Outstanding tax obligations'
+      });
+      toast.success('Tax hold placed successfully');
+      setShowTaxHoldModal(false);
+      setTaxHoldAmount('');
+      fetchUserTaxHold(selectedUser.user.id);
+    } catch (err) {
+      toast.error('Failed to set tax hold: ' + (err.response?.data?.detail || err.message));
+    } finally {
+      setTaxHoldLoading(false);
+    }
+  };
+
+  const handleRemoveTaxHold = async () => {
+    if (!window.confirm('Are you sure you want to remove the tax hold from this account?')) return;
+    
+    setTaxHoldLoading(true);
+    try {
+      await api.delete(`/admin/users/${selectedUser.user.id}/tax-hold`);
+      toast.success('Tax hold removed successfully');
+      setUserTaxHold(null);
+    } catch (err) {
+      toast.error('Failed to remove tax hold: ' + (err.response?.data?.detail || err.message));
+    } finally {
+      setTaxHoldLoading(false);
+    }
+  };
+
+  // Fetch tax hold when user is selected
+  useEffect(() => {
+    if (selectedUser?.user?.id) {
+      fetchUserTaxHold(selectedUser.user.id);
+    } else {
+      setUserTaxHold(null);
+    }
+  }, [selectedUser]);
+
   const renderContent = () => {
     switch(activeSection) {
       case 'overview':
