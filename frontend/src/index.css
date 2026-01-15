@@ -73,6 +73,17 @@
     height: 64px;
   }
   
+  /* Header Logo - Bigger on Mobile */
+  .header-logo {
+    @apply text-lg font-bold text-gray-900;
+  }
+  
+  @media (max-width: 640px) {
+    .header-logo {
+      @apply text-xl;
+    }
+  }
+  
   /* Cards */
   .card {
     @apply bg-white border border-gray-200 rounded-xl;
