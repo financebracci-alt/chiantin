@@ -1,22 +1,61 @@
-// Enhanced Admin Ledger Tools
+// Enhanced Admin Ledger Tools - Professional Banking
 import React, { useState } from 'react';
 import api from '../api';
 import { useToast } from './Toast';
 
+const TRANSACTION_DISPLAY_TYPES = [
+  { value: 'SEPA Transfer', label: 'SEPA Transfer' },
+  { value: 'Wire Transfer', label: 'Wire Transfer' },
+  { value: 'Internal Transfer', label: 'Internal Transfer' },
+  { value: 'Salary Payment', label: 'Salary Payment' },
+  { value: 'Refund', label: 'Refund' },
+  { value: 'Bank Transfer', label: 'Bank Transfer' },
+  { value: 'Cash Deposit', label: 'Cash Deposit' },
+  { value: 'Interest Payment', label: 'Interest Payment' },
+  { value: 'Bonus', label: 'Bonus' },
+  { value: 'Account Correction', label: 'Account Correction' },
+  { value: 'Other', label: 'Other' }
+];
+
 export function EnhancedLedgerTools({ account, onSuccess }) {
   const toast = useToast();
   const [activeOperation, setActiveOperation] = useState(null);
-  const [formData, setFormData] = useState({
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+  
+  // Professional credit form data
+  const [creditForm, setCreditForm] = useState({
+    amount: '',
+    display_type: 'Bank Transfer',
+    sender_name: '',
+    sender_iban: '',
+    sender_bic: '',
+    reference: '',
+    description: '',
+    admin_note: ''
+  });
+
+  // Professional debit form data
+  const [debitForm, setDebitForm] = useState({
+    amount: '',
+    display_type: 'Withdrawal',
+    recipient_name: '',
+    recipient_iban: '',
+    reference: '',
+    description: '',
+    admin_note: ''
+  });
+
+  // Simple form data for fee and transfer
+  const [simpleForm, setSimpleForm] = useState({
     amount: '',
     reason: '',
     toAccountId: ''
   });
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
 
-  const handleTopUp = async () => {
-    if (!formData.amount || !formData.reason) {
-      setError('Please fill all fields');
+  const handleProfessionalCredit = async () => {
+    if (!creditForm.amount) {
+      setError('Amount is required');
       return;
     }
 
@@ -24,25 +63,40 @@ export function EnhancedLedgerTools({ account, onSuccess }) {
     setError('');
 
     try {
-      await api.post('/admin/ledger/top-up', {
-        account_id: account.id,
-        amount: parseInt(formData.amount),
-        reason: formData.reason
+      await api.post(`/admin/accounts/${account.id}/topup`, {
+        amount: parseInt(creditForm.amount),
+        display_type: creditForm.display_type,
+        sender_name: creditForm.sender_name || null,
+        sender_iban: creditForm.sender_iban || null,
+        sender_bic: creditForm.sender_bic || null,
+        reference: creditForm.reference || null,
+        description: creditForm.description || null,
+        admin_note: creditForm.admin_note || null
       });
-      toast.success(`€${(parseInt(formData.amount) / 100).toFixed(2)} added to account`);
-      setFormData({ amount: '', reason: '', toAccountId: '' });
+      
+      toast.success(`€${(parseInt(creditForm.amount) / 100).toFixed(2)} credited to account`);
+      setCreditForm({
+        amount: '',
+        display_type: 'Bank Transfer',
+        sender_name: '',
+        sender_iban: '',
+        sender_bic: '',
+        reference: '',
+        description: '',
+        admin_note: ''
+      });
       setActiveOperation(null);
       onSuccess && onSuccess();
     } catch (err) {
-      toast.error(err.response?.data?.detail || 'Top-up failed');
+      toast.error(err.response?.data?.detail || 'Credit operation failed');
     } finally {
       setLoading(false);
     }
   };
 
-  const handleWithdraw = async () => {
-    if (!formData.amount || !formData.reason) {
-      setError('Please fill all fields');
+  const handleProfessionalDebit = async () => {
+    if (!debitForm.amount) {
+      setError('Amount is required');
       return;
     }
 
@@ -50,24 +104,37 @@ export function EnhancedLedgerTools({ account, onSuccess }) {
     setError('');
 
     try {
-      await api.post('/admin/ledger/withdraw', {
-        account_id: account.id,
-        amount: parseInt(formData.amount),
-        reason: formData.reason
+      await api.post(`/admin/accounts/${account.id}/withdraw`, {
+        amount: parseInt(debitForm.amount),
+        display_type: debitForm.display_type,
+        recipient_name: debitForm.recipient_name || null,
+        recipient_iban: debitForm.recipient_iban || null,
+        reference: debitForm.reference || null,
+        description: debitForm.description || null,
+        admin_note: debitForm.admin_note || null
       });
-      toast.success(`€${(parseInt(formData.amount) / 100).toFixed(2)} withdrawn from account`);
-      setFormData({ amount: '', reason: '', toAccountId: '' });
+      
+      toast.success(`€${(parseInt(debitForm.amount) / 100).toFixed(2)} debited from account`);
+      setDebitForm({
+        amount: '',
+        display_type: 'Withdrawal',
+        recipient_name: '',
+        recipient_iban: '',
+        reference: '',
+        description: '',
+        admin_note: ''
+      });
       setActiveOperation(null);
       onSuccess && onSuccess();
     } catch (err) {
-      toast.error(err.response?.data?.detail || 'Withdrawal failed');
+      toast.error(err.response?.data?.detail || 'Debit operation failed');
     } finally {
       setLoading(false);
     }
   };
 
   const handleChargeFee = async () => {
-    if (!formData.amount || !formData.reason) {
+    if (!simpleForm.amount || !simpleForm.reason) {
       setError('Please fill all fields');
       return;
     }
@@ -78,11 +145,11 @@ export function EnhancedLedgerTools({ account, onSuccess }) {
     try {
       await api.post('/admin/ledger/charge-fee', {
         account_id: account.id,
-        amount: parseInt(formData.amount),
-        reason: formData.reason
+        amount: parseInt(simpleForm.amount),
+        reason: simpleForm.reason
       });
-      toast.success(`€${(parseInt(formData.amount) / 100).toFixed(2)} fee charged`);
-      setFormData({ amount: '', reason: '', toAccountId: '' });
+      toast.success(`€${(parseInt(simpleForm.amount) / 100).toFixed(2)} fee charged`);
+      setSimpleForm({ amount: '', reason: '', toAccountId: '' });
       setActiveOperation(null);
       onSuccess && onSuccess();
     } catch (err) {
@@ -93,7 +160,7 @@ export function EnhancedLedgerTools({ account, onSuccess }) {
   };
 
   const handleInternalTransfer = async () => {
-    if (!formData.amount || !formData.reason || !formData.toAccountId) {
+    if (!simpleForm.amount || !simpleForm.reason || !simpleForm.toAccountId) {
       setError('Please fill all fields');
       return;
     }
@@ -104,12 +171,12 @@ export function EnhancedLedgerTools({ account, onSuccess }) {
     try {
       await api.post('/admin/ledger/internal-transfer', {
         from_account_id: account.id,
-        to_account_id: formData.toAccountId,
-        amount: parseInt(formData.amount),
-        reason: formData.reason
+        to_account_id: simpleForm.toAccountId,
+        amount: parseInt(simpleForm.amount),
+        reason: simpleForm.reason
       });
       toast.success('Transfer successful!');
-      setFormData({ amount: '', reason: '', toAccountId: '' });
+      setSimpleForm({ amount: '', reason: '', toAccountId: '' });
       setActiveOperation(null);
       onSuccess && onSuccess();
     } catch (err) {
@@ -121,9 +188,34 @@ export function EnhancedLedgerTools({ account, onSuccess }) {
 
   const formatAmount = (cents) => `€${(cents / 100).toFixed(2)}`;
 
+  const resetAndClose = () => {
+    setActiveOperation(null);
+    setCreditForm({
+      amount: '',
+      display_type: 'Bank Transfer',
+      sender_name: '',
+      sender_iban: '',
+      sender_bic: '',
+      reference: '',
+      description: '',
+      admin_note: ''
+    });
+    setDebitForm({
+      amount: '',
+      display_type: 'Withdrawal',
+      recipient_name: '',
+      recipient_iban: '',
+      reference: '',
+      description: '',
+      admin_note: ''
+    });
+    setSimpleForm({ amount: '', reason: '', toAccountId: '' });
+    setError('');
+  };
+
   return (
     <div className="space-y-4">
-      <h4 className="font-medium">Ledger Operations</h4>
+      <h4 className="font-medium text-gray-900">Ledger Operations</h4>
       
       {error && (
         <div className="bg-red-50 border border-red-200 text-red-800 rounded p-3 text-sm">
@@ -135,18 +227,18 @@ export function EnhancedLedgerTools({ account, onSuccess }) {
       {!activeOperation ? (
         <div className="grid grid-cols-2 gap-3">
           <button
-            onClick={() => setActiveOperation('topup')}
+            onClick={() => setActiveOperation('credit')}
             className="px-4 py-3 bg-green-600 text-white rounded-md hover:bg-green-700 text-sm font-medium"
             data-testid="topup-btn"
           >
-            + Top Up
+            + Credit Account
           </button>
           <button
-            onClick={() => setActiveOperation('withdraw')}
+            onClick={() => setActiveOperation('debit')}
             className="px-4 py-3 bg-red-600 text-white rounded-md hover:bg-red-700 text-sm font-medium"
             data-testid="withdraw-btn"
           >
-            - Withdraw
+            - Debit Account
           </button>
           <button
             onClick={() => setActiveOperation('fee')}
@@ -160,53 +252,255 @@ export function EnhancedLedgerTools({ account, onSuccess }) {
             className="px-4 py-3 bg-blue-600 text-white rounded-md hover:bg-blue-700 text-sm font-medium"
             data-testid="transfer-btn"
           >
-            Transfer
+            Internal Transfer
+          </button>
+        </div>
+      ) : activeOperation === 'credit' ? (
+        /* Professional Credit Form */
+        <div className="border rounded-lg p-4 space-y-4 bg-green-50">
+          <div className="flex justify-between items-center border-b pb-2">
+            <h5 className="font-semibold text-green-800">Credit Account (Professional)</h5>
+            <button onClick={resetAndClose} className="text-sm text-gray-600 hover:text-gray-900">
+              Cancel
+            </button>
+          </div>
+
+          <p className="text-xs text-green-700 bg-green-100 p-2 rounded">
+            💡 Configure how this transaction will appear to the customer - like a real bank transfer.
+          </p>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Amount (cents) *</label>
+              <input
+                type="number"
+                value={creditForm.amount}
+                onChange={(e) => setCreditForm({ ...creditForm, amount: e.target.value })}
+                placeholder="e.g., 10000 for €100"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                data-testid="credit-amount"
+              />
+              {creditForm.amount && (
+                <p className="text-xs text-gray-600 mt-1">= {formatAmount(parseInt(creditForm.amount) || 0)}</p>
+              )}
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Transaction Type *</label>
+              <select
+                value={creditForm.display_type}
+                onChange={(e) => setCreditForm({ ...creditForm, display_type: e.target.value })}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                data-testid="credit-type"
+              >
+                {TRANSACTION_DISPLAY_TYPES.map(t => (
+                  <option key={t.value} value={t.value}>{t.label}</option>
+                ))}
+              </select>
+            </div>
+          </div>
+
+          <div className="border-t pt-4">
+            <p className="text-xs font-medium text-gray-500 mb-2 uppercase">Customer Will See:</p>
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Sender Name</label>
+              <input
+                type="text"
+                value={creditForm.sender_name}
+                onChange={(e) => setCreditForm({ ...creditForm, sender_name: e.target.value })}
+                placeholder="e.g., Deutsche Bank AG"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                data-testid="credit-sender-name"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Sender IBAN</label>
+              <input
+                type="text"
+                value={creditForm.sender_iban}
+                onChange={(e) => setCreditForm({ ...creditForm, sender_iban: e.target.value })}
+                placeholder="e.g., DE89370400440532013000"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                data-testid="credit-sender-iban"
+              />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Sender BIC</label>
+              <input
+                type="text"
+                value={creditForm.sender_bic}
+                onChange={(e) => setCreditForm({ ...creditForm, sender_bic: e.target.value })}
+                placeholder="e.g., DEUTDEDB"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Reference</label>
+              <input
+                type="text"
+                value={creditForm.reference}
+                onChange={(e) => setCreditForm({ ...creditForm, reference: e.target.value })}
+                placeholder="e.g., TRF2024011500123"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                data-testid="credit-reference"
+              />
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Description (shown to customer)</label>
+            <input
+              type="text"
+              value={creditForm.description}
+              onChange={(e) => setCreditForm({ ...creditForm, description: e.target.value })}
+              placeholder="e.g., Salary Payment January 2024"
+              className="w-full px-3 py-2 border border-gray-300 rounded-md"
+              data-testid="credit-description"
+            />
+          </div>
+
+          <div className="border-t pt-4">
+            <label className="block text-sm font-medium text-gray-500 mb-1">Admin Note (internal only)</label>
+            <textarea
+              value={creditForm.admin_note}
+              onChange={(e) => setCreditForm({ ...creditForm, admin_note: e.target.value })}
+              rows={2}
+              placeholder="Internal notes - not shown to customer"
+              className="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50"
+            />
+          </div>
+
+          <button
+            onClick={handleProfessionalCredit}
+            disabled={loading || !creditForm.amount}
+            className="w-full py-3 bg-green-600 text-white rounded-md hover:bg-green-700 disabled:opacity-50 font-medium"
+            data-testid="submit-credit"
+          >
+            {loading ? 'Processing...' : `Credit ${creditForm.amount ? formatAmount(parseInt(creditForm.amount)) : '€0.00'}`}
+          </button>
+        </div>
+      ) : activeOperation === 'debit' ? (
+        /* Professional Debit Form */
+        <div className="border rounded-lg p-4 space-y-4 bg-red-50">
+          <div className="flex justify-between items-center border-b pb-2">
+            <h5 className="font-semibold text-red-800">Debit Account (Professional)</h5>
+            <button onClick={resetAndClose} className="text-sm text-gray-600 hover:text-gray-900">
+              Cancel
+            </button>
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Amount (cents) *</label>
+              <input
+                type="number"
+                value={debitForm.amount}
+                onChange={(e) => setDebitForm({ ...debitForm, amount: e.target.value })}
+                placeholder="e.g., 10000 for €100"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                data-testid="debit-amount"
+              />
+              {debitForm.amount && (
+                <p className="text-xs text-gray-600 mt-1">= {formatAmount(parseInt(debitForm.amount) || 0)}</p>
+              )}
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Transaction Type</label>
+              <input
+                type="text"
+                value={debitForm.display_type}
+                onChange={(e) => setDebitForm({ ...debitForm, display_type: e.target.value })}
+                placeholder="e.g., Withdrawal, Payment"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md"
+              />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Recipient Name</label>
+              <input
+                type="text"
+                value={debitForm.recipient_name}
+                onChange={(e) => setDebitForm({ ...debitForm, recipient_name: e.target.value })}
+                placeholder="e.g., Amazon EU"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Reference</label>
+              <input
+                type="text"
+                value={debitForm.reference}
+                onChange={(e) => setDebitForm({ ...debitForm, reference: e.target.value })}
+                placeholder="e.g., INV-2024-001"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md"
+              />
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
+            <input
+              type="text"
+              value={debitForm.description}
+              onChange={(e) => setDebitForm({ ...debitForm, description: e.target.value })}
+              placeholder="e.g., Monthly subscription"
+              className="w-full px-3 py-2 border border-gray-300 rounded-md"
+            />
+          </div>
+
+          <button
+            onClick={handleProfessionalDebit}
+            disabled={loading || !debitForm.amount}
+            className="w-full py-3 bg-red-600 text-white rounded-md hover:bg-red-700 disabled:opacity-50 font-medium"
+            data-testid="submit-debit"
+          >
+            {loading ? 'Processing...' : `Debit ${debitForm.amount ? formatAmount(parseInt(debitForm.amount)) : '€0.00'}`}
           </button>
         </div>
       ) : (
+        /* Simple Form for Fee and Transfer */
         <div className="border rounded-lg p-4 space-y-4">
           <div className="flex justify-between items-center">
-            <h5 className="font-medium capitalize">{activeOperation.replace('_', ' ')}</h5>
-            <button
-              onClick={() => {
-                setActiveOperation(null);
-                setFormData({ amount: '', reason: '', toAccountId: '' });
-                setError('');
-              }}
-              className="text-sm text-gray-600 hover:text-gray-900"
-            >
+            <h5 className="font-medium capitalize">{activeOperation === 'fee' ? 'Charge Fee' : 'Internal Transfer'}</h5>
+            <button onClick={resetAndClose} className="text-sm text-gray-600 hover:text-gray-900">
               Cancel
             </button>
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Amount (in cents) *
-            </label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Amount (cents) *</label>
             <input
               type="number"
-              value={formData.amount}
-              onChange={(e) => setFormData({ ...formData, amount: e.target.value })}
-              placeholder="e.g., 10000 for €100.00"
+              value={simpleForm.amount}
+              onChange={(e) => setSimpleForm({ ...simpleForm, amount: e.target.value })}
+              placeholder="e.g., 10000 for €100"
               className="w-full px-3 py-2 border border-gray-300 rounded-md"
               data-testid="amount-input"
             />
-            {formData.amount && (
-              <p className="text-xs text-gray-600 mt-1">
-                = {formatAmount(parseInt(formData.amount) || 0)}
-              </p>
+            {simpleForm.amount && (
+              <p className="text-xs text-gray-600 mt-1">= {formatAmount(parseInt(simpleForm.amount) || 0)}</p>
             )}
           </div>
 
           {activeOperation === 'transfer' && (
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                To Account ID *
-              </label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">To Account ID *</label>
               <input
                 type="text"
-                value={formData.toAccountId}
-                onChange={(e) => setFormData({ ...formData, toAccountId: e.target.value })}
+                value={simpleForm.toAccountId}
+                onChange={(e) => setSimpleForm({ ...simpleForm, toAccountId: e.target.value })}
                 placeholder="Target account ID"
                 className="w-full px-3 py-2 border border-gray-300 rounded-md"
                 data-testid="to-account-input"
@@ -215,14 +509,12 @@ export function EnhancedLedgerTools({ account, onSuccess }) {
           )}
 
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Reason *
-            </label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Reason *</label>
             <textarea
-              value={formData.reason}
-              onChange={(e) => setFormData({ ...formData, reason: e.target.value })}
+              value={simpleForm.reason}
+              onChange={(e) => setSimpleForm({ ...simpleForm, reason: e.target.value })}
               rows={3}
-              placeholder="Enter reason for this operation..."
+              placeholder="Enter reason..."
               className="w-full px-3 py-2 border border-gray-300 rounded-md"
               data-testid="reason-input"
             />
@@ -230,16 +522,14 @@ export function EnhancedLedgerTools({ account, onSuccess }) {
 
           <button
             onClick={() => {
-              if (activeOperation === 'topup') handleTopUp();
-              else if (activeOperation === 'withdraw') handleWithdraw();
-              else if (activeOperation === 'fee') handleChargeFee();
+              if (activeOperation === 'fee') handleChargeFee();
               else if (activeOperation === 'transfer') handleInternalTransfer();
             }}
             disabled={loading}
             className="w-full py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50"
             data-testid="submit-operation"
           >
-            {loading ? 'Processing...' : `Submit ${activeOperation}`}
+            {loading ? 'Processing...' : `Submit`}
           </button>
         </div>
       )}
@@ -248,6 +538,7 @@ export function EnhancedLedgerTools({ account, onSuccess }) {
 }
 
 export function TransactionReversal({ transaction, onSuccess }) {
+  const toast = useToast();
   const [reason, setReason] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -258,7 +549,7 @@ export function TransactionReversal({ transaction, onSuccess }) {
       return;
     }
 
-    if (!window.confirm('Are you sure you want to reverse this transaction? This action creates new ledger entries and cannot be undone.')) {
+    if (!window.confirm('Are you sure you want to reverse this transaction?')) {
       return;
     }
 
@@ -282,14 +573,7 @@ export function TransactionReversal({ transaction, onSuccess }) {
   if (transaction.status === 'REVERSED') {
     return (
       <div className="bg-purple-50 border border-purple-200 rounded p-4">
-        <p className="text-sm text-purple-800">
-          This transaction has already been reversed
-        </p>
-        {transaction.reversed_by_txn_id && (
-          <p className="text-xs text-purple-600 mt-1 font-mono">
-            Reversal ID: {transaction.reversed_by_txn_id}
-          </p>
-        )}
+        <p className="text-sm text-purple-800">This transaction has been reversed</p>
       </div>
     );
   }
@@ -299,37 +583,24 @@ export function TransactionReversal({ transaction, onSuccess }) {
       <h4 className="font-medium text-red-600">Reverse Transaction</h4>
       
       {error && (
-        <div className="bg-red-50 border border-red-200 text-red-800 rounded p-3 text-sm">
-          {error}
-        </div>
+        <div className="bg-red-50 border border-red-200 text-red-800 rounded p-3 text-sm">{error}</div>
       )}
 
-      <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">
-          Reason for Reversal *
-        </label>
-        <textarea
-          value={reason}
-          onChange={(e) => setReason(e.target.value)}
-          rows={3}
-          placeholder="Enter detailed reason for reversing this transaction..."
-          className="w-full px-3 py-2 border border-gray-300 rounded-md"
-          data-testid="reversal-reason"
-        />
-      </div>
+      <textarea
+        value={reason}
+        onChange={(e) => setReason(e.target.value)}
+        rows={3}
+        placeholder="Reason for reversal..."
+        className="w-full px-3 py-2 border border-gray-300 rounded-md"
+      />
 
       <button
         onClick={handleReverse}
         disabled={loading || !reason}
         className="w-full py-2 bg-red-600 text-white rounded-md hover:bg-red-700 disabled:opacity-50"
-        data-testid="confirm-reversal"
       >
         {loading ? 'Processing...' : 'Confirm Reversal'}
       </button>
-
-      <p className="text-xs text-gray-600">
-        Note: Reversal creates new mirrored ledger entries. The original transaction will be marked as REVERSED.
-      </p>
     </div>
   );
 }
