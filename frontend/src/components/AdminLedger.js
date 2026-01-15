@@ -283,18 +283,20 @@ export function EnhancedLedgerTools({ account, onSuccess }) {
 
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Amount (cents) *</label>
-              <input
-                type="number"
-                value={creditForm.amount}
-                onChange={(e) => setCreditForm({ ...creditForm, amount: e.target.value })}
-                placeholder="e.g., 10000 for €100"
-                className="w-full px-3 py-2 border border-gray-300 rounded-md"
-                data-testid="credit-amount"
-              />
-              {creditForm.amount && (
-                <p className="text-xs text-gray-600 mt-1">= {formatAmount(parseInt(creditForm.amount) || 0)}</p>
-              )}
+              <label className="block text-sm font-medium text-gray-700 mb-1">Amount (€) *</label>
+              <div className="relative">
+                <span className="absolute left-3 top-2 text-gray-500">€</span>
+                <input
+                  type="number"
+                  step="0.01"
+                  min="0.01"
+                  value={creditForm.amount}
+                  onChange={(e) => setCreditForm({ ...creditForm, amount: e.target.value })}
+                  placeholder="e.g., 100.00"
+                  className="w-full pl-8 pr-3 py-2 border border-gray-300 rounded-md"
+                  data-testid="credit-amount"
+                />
+              </div>
             </div>
 
             <div>
