@@ -1076,13 +1076,13 @@ async def create_p2p_transfer(
     current_user: dict = Depends(get_current_user),
     db: AsyncIOMotorDatabase = Depends(get_database)
 ):
-    """Create P2P transfer between customers."""
+    """Create P2P transfer between customers using IBAN."""
     ledger_engine = LedgerEngine(db)
     transfer_service = TransferService(db, ledger_engine)
     
     result = await transfer_service.p2p_transfer(
         from_user_id=current_user["id"],
-        to_email=data.to_email,
+        to_iban=data.to_iban,
         amount=data.amount,
         reason=data.reason
     )
