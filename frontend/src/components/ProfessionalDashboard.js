@@ -96,6 +96,34 @@ export function ProfessionalDashboard({ user, logout }) {
 
   return (
     <div className="container-main py-8">
+      {/* Tax Hold Banner */}
+      {taxHoldStatus?.is_blocked && (
+        <div className="bg-red-50 border-l-4 border-red-500 rounded-lg p-4 mb-6" data-testid="tax-hold-banner">
+          <div className="flex items-start space-x-3">
+            <svg className="w-6 h-6 text-red-600 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+            </svg>
+            <div className="flex-1">
+              <h3 className="font-semibold text-red-800">Account Restricted</h3>
+              <p className="text-sm text-red-700 mt-1">
+                Your account has been temporarily restricted due to outstanding tax obligations.
+              </p>
+              <div className="mt-2 p-3 bg-white/50 rounded border border-red-200">
+                <p className="text-sm text-red-800">
+                  <span className="font-medium">Amount Due:</span>{' '}
+                  <span className="font-bold text-lg">€{taxHoldStatus.tax_amount_due?.toLocaleString('en-EU', { minimumFractionDigits: 2 })}</span>
+                </p>
+                <p className="text-xs text-red-600 mt-1">{taxHoldStatus.reason}</p>
+              </div>
+              <p className="text-sm text-red-600 mt-3">
+                To restore full access to your banking services, please settle the required amount. 
+                For assistance, contact our support team at <a href="mailto:support@projectatlas.eu" className="underline font-medium">support@projectatlas.eu</a>
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Welcome + KYC Status */}
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-semibold text-gray-900">Welcome back, {user?.first_name}</h1>
