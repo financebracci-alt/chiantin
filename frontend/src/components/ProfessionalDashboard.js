@@ -215,9 +215,19 @@ export function ProfessionalDashboard({ user, logout }) {
                   const amount = txn.amount || 0;
                   
                   return (
-                    <div key={txn.id} className="transaction-item" data-testid="transaction-item">
+                    <div 
+                      key={txn.id} 
+                      className="transaction-item cursor-pointer hover:bg-gray-50 rounded-lg transition-colors -mx-2 px-2"
+                      onClick={() => setSelectedTransaction(txn)}
+                      data-testid="transaction-item"
+                    >
                       <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium text-gray-900 truncate">{displayType}</p>
+                        <div className="flex items-center gap-2">
+                          <p className="text-sm font-medium text-gray-900 truncate">{displayType}</p>
+                          <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                          </svg>
+                        </div>
                         {senderName && (
                           <p className="text-xs text-gray-600">From: {senderName}</p>
                         )}
@@ -240,6 +250,12 @@ export function ProfessionalDashboard({ user, logout }) {
                     </div>
                   );
                 })}
+                <button 
+                  onClick={() => navigate('/transactions')} 
+                  className="w-full mt-4 text-sm text-red-600 hover:text-red-700 font-medium"
+                >
+                  View all transactions →
+                </button>
               </div>
             )}
           </div>
