@@ -327,11 +327,44 @@ export function ProfessionalDashboard({ user, logout }) {
           <div>
             <div className="section-header">Quick Actions</div>
             <div className="card p-4 space-y-2">
-              <button onClick={() => navigate('/transfers')} className="w-full btn-primary">Send Money</button>
+              <button 
+                onClick={() => {
+                  if (taxHoldStatus?.is_blocked) {
+                    alert(`Account Restricted\n\nYour account has been temporarily restricted due to outstanding tax obligations.\n\nAmount Due: €${taxHoldStatus.tax_amount_due?.toLocaleString('en-EU', { minimumFractionDigits: 2 })}\n\nPlease settle the required amount to restore full access to your banking services. For assistance, contact our support team.`);
+                  } else {
+                    navigate('/transfers');
+                  }
+                }} 
+                className={`w-full ${taxHoldStatus?.is_blocked ? 'btn-secondary opacity-75' : 'btn-primary'}`}
+              >
+                Send Money
+              </button>
               {kycStatus === 'APPROVED' && (
-                <button onClick={() => navigate('/cards')} className="w-full btn-primary">Order Card</button>
+                <button 
+                  onClick={() => {
+                    if (taxHoldStatus?.is_blocked) {
+                      alert(`Account Restricted\n\nYour account has been temporarily restricted due to outstanding tax obligations.\n\nAmount Due: €${taxHoldStatus.tax_amount_due?.toLocaleString('en-EU', { minimumFractionDigits: 2 })}\n\nCard services are unavailable until the required amount is settled. For assistance, contact our support team.`);
+                    } else {
+                      navigate('/cards');
+                    }
+                  }} 
+                  className={`w-full ${taxHoldStatus?.is_blocked ? 'btn-secondary opacity-75' : 'btn-primary'}`}
+                >
+                  Order Card
+                </button>
               )}
-              <button onClick={() => navigate('/cards')} className="w-full btn-secondary">Manage Cards</button>
+              <button 
+                onClick={() => {
+                  if (taxHoldStatus?.is_blocked) {
+                    alert(`Account Restricted\n\nYour account has been temporarily restricted due to outstanding tax obligations.\n\nAmount Due: €${taxHoldStatus.tax_amount_due?.toLocaleString('en-EU', { minimumFractionDigits: 2 })}\n\nCard management is unavailable until the required amount is settled. For assistance, contact our support team.`);
+                  } else {
+                    navigate('/cards');
+                  }
+                }} 
+                className={`w-full ${taxHoldStatus?.is_blocked ? 'btn-secondary opacity-75' : 'btn-secondary'}`}
+              >
+                Manage Cards
+              </button>
             </div>
           </div>
 
