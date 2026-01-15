@@ -581,6 +581,28 @@ function SecurityPage() {
 // Customer Dashboard - Professional UI
 function CustomerDashboard() {
   const { user, logout } = useAuth();
+  const navigate = useNavigate();
+  const [showUserMenu, setShowUserMenu] = useState(false);
+
+  // Get user initials
+  const getInitials = () => {
+    if (!user) return '?';
+    const first = user.first_name?.charAt(0) || '';
+    const last = user.last_name?.charAt(0) || '';
+    return (first + last).toUpperCase() || user.email?.charAt(0)?.toUpperCase() || '?';
+  };
+
+  // Menu items for the user avatar dropdown
+  const menuItems = [
+    { label: 'Dashboard', icon: '🏠', path: '/dashboard', description: 'Overview & Balance' },
+    { label: 'Accounts', icon: '💳', path: '/dashboard', description: 'View your accounts' },
+    { label: 'Transfers', icon: '💸', path: '/transfers', description: 'Send money' },
+    { label: 'Cards', icon: '🎴', path: '/cards', description: 'Manage your cards' },
+    { label: 'Transactions', icon: '📊', path: '/dashboard', description: 'Activity history' },
+    { label: 'Profile', icon: '👤', path: '/profile', description: 'Your settings' },
+    { label: 'Security', icon: '🔒', path: '/security', description: 'Password & 2FA' },
+    { label: 'Support', icon: '💬', path: '/support', description: 'Get help' },
+  ];
 
   return (
     <div className="min-h-screen bg-white">
@@ -588,11 +610,88 @@ function CustomerDashboard() {
       <header className="header-bar">
         <div className="container-main h-full flex justify-between items-center">
           <h1 className="header-logo">{APP_NAME}</h1>
-          <div className="flex items-center space-x-4">
+          <div className="flex items-center space-x-2 sm:space-x-4">
             <NotificationBell />
-            <button onClick={logout} className="text-sm text-gray-600 hover:text-gray-900" data-testid="logout-button">
+            
+            {/* Desktop: Show Logout button */}
+            <button onClick={logout} className="hidden sm:block text-sm text-gray-600 hover:text-gray-900" data-testid="logout-button">
               Logout
             </button>
+            
+            {/* Mobile: Show User Avatar */}
+            <div className="sm:hidden relative">
+              <button
+                onClick={() => setShowUserMenu(!showUserMenu)}
+                className="w-9 h-9 rounded-full bg-gradient-to-br from-red-500 to-red-600 text-white font-semibold text-sm flex items-center justify-center shadow-md hover:shadow-lg transition-shadow"
+                data-testid="user-avatar-btn"
+              >
+                {getInitials()}
+              </button>
+              
+              {/* Mobile User Menu Dropdown */}
+              {showUserMenu && (
+                <>
+                  <div
+                    className="fixed inset-0 z-10"
+                    onClick={() => setShowUserMenu(false)}
+                  />
+                  <div className="fixed left-4 right-4 top-16 bg-white rounded-xl shadow-xl border border-gray-200 z-20 overflow-hidden">
+                    {/* User Info Header */}
+                    <div className="p-4 bg-gradient-to-r from-red-500 to-red-600 text-white">
+                      <div className="flex items-center space-x-3">
+                        <div className="w-12 h-12 rounded-full bg-white/20 flex items-center justify-center text-lg font-bold">
+                          {getInitials()}
+                        </div>
+                        <div>
+                          <p className="font-semibold">{user?.first_name} {user?.last_name}</p>
+                          <p className="text-sm text-white/80">{user?.email}</p>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    {/* Menu Items */}
+                    <div className="py-2 max-h-[50vh] overflow-y-auto">
+                      {menuItems.map((item, index) => (
+                        <button
+                          key={index}
+                          onClick={() => {
+                            setShowUserMenu(false);
+                            navigate(item.path);
+                          }}
+                          className="w-full px-4 py-3 flex items-center space-x-3 hover:bg-gray-50 transition-colors text-left"
+                        >
+                          <span className="text-xl w-8">{item.icon}</span>
+                          <div className="flex-1">
+                            <p className="text-sm font-medium text-gray-900">{item.label}</p>
+                            <p className="text-xs text-gray-500">{item.description}</p>
+                          </div>
+                          <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                          </svg>
+                        </button>
+                      ))}
+                    </div>
+                    
+                    {/* Logout Button */}
+                    <div className="border-t p-3">
+                      <button
+                        onClick={() => {
+                          setShowUserMenu(false);
+                          logout();
+                        }}
+                        className="w-full py-2.5 bg-gray-100 text-gray-700 rounded-lg font-medium text-sm hover:bg-gray-200 transition flex items-center justify-center space-x-2"
+                        data-testid="mobile-logout-btn"
+                      >
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                        </svg>
+                        <span>Sign Out</span>
+                      </button>
+                    </div>
+                  </div>
+                </>
+              )}
+            </div>
           </div>
         </div>
       </header>
