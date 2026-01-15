@@ -83,6 +83,12 @@ export function NotificationBell() {
       return;
     }
     
+    // Security/Tax Hold/Restriction notifications - go to support page
+    if (notifType === 'security' || title.includes('restriction') || title.includes('restricted') || title.includes('tax') || title.includes('blocked')) {
+      navigate('/support');
+      return;
+    }
+    
     // Account-related notifications
     if (entityType === 'account' || notifType === 'account') {
       navigate('/dashboard');
