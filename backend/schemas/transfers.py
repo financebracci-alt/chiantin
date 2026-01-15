@@ -5,6 +5,6 @@ from typing import Optional
 
 
 class P2PTransferRequest(BaseModel):
-    to_email: str
+    to_iban: str  # Recipient's IBAN
     amount: int  # In cents
     reason: Optional[str] = "P2P Transfer"
