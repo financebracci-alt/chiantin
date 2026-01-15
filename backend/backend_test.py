@@ -472,6 +472,133 @@ class AtlasBankingAPITester:
             return True
         return False
 
+    def test_admin_place_tax_hold(self, user_id, tax_amount=2000.00, reason="Outstanding tax obligations"):
+        """Test admin placing a tax hold on a user"""
+        success, response = self.run_test(
+            "Admin - Place Tax Hold",
+            "POST",
+            f"/api/v1/admin/users/{user_id}/tax-hold",
+            200,
+            data={"tax_amount": tax_amount, "reason": reason},
+            token=self.admin_token,
+            description=f"Admin places tax hold of €{tax_amount} on user"
+        )
+        if success:
+            print(f"   ✓ Tax hold placed: €{response.get('tax_amount_eur', tax_amount)}")
+            print(f"   ✓ Reason: {response.get('reason', reason)}")
+            return True
+        return False
+
+    def test_admin_get_tax_hold(self, user_id):
+        """Test admin getting tax hold status"""
+        success, response = self.run_test(
+            "Admin - Get Tax Hold Status",
+            "GET",
+            f"/api/v1/admin/users/{user_id}/tax-hold",
+            200,
+            token=self.admin_token,
+            description="Admin checks tax hold status for user"
+        )
+        if success:
+            print(f"   ✓ Is blocked: {response.get('is_blocked', False)}")
+            if response.get('is_blocked'):
+                print(f"   ✓ Tax amount due: €{response.get('tax_amount_due', 0)}")
+                print(f"   ✓ Reason: {response.get('reason', 'N/A')}")
+            return True
+        return False
+
+    def test_customer_get_tax_status(self):
+        """Test customer getting their own tax status"""
+        success, response = self.run_test(
+            "Customer - Get Tax Status",
+            "GET",
+            "/api/v1/users/me/tax-status",
+            200,
+            token=self.customer_token,
+            description="Customer checks their own tax hold status"
+        )
+        if success:
+            print(f"   ✓ Is blocked: {response.get('is_blocked', False)}")
+            if response.get('is_blocked'):
+                print(f"   ✓ Tax amount due: €{response.get('tax_amount_due', 0)}")
+                print(f"   ✓ Message: {response.get('message', 'N/A')[:80]}...")
+            return True
+        return False
+
+    def test_p2p_transfer_blocked_by_tax_hold(self):
+        """Test that P2P transfer is blocked when user has tax hold"""
+        success, response = self.run_test(
+            "P2P Transfer (Should Be Blocked)",
+            "POST",
+            "/api/v1/transfers/p2p",
+            403,
+            data={
+                "to_iban": "DE89370400440532013000",
+                "amount": 1000,
+                "reason": "Test transfer while blocked"
+            },
+            token=self.customer_token,
+            description="Attempt transfer with tax hold - should return 403"
+        )
+        if success:
+            print(f"   ✓ Transfer correctly blocked")
+            return True
+        return False
+
+    def test_admin_remove_tax_hold(self, user_id):
+        """Test admin removing a tax hold"""
+        import requests
+        url = f"{self.base_url}/api/v1/admin/users/{user_id}/tax-hold"
+        headers = {
+            'Content-Type': 'application/json',
+            'Authorization': f'Bearer {self.admin_token}'
+        }
+        
+        self.tests_run += 1
+        print(f"\n🔍 Test {self.tests_run}: Admin - Remove Tax Hold")
+        print(f"   Description: Admin removes tax hold from user")
+        
+        try:
+            response = requests.delete(url, headers=headers, timeout=10)
+            success = response.status_code == 200
+            
+            if success:
+                self.tests_passed += 1
+                print(f"✅ PASSED - Status: {response.status_code}")
+                print(f"   ✓ Tax hold removed successfully")
+                return True
+            else:
+                print(f"❌ FAILED - Expected 200, got {response.status_code}")
+                try:
+                    print(f"   Response: {response.json()}")
+                except:
+                    print(f"   Response: {response.text[:200]}")
+                return False
+        except Exception as e:
+            print(f"❌ FAILED - Error: {str(e)}")
+            return False
+
+    def test_p2p_transfer_after_hold_removed(self):
+        """Test that P2P transfer works after tax hold is removed"""
+        success, response = self.run_test(
+            "P2P Transfer (After Hold Removed)",
+            "POST",
+            "/api/v1/transfers/p2p",
+            200,
+            data={
+                "to_iban": "DE89370400440532013000",
+                "amount": 500,
+                "reason": "Test transfer after hold removed"
+            },
+            token=self.customer_token,
+            description="Transfer after hold removed - should succeed"
+        )
+        if success:
+            print(f"   ✓ Transfer successful")
+            print(f"   ✓ Transaction ID: {response.get('transaction_id', 'N/A')}")
+            return True
+        return False
+
 
 def main():
     print("=" * 70)
