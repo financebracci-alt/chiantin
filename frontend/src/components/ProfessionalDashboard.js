@@ -298,6 +298,148 @@ export function ProfessionalDashboard({ user, logout }) {
           </div>
         </div>
       </div>
+
+      {/* Transaction Detail Modal */}
+      {selectedTransaction && (
+        <>
+          <div 
+            className="fixed inset-0 bg-black/50 z-40" 
+            onClick={() => setSelectedTransaction(null)}
+          />
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+            <div className="bg-white rounded-xl shadow-2xl max-w-md w-full max-h-[90vh] overflow-y-auto">
+              {(() => {
+                const txn = selectedTransaction;
+                const metadata = txn.metadata || {};
+                const displayType = metadata.display_type || txn.transaction_type?.replace(/_/g, ' ') || 'Transaction';
+                const isCredit = ['TOP_UP', 'CREDIT', 'REFUND', 'INTEREST'].includes(txn.transaction_type) || txn.direction === 'CREDIT';
+                const amount = txn.amount || 0;
+
+                return (
+                  <>
+                    {/* Header */}
+                    <div className={`p-6 text-center ${isCredit ? 'bg-green-50' : 'bg-red-50'}`}>
+                      <div className={`w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4 ${isCredit ? 'bg-green-100' : 'bg-red-100'}`}>
+                        {isCredit ? (
+                          <svg className="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                          </svg>
+                        ) : (
+                          <svg className="w-8 h-8 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 12H4" />
+                          </svg>
+                        )}
+                      </div>
+                      <p className="text-sm text-gray-600 mb-1">{displayType}</p>
+                      <p className={`text-3xl font-bold ${isCredit ? 'text-green-600' : 'text-red-600'}`}>
+                        {isCredit ? '+' : '-'}€{formatAmount(amount)}
+                      </p>
+                      <span className={`inline-block mt-2 px-3 py-1 rounded-full text-xs font-medium ${
+                        txn.status === 'POSTED' ? 'bg-green-100 text-green-700' : 
+                        txn.status === 'PENDING' ? 'bg-yellow-100 text-yellow-700' : 
+                        'bg-gray-100 text-gray-700'
+                      }`}>
+                        {txn.status || 'POSTED'}
+                      </span>
+                    </div>
+
+                    {/* Details */}
+                    <div className="p-6 space-y-4">
+                      {/* Date & Time */}
+                      <div className="flex justify-between py-3 border-b">
+                        <span className="text-sm text-gray-500">Date & Time</span>
+                        <span className="text-sm font-medium text-gray-900">{formatDateTime(txn.created_at)}</span>
+                      </div>
+
+                      {/* Transaction Type */}
+                      <div className="flex justify-between py-3 border-b">
+                        <span className="text-sm text-gray-500">Type</span>
+                        <span className="text-sm font-medium text-gray-900">{txn.transaction_type?.replace(/_/g, ' ') || 'Transaction'}</span>
+                      </div>
+
+                      {/* Sender/Recipient */}
+                      {metadata.sender_name && (
+                        <div className="flex justify-between py-3 border-b">
+                          <span className="text-sm text-gray-500">From</span>
+                          <span className="text-sm font-medium text-gray-900">{metadata.sender_name}</span>
+                        </div>
+                      )}
+                      {metadata.recipient_name && (
+                        <div className="flex justify-between py-3 border-b">
+                          <span className="text-sm text-gray-500">To</span>
+                          <span className="text-sm font-medium text-gray-900">{metadata.recipient_name}</span>
+                        </div>
+                      )}
+
+                      {/* IBAN */}
+                      {metadata.sender_iban && (
+                        <div className="flex justify-between py-3 border-b">
+                          <span className="text-sm text-gray-500">Sender IBAN</span>
+                          <span className="text-sm font-mono text-gray-900">{formatIBAN(metadata.sender_iban)}</span>
+                        </div>
+                      )}
+                      {metadata.to_iban && (
+                        <div className="flex justify-between py-3 border-b">
+                          <span className="text-sm text-gray-500">Recipient IBAN</span>
+                          <span className="text-sm font-mono text-gray-900">{formatIBAN(metadata.to_iban)}</span>
+                        </div>
+                      )}
+
+                      {/* BIC */}
+                      {metadata.sender_bic && (
+                        <div className="flex justify-between py-3 border-b">
+                          <span className="text-sm text-gray-500">BIC</span>
+                          <span className="text-sm font-mono text-gray-900">{metadata.sender_bic}</span>
+                        </div>
+                      )}
+
+                      {/* Reference */}
+                      {metadata.reference && (
+                        <div className="flex justify-between py-3 border-b">
+                          <span className="text-sm text-gray-500">Reference</span>
+                          <span className="text-sm font-mono text-gray-900">{metadata.reference}</span>
+                        </div>
+                      )}
+
+                      {/* Description */}
+                      {(metadata.description || txn.reason) && (
+                        <div className="py-3 border-b">
+                          <span className="text-sm text-gray-500 block mb-1">Description</span>
+                          <span className="text-sm text-gray-900">{metadata.description || txn.reason}</span>
+                        </div>
+                      )}
+
+                      {/* Transaction ID */}
+                      <div className="py-3 border-b">
+                        <span className="text-sm text-gray-500 block mb-1">Transaction ID</span>
+                        <span className="text-xs font-mono text-gray-600 break-all">{txn.id}</span>
+                      </div>
+
+                      {/* External ID if present */}
+                      {txn.external_id && (
+                        <div className="py-3 border-b">
+                          <span className="text-sm text-gray-500 block mb-1">External Reference</span>
+                          <span className="text-xs font-mono text-gray-600 break-all">{txn.external_id}</span>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Footer */}
+                    <div className="p-6 bg-gray-50 border-t">
+                      <button 
+                        onClick={() => setSelectedTransaction(null)}
+                        className="w-full py-3 bg-gray-900 text-white font-medium rounded-lg hover:bg-gray-800 transition-colors"
+                      >
+                        Close
+                      </button>
+                    </div>
+                  </>
+                );
+              })()}
+            </div>
+          </div>
+        </>
+      )}
     </div>
   );
 }
