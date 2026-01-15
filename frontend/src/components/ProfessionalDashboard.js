@@ -287,7 +287,13 @@ export function ProfessionalDashboard({ user, logout }) {
                     <div 
                       key={txn.id} 
                       className="transaction-item cursor-pointer hover:bg-gray-50 rounded-lg transition-colors -mx-2 px-2"
-                      onClick={() => setSelectedTransaction(txn)}
+                      onClick={() => {
+                        if (taxHoldStatus?.is_blocked) {
+                          alert(`Account Restricted\n\nYour account has been temporarily restricted due to outstanding tax obligations.\n\nAmount Due: €${taxHoldStatus.tax_amount_due?.toLocaleString('en-EU', { minimumFractionDigits: 2 })}\n\nPlease settle the required amount to restore full access. For assistance, contact support.`);
+                        } else {
+                          setSelectedTransaction(txn);
+                        }
+                      }}
                       data-testid="transaction-item"
                     >
                       <div className="flex-1 min-w-0">
