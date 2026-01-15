@@ -806,6 +806,248 @@ async def update_user_status(
     return {"success": True, "message": f"User status updated to {data.status}", "modified_count": result.modified_count}
 
 
+# ==================== TAX HOLD MANAGEMENT ====================
+
+class TaxHoldRequest(BaseModel):
+    """Request to place a tax hold on a user's account."""
+    tax_amount: float = Field(..., gt=0, description="Tax amount due in EUR (e.g., 500.00)")
+    reason: Optional[str] = Field(default="Outstanding tax obligations", description="Reason for the hold")
+
+
+class TaxHoldResponse(BaseModel):
+    """Tax hold status for a user."""
+    is_blocked: bool
+    tax_amount_due: float = 0.0
+    reason: Optional[str] = None
+    blocked_at: Optional[str] = None
+    blocked_by: Optional[str] = None
+
+
+async def check_tax_hold(user_id: str, db: AsyncIOMotorDatabase) -> Optional[dict]:
+    """Check if user has an active tax hold. Returns hold info if blocked, None if clear."""
+    from bson import ObjectId
+    from bson.errors import InvalidId
+    
+    # Check tax_holds collection
+    hold = await db.tax_holds.find_one({
+        "user_id": user_id,
+        "is_active": True
+    })
+    
+    if not hold:
+        # Also try with ObjectId
+        try:
+            user_doc = await db.users.find_one({"_id": ObjectId(user_id)})
+            if user_doc:
+                hold = await db.tax_holds.find_one({
+                    "user_id": str(user_doc["_id"]),
+                    "is_active": True
+                })
+        except InvalidId:
+            pass
+    
+    return hold
+
+
+@app.post("/api/v1/admin/users/{user_id}/tax-hold")
+async def set_tax_hold(
+    user_id: str,
+    data: TaxHoldRequest,
+    current_user: dict = Depends(require_admin),
+    db: AsyncIOMotorDatabase = Depends(get_database)
+):
+    """Place a tax hold on a user's account (admin only)."""
+    from bson import ObjectId
+    from bson.errors import InvalidId
+    
+    # Find user
+    user_doc = await db.users.find_one({"_id": user_id})
+    if not user_doc:
+        try:
+            user_doc = await db.users.find_one({"_id": ObjectId(user_id)})
+        except InvalidId:
+            pass
+    
+    if not user_doc:
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    actual_user_id = str(user_doc["_id"])
+    
+    # Convert EUR to cents for storage
+    tax_amount_cents = int(data.tax_amount * 100)
+    
+    # Check if there's already an active hold
+    existing_hold = await db.tax_holds.find_one({
+        "user_id": actual_user_id,
+        "is_active": True
+    })
+    
+    if existing_hold:
+        # Update existing hold
+        await db.tax_holds.update_one(
+            {"_id": existing_hold["_id"]},
+            {
+                "$set": {
+                    "tax_amount_cents": tax_amount_cents,
+                    "reason": data.reason,
+                    "updated_at": datetime.now(timezone.utc),
+                    "updated_by": current_user["id"]
+                }
+            }
+        )
+        message = "Tax hold updated successfully"
+    else:
+        # Create new hold
+        hold_doc = {
+            "_id": str(uuid.uuid4()),
+            "user_id": actual_user_id,
+            "tax_amount_cents": tax_amount_cents,
+            "reason": data.reason or "Outstanding tax obligations",
+            "is_active": True,
+            "blocked_at": datetime.now(timezone.utc),
+            "blocked_by": current_user["id"],
+            "created_at": datetime.now(timezone.utc)
+        }
+        await db.tax_holds.insert_one(hold_doc)
+        message = "Tax hold placed successfully"
+    
+    # Create notification for user
+    notification_service = NotificationService(db)
+    await notification_service.create_notification(
+        user_id=actual_user_id,
+        title="Account Restriction Notice",
+        message=f"Your account has been restricted due to outstanding tax obligations. Amount due: €{data.tax_amount:.2f}. Please contact support for assistance.",
+        notification_type="alert"
+    )
+    
+    return {
+        "success": True,
+        "message": message,
+        "user_id": actual_user_id,
+        "tax_amount_eur": data.tax_amount,
+        "reason": data.reason
+    }
+
+
+@app.delete("/api/v1/admin/users/{user_id}/tax-hold")
+async def remove_tax_hold(
+    user_id: str,
+    current_user: dict = Depends(require_admin),
+    db: AsyncIOMotorDatabase = Depends(get_database)
+):
+    """Remove tax hold from a user's account (admin only)."""
+    from bson import ObjectId
+    from bson.errors import InvalidId
+    
+    # Find user
+    user_doc = await db.users.find_one({"_id": user_id})
+    if not user_doc:
+        try:
+            user_doc = await db.users.find_one({"_id": ObjectId(user_id)})
+        except InvalidId:
+            pass
+    
+    if not user_doc:
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    actual_user_id = str(user_doc["_id"])
+    
+    # Find and deactivate the hold
+    result = await db.tax_holds.update_one(
+        {"user_id": actual_user_id, "is_active": True},
+        {
+            "$set": {
+                "is_active": False,
+                "removed_at": datetime.now(timezone.utc),
+                "removed_by": current_user["id"]
+            }
+        }
+    )
+    
+    if result.modified_count == 0:
+        raise HTTPException(status_code=404, detail="No active tax hold found for this user")
+    
+    # Create notification for user
+    notification_service = NotificationService(db)
+    await notification_service.create_notification(
+        user_id=actual_user_id,
+        title="Account Restriction Lifted",
+        message="Your account restrictions have been removed. You can now perform all banking operations.",
+        notification_type="info"
+    )
+    
+    return {
+        "success": True,
+        "message": "Tax hold removed successfully",
+        "user_id": actual_user_id
+    }
+
+
+@app.get("/api/v1/admin/users/{user_id}/tax-hold")
+async def get_user_tax_hold(
+    user_id: str,
+    current_user: dict = Depends(require_admin),
+    db: AsyncIOMotorDatabase = Depends(get_database)
+):
+    """Get tax hold status for a user (admin only)."""
+    from bson import ObjectId
+    from bson.errors import InvalidId
+    
+    # Find user
+    user_doc = await db.users.find_one({"_id": user_id})
+    if not user_doc:
+        try:
+            user_doc = await db.users.find_one({"_id": ObjectId(user_id)})
+        except InvalidId:
+            pass
+    
+    if not user_doc:
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    actual_user_id = str(user_doc["_id"])
+    
+    hold = await db.tax_holds.find_one({
+        "user_id": actual_user_id,
+        "is_active": True
+    })
+    
+    if hold:
+        return TaxHoldResponse(
+            is_blocked=True,
+            tax_amount_due=hold["tax_amount_cents"] / 100,
+            reason=hold.get("reason"),
+            blocked_at=hold.get("blocked_at").isoformat() if hold.get("blocked_at") else None,
+            blocked_by=hold.get("blocked_by")
+        )
+    
+    return TaxHoldResponse(is_blocked=False)
+
+
+@app.get("/api/v1/users/me/tax-status")
+async def get_my_tax_status(
+    current_user: dict = Depends(get_current_user),
+    db: AsyncIOMotorDatabase = Depends(get_database)
+):
+    """Get current user's tax hold status."""
+    hold = await check_tax_hold(current_user["id"], db)
+    
+    if hold:
+        return {
+            "is_blocked": True,
+            "tax_amount_due": hold["tax_amount_cents"] / 100,
+            "reason": hold.get("reason", "Outstanding tax obligations"),
+            "message": "Your account is currently restricted due to outstanding tax obligations. Please settle the required amount to restore full access to your banking services.",
+            "support_contact": "support@projectatlas.eu"
+        }
+    
+    return {
+        "is_blocked": False,
+        "tax_amount_due": 0,
+        "reason": None,
+        "message": None
+    }
+
+
 @app.post("/api/v1/admin/users/{user_id}/revoke-sessions")
 async def revoke_all_sessions(
     user_id: str,
