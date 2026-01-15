@@ -185,7 +185,11 @@ export function ProfessionalDashboard({ user, logout }) {
                           <button
                             onClick={(e) => {
                               e.stopPropagation();
-                              navigator.clipboard.writeText(account.iban);
+                              try {
+                                navigator.clipboard.writeText(account.iban);
+                              } catch (err) {
+                                console.log('Clipboard write failed:', err);
+                              }
                             }}
                             className="text-gray-400 hover:text-red-600 transition"
                             title="Copy IBAN"
