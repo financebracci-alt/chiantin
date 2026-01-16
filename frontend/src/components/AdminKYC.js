@@ -51,6 +51,30 @@ export function AdminKYCReview() {
       return;
     }
 
+    // Validation for APPROVED status - IBAN and BIC are required
+    if (reviewData.status === 'APPROVED') {
+      if (!reviewData.assigned_iban || !reviewData.assigned_iban.trim()) {
+        toast.error('IBAN is required to approve KYC');
+        return;
+      }
+      if (!reviewData.assigned_bic || !reviewData.assigned_bic.trim()) {
+        toast.error('BIC/SWIFT is required to approve KYC');
+        return;
+      }
+      // Basic IBAN format validation (starts with 2 letters, followed by numbers/letters)
+      const ibanPattern = /^[A-Z]{2}[A-Z0-9]{13,32}$/i;
+      if (!ibanPattern.test(reviewData.assigned_iban.replace(/\s/g, ''))) {
+        toast.error('Please enter a valid IBAN format');
+        return;
+      }
+      // Basic BIC format validation (8 or 11 characters)
+      const bicPattern = /^[A-Z]{4}[A-Z]{2}[A-Z0-9]{2}([A-Z0-9]{3})?$/i;
+      if (!bicPattern.test(reviewData.assigned_bic.replace(/\s/g, ''))) {
+        toast.error('Please enter a valid BIC/SWIFT format (8 or 11 characters)');
+        return;
+      }
+    }
+
     setSubmitting(true);
     setError('');
 
