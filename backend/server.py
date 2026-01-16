@@ -1015,6 +1015,19 @@ async def set_tax_hold(
         notification_type="SECURITY"
     )
     
+    # Audit: Tax hold placed/updated
+    await create_audit_log(
+        db=db,
+        action="TAX_HOLD_SET" if not existing_hold else "TAX_HOLD_UPDATED",
+        entity_type="tax_hold",
+        entity_id=actual_user_id,
+        description=f"Tax hold {'updated' if existing_hold else 'placed'} on user {user_doc['email']}: €{data.tax_amount:.2f}",
+        performed_by=current_user["id"],
+        performed_by_role=current_user["role"],
+        performed_by_email=current_user["email"],
+        metadata={"tax_amount_eur": data.tax_amount, "reason": data.reason, "user_email": user_doc["email"]}
+    )
+    
     return {
         "success": True,
         "message": message,
