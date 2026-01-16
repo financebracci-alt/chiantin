@@ -255,11 +255,12 @@ export function AdminKYCReview() {
                   <input
                     type="text"
                     value={reviewData.assigned_bic || ''}
-                    onChange={(e) => setReviewData({ ...reviewData, assigned_bic: e.target.value })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md"
-                    placeholder="e.g., ATLASLT21XXX"
+                    onChange={(e) => setReviewData({ ...reviewData, assigned_bic: e.target.value.toUpperCase() })}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md font-mono"
+                    placeholder="e.g., ATLSLT21 or DEUTDEFF500"
+                    maxLength={11}
                   />
-                  <p className="text-xs text-gray-500 mt-1">Enter the BIC/SWIFT code (required)</p>
+                  <p className="text-xs text-gray-500 mt-1">Format: 4 letters (bank) + 2 letters (country) + 2-5 alphanumeric. Must be 8 or 11 characters.</p>
                 </div>
 
                 <div>
