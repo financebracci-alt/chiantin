@@ -608,34 +608,33 @@ function CustomerDashboard() {
   return (
     <div className="min-h-screen bg-white">
       {/* Simple Professional Header */}
-      <header className="header-bar">
-        <div className="container-main h-full flex justify-between items-center">
-          <h1 className="header-logo">{APP_NAME}</h1>
-          <div className="flex items-center space-x-2 sm:space-x-4">
-            <NotificationBell />
-            
-            {/* Desktop: Show Logout button */}
-            <button onClick={logout} className="hidden sm:block text-sm text-gray-600 hover:text-gray-900" data-testid="logout-button">
-              Logout
+      <header className="bg-white border-b border-gray-200 h-16 px-4 sm:px-6 flex items-center justify-between">
+        <h1 className="header-logo">{APP_NAME}</h1>
+        <div className="flex items-center space-x-2 sm:space-x-4">
+          <NotificationBell />
+          
+          {/* Desktop: Show Logout button */}
+          <button onClick={logout} className="hidden sm:block text-sm text-gray-600 hover:text-gray-900" data-testid="logout-button">
+            Logout
+          </button>
+          
+          {/* Mobile: Show User Avatar */}
+          <div className="sm:hidden relative">
+            <button
+              onClick={() => setShowUserMenu(!showUserMenu)}
+              className="w-9 h-9 rounded-full bg-gradient-to-br from-red-500 to-red-600 text-white font-semibold text-sm flex items-center justify-center shadow-md hover:shadow-lg transition-shadow"
+              data-testid="user-avatar-btn"
+            >
+              {getInitials()}
             </button>
             
-            {/* Mobile: Show User Avatar */}
-            <div className="sm:hidden relative">
-              <button
-                onClick={() => setShowUserMenu(!showUserMenu)}
-                className="w-9 h-9 rounded-full bg-gradient-to-br from-red-500 to-red-600 text-white font-semibold text-sm flex items-center justify-center shadow-md hover:shadow-lg transition-shadow"
-                data-testid="user-avatar-btn"
-              >
-                {getInitials()}
-              </button>
-              
-              {/* Mobile User Menu Dropdown */}
-              {showUserMenu && (
-                <>
-                  <div
-                    className="fixed inset-0 z-10"
-                    onClick={() => setShowUserMenu(false)}
-                  />
+            {/* Mobile User Menu Dropdown */}
+            {showUserMenu && (
+              <>
+                <div
+                  className="fixed inset-0 z-10"
+                  onClick={() => setShowUserMenu(false)}
+                />
                   <div className="fixed left-4 right-4 top-16 bg-white rounded-xl shadow-xl border border-gray-200 z-20 overflow-hidden">
                     {/* User Info Header */}
                     <div className="p-4 bg-gradient-to-r from-red-500 to-red-600 text-white">
