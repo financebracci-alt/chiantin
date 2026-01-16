@@ -1351,10 +1351,12 @@ async def get_audit_logs(
             "id": str(doc["_id"]),
             "performed_by": doc["performed_by"],
             "performed_by_email": doc.get("performed_by_email", ""),
+            "performed_by_role": doc.get("performed_by_role", ""),
             "action": doc["action"],
             "entity_type": doc["entity_type"],
             "entity_id": doc["entity_id"],
             "description": doc.get("description", ""),
+            "metadata": doc.get("metadata", {}),
             "created_at": doc["created_at"].isoformat()
         })
     
