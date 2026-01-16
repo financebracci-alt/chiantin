@@ -64,13 +64,19 @@ export function AdminKYCReview() {
       // Basic IBAN format validation (starts with 2 letters, followed by numbers/letters)
       const ibanPattern = /^[A-Z]{2}[A-Z0-9]{13,32}$/i;
       if (!ibanPattern.test(reviewData.assigned_iban.replace(/\s/g, ''))) {
-        toast.error('Please enter a valid IBAN format');
+        toast.error('Please enter a valid IBAN format (e.g., LT123456789012345678)');
         return;
       }
       // Basic BIC format validation (8 or 11 characters)
+      // Format: 4 letters (bank) + 2 letters (country) + 2 alphanumeric (location) + optional 3 alphanumeric (branch)
+      const bicClean = reviewData.assigned_bic.replace(/\s/g, '').toUpperCase();
+      if (bicClean.length !== 8 && bicClean.length !== 11) {
+        toast.error(`BIC/SWIFT must be exactly 8 or 11 characters (you entered ${bicClean.length})`);
+        return;
+      }
       const bicPattern = /^[A-Z]{4}[A-Z]{2}[A-Z0-9]{2}([A-Z0-9]{3})?$/i;
-      if (!bicPattern.test(reviewData.assigned_bic.replace(/\s/g, ''))) {
-        toast.error('Please enter a valid BIC/SWIFT format (8 or 11 characters)');
+      if (!bicPattern.test(bicClean)) {
+        toast.error('Invalid BIC format. Must be: 4 letters (bank) + 2 letters (country) + 2-5 alphanumeric. Example: ATLSLT21 or DEUTDEFF');
         return;
       }
     }
