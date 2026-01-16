@@ -571,6 +571,43 @@ export function LandingPage() {
         .animate-bounce-slow {
           animation: bounce-slow 3s ease-in-out infinite;
         }
+        
+        @keyframes slideDown {
+          from {
+            opacity: 0;
+            transform: translateY(-10px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
+        .animate-slideDown {
+          animation: slideDown 0.3s ease-out;
+        }
+        
+        /* Smooth scroll behavior for the entire page */
+        html {
+          scroll-behavior: smooth;
+        }
+        
+        /* Section highlight animation */
+        @keyframes sectionHighlight {
+          0% { opacity: 0.5; }
+          50% { opacity: 1; }
+          100% { opacity: 0.5; }
+        }
+        
+        /* Fade in animation for sections when scrolled to */
+        .scroll-animate {
+          opacity: 0;
+          transform: translateY(20px);
+          transition: all 0.6s ease-out;
+        }
+        .scroll-animate.visible {
+          opacity: 1;
+          transform: translateY(0);
+        }
       `}</style>
     </div>
   );
