@@ -516,7 +516,7 @@ export function ProfessionalDashboard({ user, logout }) {
                         <div>
                           <p className="text-white/50 text-[10px] uppercase tracking-wider mb-0.5">Card Holder</p>
                           <p className="text-white/90 text-sm font-medium uppercase tracking-wide">
-                            {user?.first_name} {user?.last_name}
+                            {card.cardholder_name || `${user?.first_name} ${user?.last_name}`}
                           </p>
                         </div>
                         <div className="text-right">
