@@ -76,7 +76,7 @@ A production-grade banking platform with double-entry ledger, KYC workflows, and
 - Role: SUPER_ADMIN
 
 ### Access
-- Frontend: https://bank-atlas.preview.emergentagent.com
+- Frontend: https://bankapp-preview-1.preview.emergentagent.com
 - Backend API: Port 8001
 - API Docs: http://localhost:8001/docs
 

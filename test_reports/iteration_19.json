@@ -122,7 +122,7 @@
   ],
   
   "test_environment": {
-    "backend_url": "https://bank-atlas.preview.emergentagent.com",
+    "backend_url": "https://bankapp-preview-1.preview.emergentagent.com",
     "test_accounts": {
       "admin": "admin@atlas.local",
       "customer": "customer@demo.com"
