@@ -241,7 +241,7 @@ class KYCService:
     async def get_pending_applications(self) -> List[KYCApplication]:
         """Get all pending KYC applications (admin)."""
         cursor = self.db.kyc_applications.find({
-            "status": {"$in": [KYCStatus.SUBMITTED, KYCStatus.UNDER_REVIEW]}
+            "status": {"$in": [KYCStatus.SUBMITTED, KYCStatus.UNDER_REVIEW, KYCStatus.NEEDS_MORE_INFO]}
         }).sort("submitted_at", 1)
         
         apps = []
