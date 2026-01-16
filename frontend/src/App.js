@@ -1349,18 +1349,16 @@ function InsightsPage() {
 
   return (
     <div className="min-h-screen bg-white">
-      <header className="header-bar">
-        <div className="container-main h-full flex justify-between items-center">
-          <div className="flex items-center space-x-4">
-            <button onClick={() => navigate('/dashboard')} className="text-gray-600 hover:text-gray-900">
-              ← Back
-            </button>
-            <h1 className="text-lg font-semibold text-gray-900">{APP_NAME}</h1>
-          </div>
-          <div className="flex items-center space-x-4">
-            <NotificationBell />
-            <button onClick={logout} className="text-sm text-gray-600 hover:text-gray-900">Logout</button>
-          </div>
+      <header className="bg-white border-b border-gray-200 h-16 px-4 sm:px-6 flex items-center justify-between">
+        <div className="flex items-center space-x-4">
+          <button onClick={() => navigate('/dashboard')} className="text-gray-600 hover:text-gray-900">
+            ← Back
+          </button>
+          <h1 className="text-lg font-semibold text-gray-900">{APP_NAME}</h1>
+        </div>
+        <div className="flex items-center space-x-4">
+          <NotificationBell />
+          <button onClick={logout} className="text-sm text-gray-600 hover:text-gray-900">Logout</button>
         </div>
       </header>
       <div className="container-main py-8">
