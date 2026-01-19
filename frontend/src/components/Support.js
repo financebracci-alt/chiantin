@@ -1,6 +1,7 @@
 // Support Ticket Components
 import React, { useState, useEffect } from 'react';
 import api from '../api';
+import { useLanguage, useTheme } from '../contexts/AppContext';
 
 export function SupportTickets({ isAdmin = false }) {
   const [tickets, setTickets] = useState([]);
@@ -8,6 +9,8 @@ export function SupportTickets({ isAdmin = false }) {
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [loading, setLoading] = useState(true);
   const [statusFilter, setStatusFilter] = useState('all');
+  const { t } = useLanguage();
+  const { isDark } = useTheme();
 
   useEffect(() => {
     fetchTickets();
