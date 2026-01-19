@@ -71,7 +71,7 @@ export function CardOrderingModal({ onClose, onSuccess }) {
                     </svg>
                   </div>
                   <div className="text-white text-left">
-                    <p className="text-xs opacity-80 mb-1">Project Atlas</p>
+                    <p className="text-xs opacity-80 mb-1">ecommbx</p>
                     <div className="flex justify-end">
                       <p className="text-lg font-bold">VISA</p>
                     </div>
