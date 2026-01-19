@@ -5,8 +5,14 @@ import { P2PTransferForm } from './P2PTransfer';
 import { BeneficiaryManager } from './Beneficiaries';
 import { ScheduledPayments } from './ScheduledPayments';
 import { NotificationBell } from './Notifications';
-import { APP_NAME } from '../config';
 import { useLanguage, useTheme } from '../contexts/AppContext';
+
+// Styled Logo Component - displays "ecomm" with "bx" in red
+const StyledLogo = ({ isDark = false }) => (
+  <span className={`font-bold ${isDark ? 'text-white' : 'text-gray-900'}`}>
+    ecomm<span className="text-red-500">bx</span>
+  </span>
+);
 
 export function TransfersPage({ user, logout }) {
   const navigate = useNavigate();
@@ -23,7 +29,7 @@ export function TransfersPage({ user, logout }) {
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
             </svg>
           </button>
-          <span className={`logo-text ${isDark ? 'text-white' : ''}`} data-testid="logo">{APP_NAME}</span>
+          <span className="logo-text" data-testid="logo"><StyledLogo isDark={isDark} /></span>
         </div>
         <div className="flex items-center gap-4">
           {/* Language Toggle */}
