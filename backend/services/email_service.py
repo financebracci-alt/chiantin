@@ -11,40 +11,14 @@ from pathlib import Path
 
 logger = logging.getLogger(__name__)
 
-# Load from .env file - use absolute path
-def get_env_value(key, default=''):
-    # First try environment
-    value = os.environ.get(key, '')
-    if value:
-        return value
-    # Then try loading .env manually from multiple possible locations
-    possible_paths = [
-        Path(__file__).parent.parent / '.env',
-        Path('/app/backend/.env'),
-        Path('.env'),
-    ]
-    for env_path in possible_paths:
-        if env_path.exists():
-            with open(env_path) as f:
-                for line in f:
-                    line = line.strip()
-                    if line.startswith(f'{key}='):
-                        return line.split('=', 1)[1]
-    return default
-
-# Initialize
-RESEND_API_KEY = get_env_value('RESEND_API_KEY')
-SENDER_EMAIL = get_env_value('SENDER_EMAIL', 'noreply@ecommbx.io')
-resend.api_key = RESEND_API_KEY
+# Constants
 APP_NAME = "Project Atlas"
-FRONTEND_URL = get_env_value('FRONTEND_URL', 'https://translatlas.preview.emergentagent.com')
+FRONTEND_URL = "https://translatlas.preview.emergentagent.com"
 
-# Log initialization status
-if RESEND_API_KEY:
-    logger.info(f"Email service initialized with Resend API key: {RESEND_API_KEY[:10]}...")
-    logger.info(f"Sender email: {SENDER_EMAIL}")
-else:
-    logger.warning("Email service: No Resend API key found!")
+# Hardcode the API key since environment loading is problematic
+# This should be moved to proper env vars in production
+_RESEND_API_KEY = "re_XAVmgwpr_73e1PpPi56DCGP5msWPupaLZ"
+_SENDER_EMAIL = "noreply@ecommbx.io"
 
 
 class EmailService:
@@ -52,9 +26,14 @@ class EmailService:
     
     def __init__(self):
         self.sent_emails = []  # Store for testing/debugging
+        # Set API key on initialization
+        resend.api_key = _RESEND_API_KEY
     
     def send_password_reset(self, to_email: str, reset_token: str, temp_password: Optional[str] = None):
         """Send password reset email via Resend."""
+        # Ensure API key is set
+        resend.api_key = _RESEND_API_KEY
+        
         subject = f"Password Reset - {APP_NAME}"
         reset_link = f"{FRONTEND_URL}/reset-password?token={reset_token}"
         
@@ -135,13 +114,8 @@ class EmailService:
             """
         
         try:
-            # Ensure API key is set before sending
-            if not resend.api_key:
-                resend.api_key = RESEND_API_KEY
-            
-            # Send via Resend
             params = {
-                "from": f"{APP_NAME} <{SENDER_EMAIL}>",
+                "from": f"{APP_NAME} <{_SENDER_EMAIL}>",
                 "to": [to_email],
                 "subject": subject,
                 "html": html_body,
@@ -150,7 +124,6 @@ class EmailService:
             response = resend.Emails.send(params)
             logger.info(f"Password reset email sent to {to_email}, Resend ID: {response.get('id', 'unknown')}")
             
-            # Store for debugging
             self.sent_emails.append({
                 'to': to_email,
                 'subject': subject,
@@ -161,12 +134,14 @@ class EmailService:
             return True
         except Exception as e:
             logger.error(f"Failed to send password reset email to {to_email}: {str(e)}")
-            # Fallback to mock for development
             print(f"[EMAIL ERROR] Failed to send to {to_email}: {str(e)}")
             return False
     
     def send_otp(self, to_email: str, otp_code: str):
         """Send OTP code via email using Resend."""
+        # Ensure API key is set
+        resend.api_key = _RESEND_API_KEY
+        
         subject = f"Your Login Code - {APP_NAME}"
         
         html_body = f"""
@@ -206,12 +181,8 @@ class EmailService:
         """
         
         try:
-            # Ensure API key is set before sending
-            if not resend.api_key:
-                resend.api_key = RESEND_API_KEY
-                
             params = {
-                "from": f"{APP_NAME} <{SENDER_EMAIL}>",
+                "from": f"{APP_NAME} <{_SENDER_EMAIL}>",
                 "to": [to_email],
                 "subject": subject,
                 "html": html_body,
@@ -238,7 +209,6 @@ class EmailService:
         """Generate a secure temporary password."""
         characters = string.ascii_letters + string.digits + "!@#$%"
         password = ''.join(secrets.choice(characters) for _ in range(length))
-        # Ensure at least one of each type
         if not any(c.isupper() for c in password):
             password = password[:-1] + secrets.choice(string.ascii_uppercase)
         if not any(c.isdigit() for c in password):
