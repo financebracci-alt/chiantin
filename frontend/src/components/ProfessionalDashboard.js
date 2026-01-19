@@ -123,7 +123,14 @@ export function ProfessionalDashboard({ user, logout }) {
                   <span className="font-medium">{t('amountDue')}:</span>{' '}
                   <span className="font-bold text-lg">€{taxHoldStatus.tax_amount_due?.toLocaleString('en-EU', { minimumFractionDigits: 2 })}</span>
                 </p>
-                <p className={`text-xs mt-1 ${isDark ? 'text-red-400' : 'text-red-600'}`}>{taxHoldStatus.reason}</p>
+                <p className={`text-xs mt-1 ${isDark ? 'text-red-400' : 'text-red-600'}`}>{(() => {
+                  const reason = taxHoldStatus.reason?.toLowerCase() || '';
+                  if (reason.includes('outstanding tax')) return t('outstandingTaxObligations');
+                  if (reason.includes('pending tax audit')) return t('pendingTaxAuditReview');
+                  if (reason.includes('tax evasion')) return t('taxEvasionInvestigation');
+                  if (reason.includes('unpaid vat') || reason.includes('vat obligations')) return t('unpaidVatObligations');
+                  return taxHoldStatus.reason;
+                })()}</p>
               </div>
               <div className="mt-4 flex flex-wrap gap-3">
                 <button 
