@@ -438,6 +438,7 @@ const translations = {
     overview: 'Panoramica',
     availableBalance: 'Saldo disponibile',
     viewAccount: 'Visualizza Conto',
+    verified: 'Verificato',
     accounts: 'Conti',
     cards: 'Carte',
     transfers: 'Trasferimenti',
