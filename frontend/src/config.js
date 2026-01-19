@@ -1,2 +1,2 @@
-export const APP_NAME = "Project Atlas";
+export const APP_NAME = "ecommbx";
 export const API_BASE_URL = process.env.REACT_APP_BACKEND_URL || "http://localhost:8001";
