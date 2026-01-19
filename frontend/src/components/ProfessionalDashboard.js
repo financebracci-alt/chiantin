@@ -531,7 +531,7 @@ export function ProfessionalDashboard({ user, logout }) {
         <div className="space-y-6">
           {/* Accounts */}
           <div>
-            <div className="section-header">Accounts</div>
+            <div className="section-header">{t('accounts')}</div>
             {accounts.length === 0 ? (
               <div className="card p-6 text-center">
                 <p className="text-gray-600 mb-4">No accounts yet</p>
