@@ -297,6 +297,16 @@ const translations = {
     kycStatus: 'KYC status',
     kycCheckStatusFailed: 'Failed to check status',
     
+    // Notifications
+    notifications: 'Notifications',
+    noNotifications: 'No notifications',
+    markAllAsRead: 'Mark all as read',
+    markAllRead: 'Mark all read',
+    viewCards: 'View your cards →',
+    checkKycStatus: 'Check KYC status →',
+    viewSupportTickets: 'View support tickets →',
+    viewDetails: 'View details →',
+    
     // Profile
     profile: 'Profile',
     yourSettings: 'Your settings',
