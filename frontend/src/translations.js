@@ -154,6 +154,7 @@ const translations = {
     orderCard: 'Order Card',
     manageCards: 'Manage Cards',
     myCards: 'My Cards',
+    viewAllCards: 'View all cards',
     thisMonth: 'This Month',
     totalSpending: 'Total Spending',
     viewFullBreakdown: 'View full breakdown →',
