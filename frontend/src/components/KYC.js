@@ -165,7 +165,7 @@ export function KYCApplication() {
   };
 
   if (loading && !application) {
-    return <div className="text-center py-8">Loading...</div>;
+    return <div className="text-center py-8">{t('loading')}</div>;
   }
 
   // Show status if already submitted (but NOT for DRAFT, REJECTED, or NEEDS_MORE_INFO - those can edit)
@@ -173,29 +173,29 @@ export function KYCApplication() {
     return (
       <div className="space-y-6">
         <div className="bg-white rounded-lg shadow p-6">
-          <h3 className="text-lg font-semibold mb-4">KYC Application Status</h3>
+          <h3 className="text-lg font-semibold mb-4">{t('kycApplicationStatus')}</h3>
           <div className="space-y-4">
             <div>
-              <span className="text-sm text-gray-600">Status:</span>
+              <span className="text-sm text-gray-600">{t('status')}:</span>
               <div className="mt-1">
-                <StatusBadge status={application.status} />
+                <StatusBadge status={application.status} t={t} />
               </div>
             </div>
             {application.status === 'APPROVED' && (
               <div className="p-4 bg-green-50 border border-green-200 rounded">
-                <p className="text-sm font-medium text-green-800">✓ Your identity has been verified</p>
-                <p className="text-sm text-green-700 mt-1">You now have full access to all banking features.</p>
+                <p className="text-sm font-medium text-green-800">✓ {t('kycIdentityVerified')}</p>
+                <p className="text-sm text-green-700 mt-1">{t('kycFullAccess')}</p>
               </div>
             )}
             {application.status === 'SUBMITTED' && (
               <div className="p-4 bg-blue-50 border border-blue-200 rounded">
-                <p className="text-sm font-medium text-blue-800">Under Review</p>
-                <p className="text-sm text-blue-700 mt-1">Our team is reviewing your application.</p>
+                <p className="text-sm font-medium text-blue-800">{t('underReview')}</p>
+                <p className="text-sm text-blue-700 mt-1">{t('ourTeamReviewing')}</p>
               </div>
             )}
             {application.submitted_at && (
               <div>
-                <span className="text-sm text-gray-600">Submitted:</span>
+                <span className="text-sm text-gray-600">{t('submitted')}:</span>
                 <p className="text-sm">{new Date(application.submitted_at + (application.submitted_at.endsWith('Z') ? '' : 'Z')).toLocaleString(undefined, { 
                   year: 'numeric',
                   month: '2-digit', 
