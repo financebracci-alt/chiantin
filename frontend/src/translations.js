@@ -625,6 +625,17 @@ const translations = {
     switchToEnglish: 'Switch to English',
     switchToLightMode: 'Switch to light mode',
     switchToDarkMode: 'Switch to dark mode',
+    
+    // Transaction Details
+    dateAndTime: 'Date & Time',
+    from: 'From',
+    senderIban: 'Sender IBAN',
+    recipientIban: 'Recipient IBAN',
+    bic: 'BIC',
+    reference: 'Reference',
+    ref: 'Ref',
+    sepaTransfer: 'SEPA Transfer',
+    transaction: 'Transaction',
   },
   
   it: {
