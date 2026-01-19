@@ -217,26 +217,26 @@ function CreateTicketForm({ onClose, onSuccess }) {
 
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">Subject</label>
+          <label className={`block text-sm font-medium mb-2 ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>{t('subject')}</label>
           <input
             type="text"
             value={formData.subject}
             onChange={(e) => setFormData({ ...formData, subject: e.target.value })}
             required
-            className="input-enhanced w-full"
-            placeholder="Brief description of the issue"
+            className={`input-enhanced w-full ${isDark ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400' : ''}`}
+            placeholder={t('briefDescription')}
             data-testid="ticket-subject"
           />
         </div>
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">Description</label>
+          <label className={`block text-sm font-medium mb-2 ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>{t('descriptionLabel')}</label>
           <textarea
             value={formData.description}
             onChange={(e) => setFormData({ ...formData, description: e.target.value })}
             required
             rows={4}
-            className="input-enhanced w-full"
-            placeholder="Provide details about your issue..."
+            className={`input-enhanced w-full ${isDark ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400' : ''}`}
+            placeholder={t('provideDetails')}
             data-testid="ticket-description"
           />
         </div>
@@ -244,9 +244,9 @@ function CreateTicketForm({ onClose, onSuccess }) {
           <button
             type="button"
             onClick={onClose}
-            className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50"
+            className={`px-4 py-2 border rounded-lg ${isDark ? 'border-gray-600 text-gray-300 hover:bg-gray-700' : 'border-gray-300 hover:bg-gray-50'}`}
           >
-            Cancel
+            {t('cancel')}
           </button>
           <button
             type="submit"
@@ -254,7 +254,7 @@ function CreateTicketForm({ onClose, onSuccess }) {
             className="btn-primary btn-glow"
             data-testid="submit-ticket"
           >
-            {submitting ? 'Creating...' : 'Create Ticket'}
+            {submitting ? t('creating') : t('createTicket')}
           </button>
         </div>
       </form>
