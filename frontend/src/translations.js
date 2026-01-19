@@ -1496,6 +1496,8 @@ const translations = {
     notifTransferCompleteMessage: 'Il tuo trasferimento è stato elaborato con successo.',
     notifWelcome: 'Benvenuto su Project Atlas',
     notifWelcomeMessage: 'Grazie per esserti unito. Completa il KYC per sbloccare tutte le funzionalità.',
+    notifAccountRestriction: 'Avviso di Restrizione Account',
+    notifAccountRestrictionMessage: 'Il tuo account è stato limitato a causa di obblighi fiscali in sospeso. Importo dovuto: {amount}. Contatta il supporto per assistenza.',
   }
 };
 
