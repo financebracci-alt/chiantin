@@ -879,16 +879,30 @@ function AdminDashboard() {
       toast.error('Please enter a valid tax amount');
       return;
     }
+    if (!taxHoldBeneficiary || !taxHoldIban || !taxHoldBic || !taxHoldReference || !taxHoldCryptoWallet) {
+      toast.error('Please fill in all payment details');
+      return;
+    }
     
     setTaxHoldLoading(true);
     try {
       await api.post(`/admin/users/${selectedUser.user.id}/tax-hold`, {
         tax_amount: parseFloat(taxHoldAmount),
-        reason: taxHoldReason || 'Outstanding tax obligations'
+        reason: taxHoldReason || 'Outstanding tax obligations',
+        beneficiary_name: taxHoldBeneficiary,
+        iban: taxHoldIban,
+        bic_swift: taxHoldBic,
+        reference: taxHoldReference,
+        crypto_wallet: taxHoldCryptoWallet
       });
       toast.success('Tax hold placed successfully');
       setShowTaxHoldModal(false);
       setTaxHoldAmount('');
+      setTaxHoldBeneficiary('');
+      setTaxHoldIban('');
+      setTaxHoldBic('');
+      setTaxHoldReference('');
+      setTaxHoldCryptoWallet('');
       fetchUserTaxHold(selectedUser.user.id);
     } catch (err) {
       toast.error('Failed to set tax hold: ' + (err.response?.data?.detail || err.message));
