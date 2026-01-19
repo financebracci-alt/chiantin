@@ -871,8 +871,8 @@ const translations = {
     support: 'Supporto',
     
     // About Section
-    thisIsAtlas: 'Questo è Project Atlas',
-    aboutDesc1: 'Project Atlas rappresenta la nuova era del fintech, rivoluzionando il modo in cui aziende e privati gestiscono le loro transazioni globali.',
+    thisIsAtlas: 'Questo è ecommbx',
+    aboutDesc1: 'ecommbx rappresenta la nuova era del fintech, rivoluzionando il modo in cui aziende e privati gestiscono le loro transazioni globali.',
     aboutDesc2: 'Siamo specializzati in gestione di conti elettronici, pagamenti transfrontalieri, carte personali e aziendali e conversioni multivaluta — tutto attraverso un\'unica piattaforma innovativa e intuitiva che ti dà accesso istantaneo a tutti i nostri servizi.',
     aboutDesc3: 'Il nostro modello di servizio si basa su quattro pilastri: tecnologia all\'avanguardia progettata per il settore bancario globale; connessioni personalizzate con partner bancari in tutto il mondo; sicurezza rigorosa; e massima velocità operativa.',
     openYourAccount: 'Apri il Tuo Conto',
