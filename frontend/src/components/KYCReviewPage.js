@@ -5,18 +5,21 @@ import { NotificationBell } from './Notifications';
 import { APP_NAME } from '../config';
 import { useToast } from './Toast';
 import api from '../api';
+import { useLanguage, useTheme } from '../contexts/AppContext';
 
 export function KYCReviewPage({ user, logout }) {
   const navigate = useNavigate();
   const toast = useToast();
+  const { t } = useLanguage();
+  const { isDark } = useTheme();
 
   return (
-    <div className="min-h-screen bg-white">
-      <header className="bg-white border-b border-gray-200 h-16 px-4 sm:px-6 flex items-center justify-between">
-        <h1 className="text-lg font-semibold text-gray-900">{APP_NAME}</h1>
+    <div className={`min-h-screen ${isDark ? 'bg-gray-900' : 'bg-white'}`}>
+      <header className={`h-16 px-4 sm:px-6 flex items-center justify-between border-b ${isDark ? 'bg-gray-900 border-gray-800' : 'bg-white border-gray-200'}`}>
+        <h1 className={`text-lg font-semibold ${isDark ? 'text-white' : 'text-gray-900'}`}>{APP_NAME}</h1>
         <div className="flex items-center space-x-4">
           <NotificationBell />
-          <button onClick={logout} className="text-sm text-gray-600 hover:text-gray-900">Logout</button>
+          <button onClick={logout} className={`text-sm ${isDark ? 'text-gray-400 hover:text-white' : 'text-gray-600 hover:text-gray-900'}`}>{t('logout')}</button>
         </div>
       </header>
 
@@ -24,41 +27,40 @@ export function KYCReviewPage({ user, logout }) {
         <div className="max-w-2xl mx-auto text-center">
           {/* Illustration */}
           <div className="mb-8">
-            <div className="w-32 h-32 bg-yellow-100 rounded-full flex items-center justify-center mx-auto">
+            <div className={`w-32 h-32 rounded-full flex items-center justify-center mx-auto ${isDark ? 'bg-yellow-900/30' : 'bg-yellow-100'}`}>
               <svg className="w-16 h-16 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
             </div>
           </div>
 
-          <h1 className="text-3xl font-bold mb-4">Your application is being reviewed</h1>
-          <p className="text-gray-600 mb-8">
-            Thank you for submitting your verification. Our team is reviewing your application. 
-            This usually takes 1-2 business days.
+          <h1 className={`text-3xl font-bold mb-4 ${isDark ? 'text-white' : ''}`}>{t('kycApplicationBeingReviewed')}</h1>
+          <p className={`mb-8 ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
+            {t('kycThankYouSubmitting')}
           </p>
 
-          <div className="card p-6 text-left mb-8">
-            <h3 className="font-semibold mb-4">What happens next?</h3>
+          <div className={`card p-6 text-left mb-8 ${isDark ? 'bg-gray-800 border-gray-700' : ''}`}>
+            <h3 className={`font-semibold mb-4 ${isDark ? 'text-white' : ''}`}>{t('kycWhatHappensNext')}</h3>
             <ul className="space-y-3">
               <li className="flex items-start space-x-3">
                 <span className="text-red-600 mt-1">1.</span>
                 <div>
-                  <p className="font-medium">Review process</p>
-                  <p className="text-sm text-gray-600">Our team verifies your documents and information</p>
+                  <p className={`font-medium ${isDark ? 'text-gray-200' : ''}`}>{t('kycReviewProcess')}</p>
+                  <p className={`text-sm ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>{t('kycReviewProcessDesc')}</p>
                 </div>
               </li>
               <li className="flex items-start space-x-3">
                 <span className="text-red-600 mt-1">2.</span>
                 <div>
-                  <p className="font-medium">Account activation</p>
-                  <p className="text-sm text-gray-600">Once approved, your account and IBAN will be activated</p>
+                  <p className={`font-medium ${isDark ? 'text-gray-200' : ''}`}>{t('kycAccountActivation')}</p>
+                  <p className={`text-sm ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>{t('kycAccountActivationDesc')}</p>
                 </div>
               </li>
               <li className="flex items-start space-x-3">
                 <span className="text-red-600 mt-1">3.</span>
                 <div>
-                  <p className="font-medium">Full banking access</p>
-                  <p className="text-sm text-gray-600">You'll be able to send money, order cards, and use all features</p>
+                  <p className={`font-medium ${isDark ? 'text-gray-200' : ''}`}>{t('kycFullBankingAccess')}</p>
+                  <p className={`text-sm ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>{t('kycFullBankingAccessDesc')}</p>
                 </div>
               </li>
             </ul>
@@ -74,15 +76,15 @@ export function KYCReviewPage({ user, logout }) {
                   // Refresh the page to go to dashboard
                   window.location.href = '/dashboard';
                 } else {
-                  toast.info(`KYC status: ${status}`);
+                  toast.info(`${t('kycStatus')}: ${status}`);
                 }
               } catch (err) {
-                toast.error('Failed to check status');
+                toast.error(t('kycCheckStatusFailed'));
               }
             }}
             className="btn-secondary"
           >
-            Check Status
+            {t('kycCheckStatus')}
           </button>
         </div>
       </div>
