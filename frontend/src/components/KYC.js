@@ -267,9 +267,9 @@ export function KYCApplication() {
           ))}
         </div>
         <div className="flex justify-between mt-2">
-          <span className="text-xs text-gray-600">Personal Info</span>
-          <span className="text-xs text-gray-600">Documents</span>
-          <span className="text-xs text-gray-600">Review</span>
+          <span className="text-xs text-gray-600">{t('kycPersonalInfo')}</span>
+          <span className="text-xs text-gray-600">{t('kycDocuments')}</span>
+          <span className="text-xs text-gray-600">{t('kycReview')}</span>
         </div>
       </div>
 
@@ -282,10 +282,10 @@ export function KYCApplication() {
       {/* Step 1: Personal Information */}
       {step === 1 && (
         <div className="bg-white rounded-lg shadow p-6">
-          <h3 className="text-lg font-semibold mb-4">Personal Information</h3>
+          <h3 className="text-lg font-semibold mb-4">{t('kycPersonalInformation')}</h3>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Full Legal Name</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">{t('kycFullLegalName')}</label>
               <input
                 type="text"
                 name="full_name"
@@ -296,7 +296,7 @@ export function KYCApplication() {
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Date of Birth</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">{t('kycDateOfBirth')}</label>
               <input
                 type="date"
                 name="date_of_birth"
@@ -307,7 +307,7 @@ export function KYCApplication() {
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Nationality</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">{t('kycNationality')}</label>
               <input
                 type="text"
                 name="nationality"
@@ -319,7 +319,7 @@ export function KYCApplication() {
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Country</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">{t('kycCountry')}</label>
               <input
                 type="text"
                 name="country"
@@ -331,7 +331,7 @@ export function KYCApplication() {
               />
             </div>
             <div className="md:col-span-2">
-              <label className="block text-sm font-medium text-gray-700 mb-1">Street Address</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">{t('kycStreetAddress')}</label>
               <input
                 type="text"
                 name="street_address"
@@ -342,7 +342,7 @@ export function KYCApplication() {
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">City</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">{t('kycCity')}</label>
               <input
                 type="text"
                 name="city"
