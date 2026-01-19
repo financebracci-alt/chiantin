@@ -690,6 +690,16 @@ const translations = {
     kycStatus: 'Stato KYC',
     kycCheckStatusFailed: 'Impossibile verificare lo stato',
     
+    // Notifications
+    notifications: 'Notifiche',
+    noNotifications: 'Nessuna notifica',
+    markAllAsRead: 'Segna tutto come letto',
+    markAllRead: 'Segna tutto letto',
+    viewCards: 'Visualizza le tue carte →',
+    checkKycStatus: 'Verifica stato KYC →',
+    viewSupportTickets: 'Visualizza ticket supporto →',
+    viewDetails: 'Visualizza dettagli →',
+    
     // Profile
     profile: 'Profilo',
     yourSettings: 'Le tue impostazioni',
