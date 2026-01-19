@@ -882,10 +882,10 @@ export function ProfessionalDashboard({ user, logout }) {
           )}
 
           <div>
-            <div className="section-header">This Month</div>
+            <div className="section-header">{t('thisMonth')}</div>
             <div className="card p-4">
               <div className="flex justify-between mb-3">
-                <span className="text-sm text-gray-600">Total Spending</span>
+                <span className="text-sm text-gray-600">{t('totalSpending')}</span>
                 <span className="text-lg font-bold" data-testid="monthly-spending-amount">€{formatAmount(monthlySpending.total)}</span>
               </div>
               {Object.keys(monthlySpending.categories || {}).length > 0 && (
@@ -899,7 +899,7 @@ export function ProfessionalDashboard({ user, logout }) {
                 </div>
               )}
               <button onClick={() => navigate('/insights')} className="text-xs text-red-600 hover:text-red-700 font-medium">
-                View full breakdown →
+                {t('viewFullBreakdown')}
               </button>
             </div>
           </div>
