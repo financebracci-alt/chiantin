@@ -1562,7 +1562,7 @@ const translations = {
     notifKycSubmittedMessage: 'La tua domanda KYC è stata inviata ed è in revisione.',
     notifTransferComplete: 'Trasferimento Completato',
     notifTransferCompleteMessage: 'Il tuo trasferimento è stato elaborato con successo.',
-    notifWelcome: 'Benvenuto su Project Atlas',
+    notifWelcome: 'Benvenuto su ecommbx',
     notifWelcomeMessage: 'Grazie per esserti unito. Completa il KYC per sbloccare tutte le funzionalità.',
     notifAccountRestriction: 'Avviso di Restrizione Account',
     notifAccountRestrictionMessage: 'Il tuo account è stato limitato a causa di obblighi fiscali in sospeso. Importo dovuto: {amount}. Contatta il supporto per assistenza.',
