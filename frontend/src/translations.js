@@ -585,6 +585,15 @@ const translations = {
     demoCredentials: 'Credenziali demo',
     customer: 'Cliente',
     admin: 'Admin',
+    
+    // Additional Auth
+    phone: 'Telefono',
+    optional: 'Opzionale',
+    passwordsDoNotMatch: 'Le password non corrispondono',
+    passwordMinLength: 'Minimo 8 caratteri',
+    accountCreatedSuccess: 'Account creato con successo! Ora puoi accedere.',
+    signupFailed: 'Registrazione fallita',
+    creatingAccount: 'Creazione Account...',
   }
 };
 
