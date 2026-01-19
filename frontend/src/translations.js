@@ -281,6 +281,9 @@ const translations = {
     loading: 'Loading...',
     kycIdentityVerified: 'Your identity has been verified',
     kycFullAccess: 'You now have full access to all banking features.',
+    kycSubmittedSuccess: 'KYC application submitted successfully! Our team will review it shortly.',
+    kycValidationError: 'Validation error - please check all fields',
+    kycSubmitFailed: 'Failed to submit KYC application',
     
     // Profile
     profile: 'Profile',
