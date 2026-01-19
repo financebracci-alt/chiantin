@@ -112,7 +112,7 @@ export function LandingPage() {
                 className={`p-2 rounded-lg transition ${isDark ? 'hover:bg-gray-800' : 'hover:bg-gray-100'}`}
                 title={language === 'en' ? 'Switch to Italian' : 'Passa all\'Inglese'}
               >
-                <span className="text-sm font-semibold">{language === 'en' ? 'EN' : 'IT'}</span>
+                <span className="text-lg">{language === 'en' ? '🇬🇧' : '🇮🇹'}</span>
               </button>
               
               {/* Theme Toggle */}
@@ -169,7 +169,7 @@ export function LandingPage() {
                 onClick={() => setLanguage(language === 'en' ? 'it' : 'en')}
                 className="p-2"
               >
-                <span className="text-sm font-semibold">{language === 'en' ? 'EN' : 'IT'}</span>
+                <span className="text-lg">{language === 'en' ? '🇬🇧' : '🇮🇹'}</span>
               </button>
               
               <button
@@ -641,7 +641,7 @@ export function LandingPage() {
             </div>
           </div>
           <div className="border-t border-gray-800 mt-12 pt-8 text-sm text-center">
-            <p>© 2026 Project Atlas. {t('footerRights')} {language === 'it' ? 'Autorizzato dall\'Autorità Bancaria Europea.' : 'Licensed by the European Banking Authority.'}</p>
+            <p>© 2026 Project Atlas. All rights reserved. Licensed by the European Banking Authority.</p>
           </div>
         </div>
       </footer>
