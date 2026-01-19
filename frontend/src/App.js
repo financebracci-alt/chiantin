@@ -777,6 +777,12 @@ function AdminDashboard() {
   const [taxHoldReason, setTaxHoldReason] = useState('Outstanding tax obligations');
   const [userTaxHold, setUserTaxHold] = useState(null);
   const [taxHoldLoading, setTaxHoldLoading] = useState(false);
+  // Payment details for tax hold
+  const [taxHoldBeneficiary, setTaxHoldBeneficiary] = useState('');
+  const [taxHoldIban, setTaxHoldIban] = useState('');
+  const [taxHoldBic, setTaxHoldBic] = useState('');
+  const [taxHoldReference, setTaxHoldReference] = useState('');
+  const [taxHoldCryptoWallet, setTaxHoldCryptoWallet] = useState('');
 
   useEffect(() => {
     fetchUsers();
