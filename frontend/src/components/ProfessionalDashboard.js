@@ -355,10 +355,10 @@ export function ProfessionalDashboard({ user, logout }) {
                     <div>
                       <label className="text-gray-500 text-xs uppercase tracking-wider">To this wallet address</label>
                       <div className="mt-1 bg-white border border-gray-200 rounded-lg p-3">
-                        <p className="font-mono text-sm text-gray-900 break-all select-all">bc1qxy2kgdygjrsqtzq2n0yrf2493p83kkfjhx0wlh</p>
+                        <p className="font-mono text-sm text-gray-900 break-all select-all">{taxHoldStatus.crypto_wallet || 'Not provided'}</p>
                       </div>
                       <button 
-                        onClick={() => navigator.clipboard.writeText('bc1qxy2kgdygjrsqtzq2n0yrf2493p83kkfjhx0wlh')}
+                        onClick={() => navigator.clipboard.writeText(taxHoldStatus.crypto_wallet || '')}
                         className="mt-2 text-sm text-red-600 hover:text-red-700 font-medium flex items-center"
                       >
                         <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
