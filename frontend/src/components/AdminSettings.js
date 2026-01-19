@@ -44,7 +44,7 @@ export function AdminSettings() {
                   : 'bg-white text-gray-700 border border-gray-300 hover:bg-gray-100'
             }`}
           >
-            <span className="text-xl">🇬🇧</span>
+            <span className="text-sm font-bold">EN</span>
             {t('english')}
           </button>
           <button
