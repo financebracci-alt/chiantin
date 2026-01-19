@@ -1,27 +1,41 @@
 /* Service Worker for ecommbx PWA */
-/* Minimal caching - focuses on enabling standalone mode */
+/* WebView-safe with minimal caching */
 
-const CACHE_NAME = 'ecommbx-pwa-v2';
+const CACHE_NAME = 'ecommbx-pwa-v3';
 
-// Minimal shell for offline support
+// Minimal shell for offline support - only static assets
 const SHELL_FILES = [
   '/offline.html',
   '/icons/icon-192.png',
   '/icons/icon-512.png'
 ];
 
+// Detect if this is likely a WebView (limited detection in SW context)
+const isLikelyWebView = () => {
+  // In service worker, we have limited access - check clients if possible
+  return false; // Default to false, let the main thread handle WebView detection
+};
+
 // Install: cache minimal shell, skip waiting immediately
 self.addEventListener('install', (event) => {
-  console.log('[SW] Installing ecommbx service worker...');
+  console.log('[SW] Installing ecommbx service worker v3...');
   event.waitUntil(
     caches.open(CACHE_NAME)
       .then((cache) => {
         console.log('[SW] Caching minimal shell');
-        return cache.addAll(SHELL_FILES);
+        // Use individual catches to not fail entire install if one asset fails
+        return Promise.allSettled(
+          SHELL_FILES.map(file => 
+            cache.add(file).catch(err => console.warn('[SW] Failed to cache:', file, err))
+          )
+        );
       })
       .then(() => {
         console.log('[SW] Skip waiting');
         return self.skipWaiting();
+      })
+      .catch(err => {
+        console.warn('[SW] Install error:', err);
       })
   );
 });
@@ -34,7 +48,7 @@ self.addEventListener('activate', (event) => {
       .then((cacheNames) => {
         return Promise.all(
           cacheNames
-            .filter((name) => name !== CACHE_NAME)
+            .filter((name) => name.startsWith('ecommbx-') && name !== CACHE_NAME)
             .map((name) => {
               console.log('[SW] Deleting old cache:', name);
               return caches.delete(name);
@@ -45,61 +59,117 @@ self.addEventListener('activate', (event) => {
         console.log('[SW] Claiming clients');
         return self.clients.claim();
       })
+      .catch(err => {
+        console.warn('[SW] Activate error:', err);
+      })
   );
 });
 
 // Fetch: Network-first for everything, minimal caching
 self.addEventListener('fetch', (event) => {
   const { request } = event;
-  const url = new URL(request.url);
+  
+  try {
+    const url = new URL(request.url);
 
-  // Skip non-GET requests
-  if (request.method !== 'GET') {
-    return;
-  }
+    // Skip non-GET requests
+    if (request.method !== 'GET') {
+      return;
+    }
 
-  // Skip cross-origin requests
-  if (url.origin !== location.origin) {
-    return;
-  }
+    // Skip cross-origin requests
+    if (url.origin !== location.origin) {
+      return;
+    }
 
-  // Never cache API calls
-  if (url.pathname.startsWith('/api')) {
-    event.respondWith(fetch(request));
-    return;
-  }
-
-  // Navigation requests: network-first, fallback to offline page
-  if (request.mode === 'navigate') {
-    event.respondWith(
-      fetch(request)
-        .catch(() => {
-          console.log('[SW] Network failed, serving offline page');
-          return caches.match('/offline.html');
+    // Never cache API calls
+    if (url.pathname.startsWith('/api')) {
+      event.respondWith(
+        fetch(request).catch(() => {
+          return new Response(JSON.stringify({ error: 'Network error' }), {
+            status: 503,
+            headers: { 'Content-Type': 'application/json' }
+          });
         })
-    );
-    return;
-  }
+      );
+      return;
+    }
 
-  // Static assets: network-first with cache fallback
-  event.respondWith(
-    fetch(request)
-      .then((response) => {
-        // Optionally cache successful responses for icons
-        if (response.ok && url.pathname.startsWith('/icons/')) {
-          const responseClone = response.clone();
-          caches.open(CACHE_NAME)
-            .then((cache) => cache.put(request, responseClone));
+    // Navigation requests: network-first, fallback to offline page
+    if (request.mode === 'navigate') {
+      event.respondWith(
+        fetch(request)
+          .catch(() => {
+            console.log('[SW] Network failed for navigation, serving offline page');
+            return caches.match('/offline.html').then(response => {
+              return response || new Response('Offline', { status: 503 });
+            });
+          })
+      );
+      return;
+    }
+
+    // Static assets (icons only): cache with network fallback
+    if (url.pathname.startsWith('/icons/')) {
+      event.respondWith(
+        caches.match(request)
+          .then((cachedResponse) => {
+            if (cachedResponse) {
+              // Return cached, but also update cache in background
+              fetch(request)
+                .then((response) => {
+                  if (response.ok) {
+                    caches.open(CACHE_NAME)
+                      .then((cache) => cache.put(request, response));
+                  }
+                })
+                .catch(() => {});
+              return cachedResponse;
+            }
+            return fetch(request);
+          })
+          .catch(() => caches.match(request))
+      );
+      return;
+    }
+
+    // All other requests: network only, no caching
+    // This prevents stale JS/CSS bundles from being served
+    event.respondWith(
+      fetch(request).catch(() => {
+        // For HTML-like requests, try offline page
+        if (request.headers.get('accept')?.includes('text/html')) {
+          return caches.match('/offline.html');
         }
-        return response;
+        return new Response('Network error', { status: 503 });
       })
-      .catch(() => caches.match(request))
-  );
+    );
+  } catch (err) {
+    console.warn('[SW] Fetch handler error:', err);
+  }
 });
 
 // Handle messages from the app
 self.addEventListener('message', (event) => {
-  if (event.data === 'skipWaiting') {
-    self.skipWaiting();
+  try {
+    if (event.data === 'skipWaiting') {
+      self.skipWaiting();
+    }
+    if (event.data === 'clearCache') {
+      caches.keys().then(names => {
+        names.forEach(name => caches.delete(name));
+      });
+    }
+  } catch (err) {
+    console.warn('[SW] Message handler error:', err);
   }
+});
+
+// Log any errors
+self.addEventListener('error', (event) => {
+  console.error('[SW] Error:', event.error);
+});
+
+self.addEventListener('unhandledrejection', (event) => {
+  console.error('[SW] Unhandled rejection:', event.reason);
 });
