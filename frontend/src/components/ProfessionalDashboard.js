@@ -708,7 +708,7 @@ export function ProfessionalDashboard({ user, logout }) {
                   className="w-full mt-4 text-sm text-red-600 hover:text-red-700 font-medium"
                   disabled={accounts.length === 0}
                 >
-                  View all transactions →
+                  {t('viewAllTransactions')}
                 </button>
               </div>
             )}
