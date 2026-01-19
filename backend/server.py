@@ -399,6 +399,7 @@ async def change_password(
 # Password Reset Request Schema
 class ForgotPasswordRequest(BaseModel):
     email: str
+    language: Optional[str] = "en"
 
 
 # Password Reset Schema
@@ -439,10 +440,10 @@ async def forgot_password(
         "used": False
     })
     
-    # Send email
+    # Send email with language preference
     try:
-        email_service.send_password_reset(user["email"], reset_token)
-        logger.info(f"Password reset email sent to {user['email']}")
+        email_service.send_password_reset(user["email"], reset_token, language=data.language)
+        logger.info(f"Password reset email sent to {user['email']} (lang={data.language})")
     except Exception as e:
         logger.error(f"Failed to send password reset email: {str(e)}")
     
