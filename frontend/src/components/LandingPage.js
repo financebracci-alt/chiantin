@@ -187,6 +187,7 @@ export function LandingPage() {
               )}
             </button>
           </div>
+          </div>
 
           {/* Mobile Menu */}
           {mobileMenuOpen && (
