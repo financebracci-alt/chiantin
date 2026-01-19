@@ -1,4 +1,4 @@
-"""Configuration management for Project Atlas."""
+"""Configuration management for ecommbx Banking Platform."""
 
 import os
 from functools import lru_cache
