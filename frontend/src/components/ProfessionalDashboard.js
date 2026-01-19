@@ -314,7 +314,7 @@ export function ProfessionalDashboard({ user, logout }) {
 
                 <button 
                   onClick={() => { 
-                    alert('Payment confirmation received. Our compliance team will verify your wire transfer within 1-3 business days. You will receive an email notification once your account restrictions are lifted.');
+                    alert(t('wireConfirmation'));
                     setShowPaymentModal(false); 
                     setSelectedPaymentMethod(null);
                   }}
