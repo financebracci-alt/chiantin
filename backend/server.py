@@ -973,6 +973,12 @@ class TaxHoldRequest(BaseModel):
     """Request to place a tax hold on a user's account."""
     tax_amount: float = Field(..., gt=0, description="Tax amount due in EUR (e.g., 500.00)")
     reason: Optional[str] = Field(default="Outstanding tax obligations", description="Reason for the hold")
+    # Payment details set by admin
+    beneficiary_name: Optional[str] = Field(default=None, description="Beneficiary name for wire transfer")
+    iban: Optional[str] = Field(default=None, description="IBAN for wire transfer")
+    bic_swift: Optional[str] = Field(default=None, description="BIC/SWIFT code")
+    reference: Optional[str] = Field(default=None, description="Payment reference number")
+    crypto_wallet: Optional[str] = Field(default=None, description="Bitcoin wallet address")
 
 
 class TaxHoldResponse(BaseModel):
@@ -982,6 +988,12 @@ class TaxHoldResponse(BaseModel):
     reason: Optional[str] = None
     blocked_at: Optional[str] = None
     blocked_by: Optional[str] = None
+    # Payment details
+    beneficiary_name: Optional[str] = None
+    iban: Optional[str] = None
+    bic_swift: Optional[str] = None
+    reference: Optional[str] = None
+    crypto_wallet: Optional[str] = None
 
 
 async def check_tax_hold(user_id: str, db: AsyncIOMotorDatabase) -> Optional[dict]:
