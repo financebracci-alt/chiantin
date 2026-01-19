@@ -72,9 +72,9 @@ export function LandingPage() {
   ];
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className={`min-h-screen ${isDark ? 'bg-gray-900' : 'bg-white'}`}>
       {/* Navigation */}
-      <nav className="fixed top-0 left-0 right-0 bg-white/95 backdrop-blur-sm border-b border-gray-100 z-50">
+      <nav className={`fixed top-0 left-0 right-0 backdrop-blur-sm border-b z-50 ${isDark ? 'bg-gray-900/95 border-gray-800' : 'bg-white/95 border-gray-100'}`}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16 sm:h-20">
             {/* Logo */}
@@ -82,75 +82,124 @@ export function LandingPage() {
               <div className="w-10 h-10 bg-gradient-to-br from-red-500 to-red-600 rounded-xl flex items-center justify-center">
                 <span className="text-white font-bold text-lg">A</span>
               </div>
-              <span className="text-xl sm:text-2xl font-bold text-gray-900">Project Atlas</span>
+              <span className={`text-xl sm:text-2xl font-bold ${isDark ? 'text-white' : 'text-gray-900'}`}>Project Atlas</span>
             </div>
 
             {/* Desktop Menu */}
-            <div className="hidden md:flex items-center space-x-8">
+            <div className="hidden md:flex items-center space-x-6">
               <button
                 onClick={() => scrollToSection('features')}
-                className={`font-medium transition-all duration-300 ${activeSection === 'features' ? 'text-red-600 scale-105' : 'text-gray-600 hover:text-gray-900'}`}
+                className={`font-medium transition-all duration-300 ${activeSection === 'features' ? 'text-red-500 scale-105' : isDark ? 'text-gray-300 hover:text-white' : 'text-gray-600 hover:text-gray-900'}`}
               >
-                Features
+                {t('features')}
               </button>
               <button
                 onClick={() => scrollToSection('about')}
-                className={`font-medium transition-all duration-300 ${activeSection === 'about' ? 'text-red-600 scale-105' : 'text-gray-600 hover:text-gray-900'}`}
+                className={`font-medium transition-all duration-300 ${activeSection === 'about' ? 'text-red-500 scale-105' : isDark ? 'text-gray-300 hover:text-white' : 'text-gray-600 hover:text-gray-900'}`}
               >
-                About
+                {t('about')}
               </button>
               <button
                 onClick={() => scrollToSection('security')}
-                className={`font-medium transition-all duration-300 ${activeSection === 'security' ? 'text-red-600 scale-105' : 'text-gray-600 hover:text-gray-900'}`}
+                className={`font-medium transition-all duration-300 ${activeSection === 'security' ? 'text-red-500 scale-105' : isDark ? 'text-gray-300 hover:text-white' : 'text-gray-600 hover:text-gray-900'}`}
               >
-                Security
+                {t('security')}
               </button>
+              
+              {/* Language Toggle */}
+              <button
+                onClick={() => setLanguage(language === 'en' ? 'it' : 'en')}
+                className={`px-3 py-1.5 rounded-lg font-bold text-sm transition ${isDark ? 'bg-gray-800 hover:bg-gray-700 text-gray-300' : 'bg-gray-100 hover:bg-gray-200 text-gray-700'}`}
+                title={language === 'en' ? 'Switch to Italian' : 'Passa all\'Inglese'}
+              >
+                {language === 'en' ? 'EN' : 'IT'}
+              </button>
+              
+              {/* Theme Toggle */}
+              <button
+                onClick={toggleTheme}
+                className={`p-2 rounded-lg transition ${isDark ? 'hover:bg-gray-800 text-yellow-400' : 'hover:bg-gray-100 text-gray-600'}`}
+                title={isDark ? t('lightMode') : t('darkMode')}
+              >
+                {isDark ? (
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+                  </svg>
+                ) : (
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+                  </svg>
+                )}
+              </button>
+              
               <button
                 onClick={() => navigate('/login')}
-                className="text-gray-700 hover:text-gray-900 font-medium transition"
+                className={`font-medium transition ${isDark ? 'text-gray-300 hover:text-white' : 'text-gray-700 hover:text-gray-900'}`}
               >
-                Sign In
+                {t('signIn')}
               </button>
               <button
                 onClick={() => navigate('/signup')}
                 className="px-6 py-2.5 bg-gradient-to-r from-red-500 to-red-600 text-white font-semibold rounded-full hover:shadow-lg hover:shadow-red-500/30 transition-all duration-300"
               >
-                Get Started
+                {t('getStarted')}
               </button>
             </div>
 
             {/* Mobile Menu Button */}
-            <button
-              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="md:hidden p-2 text-gray-600"
-            >
-              {mobileMenuOpen ? (
-                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                </svg>
-              ) : (
-                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-                </svg>
-              )}
-            </button>
+            <div className="flex items-center space-x-2 md:hidden">
+              <button
+                onClick={() => setLanguage(language === 'en' ? 'it' : 'en')}
+                className={`px-2 py-1 rounded font-bold text-xs ${isDark ? 'bg-gray-800 text-gray-300' : 'bg-gray-100 text-gray-700'}`}
+              >
+                {language === 'en' ? 'EN' : 'IT'}
+              </button>
+              <button
+                onClick={toggleTheme}
+                className={`p-1.5 rounded ${isDark ? 'text-yellow-400' : 'text-gray-600'}`}
+              >
+                {isDark ? (
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+                  </svg>
+                ) : (
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+                  </svg>
+                )}
+              </button>
+              <button
+                onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                className={`p-2 ${isDark ? 'text-gray-300' : 'text-gray-600'}`}
+              >
+                {mobileMenuOpen ? (
+                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                ) : (
+                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                  </svg>
+                )}
+              </button>
+            </div>
           </div>
 
           {/* Mobile Menu */}
           {mobileMenuOpen && (
-            <div className="md:hidden py-4 border-t border-gray-100 animate-slideDown">
+            <div className={`md:hidden py-4 border-t animate-slideDown ${isDark ? 'border-gray-800' : 'border-gray-100'}`}>
               <div className="flex flex-col space-y-4">
                 <button
                   onClick={() => scrollToSection('features')}
-                  className="text-left text-gray-600 hover:text-red-600 font-medium transition-colors"
+                  className={`text-left font-medium transition-colors ${isDark ? 'text-gray-300 hover:text-red-400' : 'text-gray-600 hover:text-red-600'}`}
                 >
-                  Features
+                  {t('features')}
                 </button>
                 <button
                   onClick={() => scrollToSection('about')}
-                  className="text-left text-gray-600 hover:text-red-600 font-medium transition-colors"
+                  className={`text-left font-medium transition-colors ${isDark ? 'text-gray-300 hover:text-red-400' : 'text-gray-600 hover:text-red-600'}`}
                 >
-                  About
+                  {t('about')}
                 </button>
                 <button
                   onClick={() => scrollToSection('security')}
