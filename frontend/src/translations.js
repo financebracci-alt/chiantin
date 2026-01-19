@@ -611,6 +611,20 @@ const translations = {
     accountCreatedSuccess: 'Account created successfully! You can now login.',
     signupFailed: 'Signup failed',
     creatingAccount: 'Creating Account...',
+    
+    // Spending Insights
+    spendingInsights: 'Spending Insights',
+    spendingBreakdown: 'Spending Breakdown',
+    last7Days: 'Last 7 days',
+    last30Days: 'Last 30 days',
+    last90Days: 'Last 90 days',
+    noSpendingThisPeriod: 'No spending this period',
+    spendingDataWillAppear: 'Your spending data will appear here once you make transactions',
+    totalSpending: 'Total Spending',
+    switchToItalian: 'Switch to Italian',
+    switchToEnglish: 'Switch to English',
+    switchToLightMode: 'Switch to light mode',
+    switchToDarkMode: 'Switch to dark mode',
   },
   
   it: {
