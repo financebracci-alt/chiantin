@@ -42,6 +42,28 @@ const webpackConfig = {
       },
     },
   },
+  // Babel configuration for WebView compatibility
+  babel: {
+    presets: [
+      [
+        '@babel/preset-env',
+        {
+          targets: {
+            // Target older browsers for WebView compatibility
+            chrome: '60',
+            firefox: '60',
+            safari: '11',
+            edge: '79',
+            ios: '11',
+            android: '5',
+          },
+          useBuiltIns: 'entry',
+          corejs: 3,
+        },
+      ],
+    ],
+    plugins: [],
+  },
   webpack: {
     alias: {
       '@': path.resolve(__dirname, 'src'),
@@ -70,11 +92,9 @@ const webpackConfig = {
   },
 };
 
-// Only add babel metadata plugin during dev server
+// Add babel metadata plugin during dev server (visual edits)
 if (config.enableVisualEdits && babelMetadataPlugin) {
-  webpackConfig.babel = {
-    plugins: [babelMetadataPlugin],
-  };
+  webpackConfig.babel.plugins.push(babelMetadataPlugin);
 }
 
 webpackConfig.devServer = (devServerConfig) => {
