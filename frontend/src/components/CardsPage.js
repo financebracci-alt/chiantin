@@ -159,7 +159,7 @@ export function CardsPage({ user, logout }) {
                           {/* Card Type Badge */}
                           <div className="absolute top-16 left-6">
                             <span className="text-white/60 text-xs font-medium uppercase tracking-widest">
-                              {card.card_type === 'VIRTUAL' ? 'Virtual Card' : 'Physical Card'}
+                              {card.card_type === 'VIRTUAL' ? t('virtualCard') : t('physicalCard')}
                             </span>
                           </div>
 
