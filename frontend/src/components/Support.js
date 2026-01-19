@@ -52,16 +52,16 @@ export function SupportTickets({ isAdmin = false }) {
   };
 
   if (loading) {
-    return <div className="text-center py-8"><div className="skeleton h-32 rounded-lg"></div></div>;
+    return <div className="text-center py-8"><div className={`skeleton h-32 rounded-lg ${isDark ? 'bg-gray-700' : ''}`}></div></div>;
   }
 
   return (
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
         <div>
-          <h2 className="text-2xl font-bold">Support Tickets</h2>
-          <p className="text-sm text-gray-600 mt-1">
-            {isAdmin ? 'Manage customer support requests' : 'Get help from our support team'}
+          <h2 className={`text-2xl font-bold ${isDark ? 'text-white' : 'text-gray-900'}`}>{t('supportTickets')}</h2>
+          <p className={`text-sm mt-1 ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
+            {isAdmin ? t('manageCustomerRequests') : t('getHelpFromSupport')}
           </p>
         </div>
         {!isAdmin && (
@@ -70,7 +70,7 @@ export function SupportTickets({ isAdmin = false }) {
             className="btn-primary text-sm px-4 py-2 whitespace-nowrap w-full sm:w-auto"
             data-testid="create-ticket-button"
           >
-            Create New Ticket
+            {t('createNewTicket')}
           </button>
         )}
       </div>
