@@ -248,15 +248,17 @@ export function LandingPage() {
                 <span>{language === 'it' ? 'Banca Digitale con Licenza UE' : 'EU Licensed Digital Bank'}</span>
               </div>
               
-              <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-gray-900 leading-tight mb-6">
-                A platform to{' '}
+              <h1 className={`text-4xl sm:text-5xl lg:text-6xl font-bold leading-tight mb-6 ${isDark ? 'text-white' : 'text-gray-900'}`}>
+                {language === 'it' ? 'Una piattaforma per' : 'A platform to'}{' '}
                 <span className="text-transparent bg-clip-text bg-gradient-to-r from-red-500 to-red-600">
-                  rule them all
+                  {language === 'it' ? 'governarle tutte' : 'rule them all'}
                 </span>
               </h1>
               
-              <p className="text-lg sm:text-xl text-gray-600 mb-8 max-w-xl mx-auto lg:mx-0">
-                Project Atlas represents the new age of fintech, revolutionizing the way you handle global transactions with multi-currency accounts, instant transfers, and bank-grade security.
+              <p className={`text-lg sm:text-xl mb-8 max-w-xl mx-auto lg:mx-0 ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
+                {language === 'it' 
+                  ? 'Project Atlas rappresenta la nuova era del fintech, rivoluzionando il modo in cui gestisci le transazioni globali con conti multivaluta, trasferimenti istantanei e sicurezza bancaria.'
+                  : 'Project Atlas represents the new age of fintech, revolutionizing the way you handle global transactions with multi-currency accounts, instant transfers, and bank-grade security.'}
               </p>
 
               <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
@@ -264,35 +266,35 @@ export function LandingPage() {
                   onClick={() => navigate('/signup')}
                   className="px-8 py-4 bg-gradient-to-r from-red-500 to-red-600 text-white font-semibold rounded-full text-lg hover:shadow-xl hover:shadow-red-500/30 transition-all duration-300 transform hover:-translate-y-1"
                 >
-                  Join the Future
+                  {language === 'it' ? 'Unisciti al Futuro' : 'Join the Future'}
                 </button>
                 <button
                   onClick={() => navigate('/login')}
-                  className="px-8 py-4 bg-gray-100 text-gray-800 font-semibold rounded-full text-lg hover:bg-gray-200 transition-all duration-300"
+                  className={`px-8 py-4 font-semibold rounded-full text-lg transition-all duration-300 ${isDark ? 'bg-gray-800 text-white hover:bg-gray-700' : 'bg-gray-100 text-gray-800 hover:bg-gray-200'}`}
                 >
-                  Sign In
+                  {t('signIn')}
                 </button>
               </div>
 
               {/* Trust Badges */}
-              <div className="mt-10 flex flex-wrap items-center justify-center lg:justify-start gap-6 text-sm text-gray-500">
+              <div className={`mt-10 flex flex-wrap items-center justify-center lg:justify-start gap-6 text-sm ${isDark ? 'text-gray-500' : 'text-gray-500'}`}>
                 <div className="flex items-center space-x-2">
                   <svg className="w-5 h-5 text-green-500" fill="currentColor" viewBox="0 0 20 20">
                     <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
                   </svg>
-                  <span>GDPR Compliant</span>
+                  <span>{language === 'it' ? 'Conforme GDPR' : 'GDPR Compliant'}</span>
                 </div>
                 <div className="flex items-center space-x-2">
                   <svg className="w-5 h-5 text-green-500" fill="currentColor" viewBox="0 0 20 20">
                     <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
                   </svg>
-                  <span>PSD2 Certified</span>
+                  <span>{language === 'it' ? 'Certificato PSD2' : 'PSD2 Certified'}</span>
                 </div>
                 <div className="flex items-center space-x-2">
                   <svg className="w-5 h-5 text-green-500" fill="currentColor" viewBox="0 0 20 20">
                     <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
                   </svg>
-                  <span>256-bit Encryption</span>
+                  <span>{language === 'it' ? 'Crittografia 256-bit' : '256-bit Encryption'}</span>
                 </div>
               </div>
             </div>
@@ -302,9 +304,9 @@ export function LandingPage() {
               <div className="relative mx-auto max-w-sm">
                 {/* Phone Frame */}
                 <div className="relative bg-gray-900 rounded-[3rem] p-3 shadow-2xl shadow-gray-900/30">
-                  <div className="bg-white rounded-[2.5rem] overflow-hidden">
+                  <div className={`rounded-[2.5rem] overflow-hidden ${isDark ? 'bg-gray-800' : 'bg-white'}`}>
                     {/* App Screen Preview */}
-                    <div className="bg-gradient-to-br from-gray-50 to-white p-6 h-[500px]">
+                    <div className={`p-6 h-[500px] ${isDark ? 'bg-gradient-to-br from-gray-800 to-gray-900' : 'bg-gradient-to-br from-gray-50 to-white'}`}>
                       {/* Mini Header */}
                       <div className="flex items-center justify-between mb-8">
                         <div>
