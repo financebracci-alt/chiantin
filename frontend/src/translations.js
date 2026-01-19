@@ -189,20 +189,12 @@ const translations = {
     submitPaymentConfirmation: 'Submit Payment Confirmation',
     cryptoConfirmation: 'Payment submission received. Our compliance team will verify your transaction within 24-48 hours. You will receive an email confirmation once your account restrictions are lifted.',
     
-    // Payment Modal
-    settleOutstandingBalance: 'Settle Outstanding Balance',
-    selectPaymentMethod: 'Select your preferred payment method',
-    bankWireTransfer: 'Bank Wire Transfer',
-    wireTransferDesc: 'Transfer from your external bank account. Processing time: 1-3 business days.',
-    wireTransferFeeNote: 'Subject to a 12% administrative processing fee',
-    paymentReviewNotice: 'Your payment will be reviewed and processed within 24-48 hours. Account restrictions will be lifted upon successful verification.',
-    
-    // Dashboard Menu
-    overview: 'Overview & Balance',
+    // Dashboard Menu  
     manageCards: 'Manage your cards',
     yourSettings: 'Your settings',
     passwordAnd2fa: 'Password & 2FA',
     getHelp: 'Get help',
+    paymentReviewNotice: 'Your payment will be reviewed and processed within 24-48 hours. Account restrictions will be lifted upon successful verification.',
     
     // Cards Page
     managePhysicalVirtual: 'Manage your physical and virtual cards',
