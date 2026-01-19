@@ -455,6 +455,9 @@ const translations = {
     totalSpending: 'Spesa Totale',
     viewFullBreakdown: 'Visualizza dettagli →',
     viewTransactions: 'Visualizza transazioni →',
+    viewAllTransactions: 'Visualizza tutte le transazioni →',
+    clickCardToShow: 'Clicca sulla carta per vedere i dettagli',
+    clickCardToHide: 'Clicca sulla carta per nascondere i dettagli',
     
     // Account Restricted / Tax Hold
     accountRestricted: 'Conto Limitato',
