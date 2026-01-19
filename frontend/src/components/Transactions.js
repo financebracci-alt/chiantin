@@ -1,8 +1,11 @@
 // Transaction Components
 import React, { useState, useEffect } from 'react';
 import api from '../api';
+import { useLanguage, useTheme } from '../contexts/AppContext';
 
 export function TransactionsList({ accountId, isAdmin = false }) {
+  const { t } = useLanguage();
+  const { isDark } = useTheme();
   const [transactions, setTransactions] = useState([]);
   const [filteredTransactions, setFilteredTransactions] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -88,7 +91,7 @@ export function TransactionsList({ accountId, isAdmin = false }) {
     const csvContent = [
       headers.join(','),
       ...rows.map(row => row.map(cell => `"${cell}"`).join(','))
-    ].join('\\n');
+    ].join('\n');
 
     const blob = new Blob([csvContent], { type: 'text/csv' });
     const url = window.URL.createObjectURL(blob);
@@ -97,10 +100,6 @@ export function TransactionsList({ accountId, isAdmin = false }) {
     a.download = `transactions_${accountId}_${new Date().toISOString().split('T')[0]}.csv`;
     a.click();
     window.URL.revokeObjectURL(url);
-  };
-
-  const formatAmount = (cents) => {
-    return `€${(cents / 100).toFixed(2)}`;
   };
 
   const formatDate = (dateStr) => {
@@ -118,86 +117,106 @@ export function TransactionsList({ accountId, isAdmin = false }) {
     return colors[type] || 'text-gray-600';
   };
 
+  const getTypeLabel = (type) => {
+    const labels = {
+      TOP_UP: t('topUp'),
+      WITHDRAW: t('withdraw'),
+      FEE: t('fee'),
+      TRANSFER: t('transfer'),
+      REVERSAL: t('reversal')
+    };
+    return labels[type] || type.replace('_', ' ');
+  };
+
+  const getStatusLabel = (status) => {
+    const labels = {
+      POSTED: t('posted'),
+      REVERSED: t('reversed'),
+      PENDING: t('pending')
+    };
+    return labels[status] || status;
+  };
+
   if (loading) {
-    return <div className="text-center py-8">Loading transactions...</div>;
+    return <div className={`text-center py-8 ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>{t('loadingTransactions')}</div>;
   }
 
   return (
     <div className="space-y-4">
       <div className="flex justify-between items-center">
-        <h3 className="text-lg font-semibold">Transaction History</h3>
+        <h3 className={`text-lg font-semibold ${isDark ? 'text-white' : 'text-gray-900'}`}>{t('transactionHistory')}</h3>
         {filteredTransactions.length > 0 && (
           <button
             onClick={exportToCSV}
-            className="px-4 py-2 border border-gray-300 rounded-md hover:bg-gray-50 text-sm"
+            className={`px-4 py-2 border rounded-md text-sm ${isDark ? 'border-gray-600 text-gray-300 hover:bg-gray-700' : 'border-gray-300 hover:bg-gray-50'}`}
             data-testid="export-csv"
           >
-            Export CSV
+            {t('exportCsv')}
           </button>
         )}
       </div>
 
       {/* Filters */}
-      <div className="bg-white rounded-lg shadow p-4">
+      <div className={`rounded-lg shadow p-4 ${isDark ? 'bg-gray-800' : 'bg-white'}`}>
         <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Type</label>
+            <label className={`block text-sm font-medium mb-1 ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>{t('type')}</label>
             <select
               value={filters.type}
               onChange={(e) => setFilters({ ...filters, type: e.target.value })}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
+              className={`w-full px-3 py-2 border rounded-md text-sm ${isDark ? 'bg-gray-700 border-gray-600 text-white' : 'border-gray-300'}`}
               data-testid="filter-type"
             >
-              <option value="all">All Types</option>
-              <option value="TOP_UP">Top Up</option>
-              <option value="WITHDRAW">Withdraw</option>
-              <option value="FEE">Fee</option>
-              <option value="TRANSFER">Transfer</option>
-              <option value="REVERSAL">Reversal</option>
+              <option value="all">{t('allTypes')}</option>
+              <option value="TOP_UP">{t('topUp')}</option>
+              <option value="WITHDRAW">{t('withdraw')}</option>
+              <option value="FEE">{t('fee')}</option>
+              <option value="TRANSFER">{t('transfer')}</option>
+              <option value="REVERSAL">{t('reversal')}</option>
             </select>
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Status</label>
+            <label className={`block text-sm font-medium mb-1 ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>{t('status')}</label>
             <select
               value={filters.status}
               onChange={(e) => setFilters({ ...filters, status: e.target.value })}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
+              className={`w-full px-3 py-2 border rounded-md text-sm ${isDark ? 'bg-gray-700 border-gray-600 text-white' : 'border-gray-300'}`}
               data-testid="filter-status"
             >
-              <option value="all">All Status</option>
-              <option value="POSTED">Posted</option>
-              <option value="REVERSED">Reversed</option>
-              <option value="PENDING">Pending</option>
+              <option value="all">{t('allStatus')}</option>
+              <option value="POSTED">{t('posted')}</option>
+              <option value="REVERSED">{t('reversed')}</option>
+              <option value="PENDING">{t('pending')}</option>
             </select>
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">From Date</label>
+            <label className={`block text-sm font-medium mb-1 ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>{t('fromDate')}</label>
             <input
               type="date"
               value={filters.dateFrom}
               onChange={(e) => setFilters({ ...filters, dateFrom: e.target.value })}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
+              className={`w-full px-3 py-2 border rounded-md text-sm ${isDark ? 'bg-gray-700 border-gray-600 text-white' : 'border-gray-300'}`}
               data-testid="filter-date-from"
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">To Date</label>
+            <label className={`block text-sm font-medium mb-1 ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>{t('toDate')}</label>
             <input
               type="date"
               value={filters.dateTo}
               onChange={(e) => setFilters({ ...filters, dateTo: e.target.value })}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
+              className={`w-full px-3 py-2 border rounded-md text-sm ${isDark ? 'bg-gray-700 border-gray-600 text-white' : 'border-gray-300'}`}
               data-testid="filter-date-to"
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Search</label>
+            <label className={`block text-sm font-medium mb-1 ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>{t('search')}</label>
             <input
               type="text"
               value={filters.search}
               onChange={(e) => setFilters({ ...filters, search: e.target.value })}
-              placeholder="ID or reason..."
-              className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm"
+              placeholder={t('idOrReason')}
+              className={`w-full px-3 py-2 border rounded-md text-sm ${isDark ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400' : 'border-gray-300'}`}
               data-testid="filter-search"
             />
           </div>
@@ -208,19 +227,19 @@ export function TransactionsList({ accountId, isAdmin = false }) {
             className="mt-3 text-sm text-blue-600 hover:text-blue-700"
             data-testid="clear-filters"
           >
-            Clear all filters
+            {t('clearAllFilters')}
           </button>
         )}
       </div>
       
       {filteredTransactions.length === 0 ? (
-        <div className="bg-white rounded-lg shadow p-8 text-center">
-          <p className="text-gray-600">
-            {transactions.length === 0 ? 'No transactions yet' : 'No transactions match your filters'}
+        <div className={`rounded-lg shadow p-8 text-center ${isDark ? 'bg-gray-800' : 'bg-white'}`}>
+          <p className={`${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
+            {transactions.length === 0 ? t('noTransactionsYet') : t('noTransactionsMatchFilters')}
           </p>
         </div>
       ) : (
-        <div className="bg-white rounded-lg shadow divide-y">
+        <div className={`rounded-lg shadow divide-y ${isDark ? 'bg-gray-800 divide-gray-700' : 'bg-white'}`}>
           {filteredTransactions.map((txn) => (
             <div
               key={txn.id}
@@ -228,29 +247,29 @@ export function TransactionsList({ accountId, isAdmin = false }) {
                 setSelectedTxn(txn);
                 setShowDetails(true);
               }}
-              className="p-4 hover:bg-gray-50 cursor-pointer"
+              className={`p-4 cursor-pointer ${isDark ? 'hover:bg-gray-700' : 'hover:bg-gray-50'}`}
               data-testid={`transaction-${txn.id}`}
             >
               <div className="flex justify-between items-start">
                 <div className="flex-1">
                   <div className="flex items-center space-x-2">
                     <span className={`font-medium ${getTypeColor(txn.transaction_type)}`}>
-                      {txn.transaction_type.replace('_', ' ')}
+                      {getTypeLabel(txn.transaction_type)}
                     </span>
                     <span className={`text-xs px-2 py-1 rounded ${
                       txn.status === 'POSTED' 
-                        ? 'bg-green-100 text-green-800'
+                        ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400'
                         : txn.status === 'REVERSED'
-                        ? 'bg-purple-100 text-purple-800'
-                        : 'bg-gray-100 text-gray-800'
+                        ? 'bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-400'
+                        : 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300'
                     }`}>
-                      {txn.status}
+                      {getStatusLabel(txn.status)}
                     </span>
                   </div>
                   {txn.reason && (
-                    <p className="text-sm text-gray-600 mt-1">{txn.reason}</p>
+                    <p className={`text-sm mt-1 ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>{txn.reason}</p>
                   )}
-                  <p className="text-xs text-gray-500 mt-1">
+                  <p className={`text-xs mt-1 ${isDark ? 'text-gray-500' : 'text-gray-500'}`}>
                     {formatDate(txn.created_at)}
                   </p>
                 </div>
@@ -263,7 +282,7 @@ export function TransactionsList({ accountId, isAdmin = false }) {
                   className="text-sm text-blue-600 hover:text-blue-700"
                   data-testid={`view-details-${txn.id}`}
                 >
-                  View Details →
+                  {t('viewDetailsArrow')}
                 </button>
               </div>
             </div>
@@ -286,31 +305,46 @@ export function TransactionsList({ accountId, isAdmin = false }) {
 }
 
 function TransactionDetailsModal({ transaction, onClose }) {
-  const [entries, setEntries] = useState([]);
+  const { t } = useLanguage();
+  const { isDark } = useTheme();
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // In a real implementation, fetch ledger entries for this transaction
-    // For now, we'll show the transaction details
     setLoading(false);
   }, [transaction]);
-
-  const formatAmount = (cents) => {
-    return `€${(cents / 100).toFixed(2)}`;
-  };
 
   const formatDate = (dateStr) => {
     return new Date(dateStr).toLocaleString();
   };
 
+  const getTypeLabel = (type) => {
+    const labels = {
+      TOP_UP: t('topUp'),
+      WITHDRAW: t('withdraw'),
+      FEE: t('fee'),
+      TRANSFER: t('transfer'),
+      REVERSAL: t('reversal')
+    };
+    return labels[type] || type.replace('_', ' ');
+  };
+
+  const getStatusLabel = (status) => {
+    const labels = {
+      POSTED: t('posted'),
+      REVERSED: t('reversed'),
+      PENDING: t('pending')
+    };
+    return labels[status] || status;
+  };
+
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-        <div className="sticky top-0 bg-white border-b p-6 flex justify-between items-center">
-          <h3 className="text-xl font-semibold">Transaction Details</h3>
+      <div className={`rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto ${isDark ? 'bg-gray-800' : 'bg-white'}`}>
+        <div className={`sticky top-0 border-b p-6 flex justify-between items-center ${isDark ? 'bg-gray-800 border-gray-700' : 'bg-white'}`}>
+          <h3 className={`text-xl font-semibold ${isDark ? 'text-white' : 'text-gray-900'}`}>{t('transactionDetails')}</h3>
           <button
             onClick={onClose}
-            className="text-gray-400 hover:text-gray-600"
+            className={`${isDark ? 'text-gray-400 hover:text-gray-200' : 'text-gray-400 hover:text-gray-600'}`}
             data-testid="close-modal"
           >
             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -322,80 +356,80 @@ function TransactionDetailsModal({ transaction, onClose }) {
         <div className="p-6 space-y-6">
           {/* Transaction Info */}
           <div>
-            <h4 className="font-semibold mb-3">Transaction Information</h4>
+            <h4 className={`font-semibold mb-3 ${isDark ? 'text-white' : 'text-gray-900'}`}>{t('transactionInformation')}</h4>
             <dl className="grid grid-cols-2 gap-4 text-sm">
               <div>
-                <dt className="text-gray-600">Transaction ID</dt>
-                <dd className="font-mono mt-1">{transaction.id}</dd>
+                <dt className={`${isDark ? 'text-gray-400' : 'text-gray-600'}`}>{t('transactionIdLabel')}</dt>
+                <dd className={`font-mono mt-1 ${isDark ? 'text-gray-200' : 'text-gray-900'}`}>{transaction.id}</dd>
               </div>
               <div>
-                <dt className="text-gray-600">Type</dt>
-                <dd className="font-medium mt-1">{transaction.transaction_type}</dd>
+                <dt className={`${isDark ? 'text-gray-400' : 'text-gray-600'}`}>{t('type')}</dt>
+                <dd className={`font-medium mt-1 ${isDark ? 'text-gray-200' : 'text-gray-900'}`}>{getTypeLabel(transaction.transaction_type)}</dd>
               </div>
               <div>
-                <dt className="text-gray-600">Status</dt>
+                <dt className={`${isDark ? 'text-gray-400' : 'text-gray-600'}`}>{t('status')}</dt>
                 <dd className="mt-1">
                   <span className={`px-2 py-1 rounded text-xs ${
                     transaction.status === 'POSTED' 
-                      ? 'bg-green-100 text-green-800'
+                      ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400'
                       : transaction.status === 'REVERSED'
-                      ? 'bg-purple-100 text-purple-800'
-                      : 'bg-gray-100 text-gray-800'
+                      ? 'bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-400'
+                      : 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300'
                   }`}>
-                    {transaction.status}
+                    {getStatusLabel(transaction.status)}
                   </span>
                 </dd>
               </div>
               <div>
-                <dt className="text-gray-600">Created</dt>
-                <dd className="mt-1">{formatDate(transaction.created_at)}</dd>
+                <dt className={`${isDark ? 'text-gray-400' : 'text-gray-600'}`}>{t('created')}</dt>
+                <dd className={`mt-1 ${isDark ? 'text-gray-200' : 'text-gray-900'}`}>{formatDate(transaction.created_at)}</dd>
               </div>
               {transaction.external_id && (
                 <div className="col-span-2">
-                  <dt className="text-gray-600">External ID</dt>
-                  <dd className="font-mono text-xs mt-1">{transaction.external_id}</dd>
+                  <dt className={`${isDark ? 'text-gray-400' : 'text-gray-600'}`}>{t('externalId')}</dt>
+                  <dd className={`font-mono text-xs mt-1 ${isDark ? 'text-gray-200' : 'text-gray-900'}`}>{transaction.external_id}</dd>
                 </div>
               )}
               {transaction.reason && (
                 <div className="col-span-2">
-                  <dt className="text-gray-600">Reason</dt>
-                  <dd className="mt-1">{transaction.reason}</dd>
+                  <dt className={`${isDark ? 'text-gray-400' : 'text-gray-600'}`}>{t('reason')}</dt>
+                  <dd className={`mt-1 ${isDark ? 'text-gray-200' : 'text-gray-900'}`}>{transaction.reason}</dd>
                 </div>
               )}
               {transaction.performed_by && (
                 <div>
-                  <dt className="text-gray-600">Performed By</dt>
-                  <dd className="font-mono text-xs mt-1">{transaction.performed_by}</dd>
+                  <dt className={`${isDark ? 'text-gray-400' : 'text-gray-600'}`}>{t('performedBy')}</dt>
+                  <dd className={`font-mono text-xs mt-1 ${isDark ? 'text-gray-200' : 'text-gray-900'}`}>{transaction.performed_by}</dd>
                 </div>
               )}
             </dl>
           </div>
 
           {/* Ledger Entries Info */}
-          <div className="border-t pt-6">
-            <h4 className="font-semibold mb-3">Double-Entry Ledger Details</h4>
-            <p className="text-sm text-gray-600 mb-4">
-              This transaction follows double-entry bookkeeping principles. Every transaction creates balanced debit and credit entries.
+          <div className={`border-t pt-6 ${isDark ? 'border-gray-700' : ''}`}>
+            <h4 className={`font-semibold mb-3 ${isDark ? 'text-white' : 'text-gray-900'}`}>{t('doubleEntryLedgerDetails')}</h4>
+            <p className={`text-sm mb-4 ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
+              {t('doubleEntryDesc')}
             </p>
-            <div className="bg-gray-50 rounded p-4 space-y-2 text-sm">
+            <div className={`rounded p-4 space-y-2 text-sm ${isDark ? 'bg-gray-700' : 'bg-gray-50'}`}>
               <div className="flex justify-between">
-                <span className="text-gray-600">Transaction Type:</span>
-                <span className="font-medium">{transaction.transaction_type}</span>
+                <span className={`${isDark ? 'text-gray-400' : 'text-gray-600'}`}>{t('transactionType')}:</span>
+                <span className={`font-medium ${isDark ? 'text-gray-200' : 'text-gray-900'}`}>{getTypeLabel(transaction.transaction_type)}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-gray-600">Status:</span>
-                <span className="font-medium">{transaction.status}</span>
+                <span className={`${isDark ? 'text-gray-400' : 'text-gray-600'}`}>{t('status')}:</span>
+                <span className={`font-medium ${isDark ? 'text-gray-200' : 'text-gray-900'}`}>{getStatusLabel(transaction.status)}</span>
               </div>
               {transaction.reverses_txn_id && (
-                <div className="flex justify-between border-t pt-2">
-                  <span className="text-gray-600">Reverses Transaction:</span>
-                  <span className="font-mono text-xs">{transaction.reverses_txn_id}</span>
+                <div className={`flex justify-between border-t pt-2 ${isDark ? 'border-gray-600' : ''}`}>
+                  <span className={`${isDark ? 'text-gray-400' : 'text-gray-600'}`}>{t('reversesTransaction')}:</span>
+                  <span className={`font-mono text-xs ${isDark ? 'text-gray-200' : 'text-gray-900'}`}>{transaction.reverses_txn_id}</span>
                 </div>
               )}
               {transaction.reversed_by_txn_id && (
-                <div className="flex justify-between border-t pt-2">
-                  <span className="text-gray-600">Reversed By:</span>
-                  <span className="font-mono text-xs">{transaction.reversed_by_txn_id}</span>
+                <div className={`flex justify-between border-t pt-2 ${isDark ? 'border-gray-600' : ''}`}>
+                  <span className={`${isDark ? 'text-gray-400' : 'text-gray-600'}`}>{t('reversedBy')}:</span>
+                  <span className={`font-mono text-xs ${isDark ? 'text-gray-200' : 'text-gray-900'}`}>{transaction.reversed_by_txn_id}</span>
                 </div>
               )}
             </div>
@@ -403,26 +437,26 @@ function TransactionDetailsModal({ transaction, onClose }) {
 
           {/* Actions */}
           {transaction.status === 'POSTED' && (
-            <div className="border-t pt-6">
-              <h4 className="font-semibold mb-3">Actions</h4>
+            <div className={`border-t pt-6 ${isDark ? 'border-gray-700' : ''}`}>
+              <h4 className={`font-semibold mb-3 ${isDark ? 'text-white' : 'text-gray-900'}`}>{t('actions')}</h4>
               <button
-                onClick={() => alert('Reversal feature requires admin privileges')}
-                className="px-4 py-2 border border-red-600 text-red-600 rounded hover:bg-red-50"
+                onClick={() => alert(t('reversalRequiresAdmin'))}
+                className="px-4 py-2 border border-red-600 text-red-600 rounded hover:bg-red-50 dark:hover:bg-red-900/20"
                 data-testid="request-reversal"
               >
-                Request Reversal
+                {t('requestReversal')}
               </button>
             </div>
           )}
         </div>
 
-        <div className="sticky bottom-0 bg-gray-50 border-t p-6">
+        <div className={`sticky bottom-0 border-t p-6 ${isDark ? 'bg-gray-700 border-gray-600' : 'bg-gray-50'}`}>
           <button
             onClick={onClose}
-            className="w-full py-2 bg-gray-600 text-white rounded hover:bg-gray-700"
+            className={`w-full py-2 rounded ${isDark ? 'bg-gray-600 text-white hover:bg-gray-500' : 'bg-gray-600 text-white hover:bg-gray-700'}`}
             data-testid="close-details"
           >
-            Close
+            {t('close')}
           </button>
         </div>
       </div>
