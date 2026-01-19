@@ -97,7 +97,7 @@ export function CardOrderingModal({ onClose, onSuccess }) {
                     </svg>
                   </div>
                   <div className={`text-left ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
-                    <p className="text-xs opacity-60 mb-1">Project Atlas</p>
+                    <p className="text-xs opacity-60 mb-1">ecommbx</p>
                     <div className="flex justify-end">
                       <p className="text-lg font-bold">VISA</p>
                     </div>
