@@ -12,7 +12,7 @@ from pathlib import Path
 logger = logging.getLogger(__name__)
 
 # Constants
-APP_NAME = "Project Atlas"
+APP_NAME = "ecommbx"
 FRONTEND_URL = "https://translatlas.preview.emergentagent.com"
 
 # Hardcode the API key since environment loading is problematic
