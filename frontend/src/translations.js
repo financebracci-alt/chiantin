@@ -636,6 +636,24 @@ const translations = {
     ref: 'Ref',
     sepaTransfer: 'SEPA Transfer',
     transaction: 'Transaction',
+    
+    // Time formatting
+    justNow: 'Just now',
+    minutesAgo: 'm ago',
+    hoursAgo: 'h ago',
+    daysAgo: 'd ago',
+    
+    // Notification content translations
+    notifCardReady: 'Your card is ready!',
+    notifCardReadyMessage: 'Your card has been issued and is ready to use.',
+    notifKycApproved: 'KYC Approved',
+    notifKycApprovedMessage: 'Your identity verification has been approved. You now have full access to all features.',
+    notifKycSubmitted: 'KYC Submitted',
+    notifKycSubmittedMessage: 'Your KYC application has been submitted and is under review.',
+    notifTransferComplete: 'Transfer Complete',
+    notifTransferCompleteMessage: 'Your transfer has been processed successfully.',
+    notifWelcome: 'Welcome to Project Atlas',
+    notifWelcomeMessage: 'Thank you for joining. Complete your KYC to unlock all features.',
   },
   
   it: {
