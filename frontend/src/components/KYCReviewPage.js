@@ -2,10 +2,16 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { NotificationBell } from './Notifications';
-import { APP_NAME } from '../config';
 import { useToast } from './Toast';
 import api from '../api';
 import { useLanguage, useTheme } from '../contexts/AppContext';
+
+// Styled Logo Component - displays "ecomm" with "bx" in red
+const StyledLogo = ({ isDark = false }) => (
+  <span className={isDark ? 'text-white' : 'text-gray-900'}>
+    ecomm<span className="text-red-500">bx</span>
+  </span>
+);
 
 export function KYCReviewPage({ user, logout }) {
   const navigate = useNavigate();
@@ -16,7 +22,7 @@ export function KYCReviewPage({ user, logout }) {
   return (
     <div className={`min-h-screen ${isDark ? 'bg-gray-900' : 'bg-white'}`}>
       <header className={`h-16 px-4 sm:px-6 flex items-center justify-between border-b ${isDark ? 'bg-gray-900 border-gray-800' : 'bg-white border-gray-200'}`}>
-        <h1 className={`text-lg font-semibold ${isDark ? 'text-white' : 'text-gray-900'}`}>{APP_NAME}</h1>
+        <h1 className={`text-lg font-semibold ${isDark ? 'text-white' : 'text-gray-900'}`}><StyledLogo isDark={isDark} /></h1>
         <div className="flex items-center space-x-4">
           <NotificationBell />
           <button onClick={logout} className={`text-sm ${isDark ? 'text-gray-400 hover:text-white' : 'text-gray-600 hover:text-gray-900'}`}>{t('logout')}</button>
