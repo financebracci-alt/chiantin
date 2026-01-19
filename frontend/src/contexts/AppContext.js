@@ -1,6 +1,6 @@
 // App Context - Language and Theme Management
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { translations } from './translations';
+import { translations } from '../translations';
 
 // Language Context
 const LanguageContext = createContext();
