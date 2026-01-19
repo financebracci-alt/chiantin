@@ -645,6 +645,10 @@ const translations = {
     back: 'Indietro',
     name: 'Nome',
     address: 'Indirizzo',
+    draft: 'Bozza',
+    loading: 'Caricamento...',
+    kycIdentityVerified: 'La tua identità è stata verificata',
+    kycFullAccess: 'Ora hai accesso completo a tutte le funzionalità bancarie.',
     
     // Profile
     profile: 'Profilo',
