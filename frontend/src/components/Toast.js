@@ -46,7 +46,7 @@ export function ToastProvider({ children }) {
 
 function ToastContainer({ toasts, onRemove }) {
   return (
-    <div className="fixed top-4 right-4 z-50 space-y-2" style={{ maxWidth: '400px' }}>
+    <div className="fixed top-4 right-4 z-[9999] space-y-2" style={{ maxWidth: '400px' }}>
       {toasts.map(toast => (
         <Toast key={toast.id} toast={toast} onRemove={onRemove} />
       ))}
