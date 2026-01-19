@@ -801,6 +801,9 @@ const translations = {
     success: 'Successo',
     warning: 'Avviso',
     
+    // PWA
+    installApp: 'Installa App',
+    
     // Auth
     signIn: 'Accedi',
     signUp: 'Registrati',
