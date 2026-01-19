@@ -8,7 +8,7 @@ export function MobileBottomTabs() {
 
   const tabs = [
     { path: '/dashboard', label: 'Home', icon: 'home' },
-    { path: '/accounts', label: 'Accounts', icon: 'wallet' },
+    { path: '/dashboard', label: 'Accounts', icon: 'wallet' },
     { path: '/support', label: 'Activity', icon: 'activity' },
     { path: '/profile', label: 'Profile', icon: 'user' }
   ];
