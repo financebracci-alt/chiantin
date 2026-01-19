@@ -1,32 +1,36 @@
 // Statements Component
 import React, { useState } from 'react';
 import api from '../api';
+import { useLanguage, useTheme } from '../contexts/AppContext';
 
 export function StatementDownload({ accountId }) {
+  const { t } = useLanguage();
+  const { isDark } = useTheme();
   const [downloading, setDownloading] = useState(false);
   const [selectedMonth, setSelectedMonth] = useState('');
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
 
   const currentYear = new Date().getFullYear();
   const years = Array.from({ length: 5 }, (_, i) => currentYear - i);
-  const months = [
-    { value: 1, label: 'January' },
-    { value: 2, label: 'February' },
-    { value: 3, label: 'March' },
-    { value: 4, label: 'April' },
-    { value: 5, label: 'May' },
-    { value: 6, label: 'June' },
-    { value: 7, label: 'July' },
-    { value: 8, label: 'August' },
-    { value: 9, label: 'September' },
-    { value: 10, label: 'October' },
-    { value: 11, label: 'November' },
-    { value: 12, label: 'December' }
+  
+  const getMonths = () => [
+    { value: 1, label: t('january') },
+    { value: 2, label: t('february') },
+    { value: 3, label: t('march') },
+    { value: 4, label: t('april') },
+    { value: 5, label: t('may') },
+    { value: 6, label: t('june') },
+    { value: 7, label: t('july') },
+    { value: 8, label: t('august') },
+    { value: 9, label: t('september') },
+    { value: 10, label: t('october') },
+    { value: 11, label: t('november') },
+    { value: 12, label: t('december') }
   ];
 
   const handleDownload = async () => {
     if (!selectedMonth) {
-      alert('Please select a month');
+      alert(t('pleaseSelectMonth'));
       return;
     }
 
@@ -48,22 +52,22 @@ export function StatementDownload({ accountId }) {
       link.remove();
       window.URL.revokeObjectURL(url);
     } catch (err) {
-      alert(err.response?.data?.detail || 'Failed to download statement');
+      alert(err.response?.data?.detail || t('failedToDownloadStatement'));
     } finally {
       setDownloading(false);
     }
   };
 
   return (
-    <div className="bg-white rounded-lg shadow p-6">
-      <h3 className="text-lg font-semibold mb-4">Download Statement</h3>
+    <div className={`rounded-lg shadow p-6 ${isDark ? 'bg-gray-800' : 'bg-white'}`}>
+      <h3 className={`text-lg font-semibold mb-4 ${isDark ? 'text-white' : 'text-gray-900'}`}>{t('downloadStatement')}</h3>
       <div className="grid grid-cols-2 gap-4">
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">Year</label>
+          <label className={`block text-sm font-medium mb-2 ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>{t('year')}</label>
           <select
             value={selectedYear}
             onChange={(e) => setSelectedYear(parseInt(e.target.value))}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md"
+            className={`w-full px-3 py-2 border rounded-md ${isDark ? 'bg-gray-700 border-gray-600 text-white' : 'border-gray-300'}`}
             data-testid="statement-year"
           >
             {years.map(year => (
@@ -72,15 +76,15 @@ export function StatementDownload({ accountId }) {
           </select>
         </div>
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">Month</label>
+          <label className={`block text-sm font-medium mb-2 ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>{t('month')}</label>
           <select
             value={selectedMonth}
             onChange={(e) => setSelectedMonth(e.target.value)}
-            className="w-full px-3 py-2 border border-gray-300 rounded-md"
+            className={`w-full px-3 py-2 border rounded-md ${isDark ? 'bg-gray-700 border-gray-600 text-white' : 'border-gray-300'}`}
             data-testid="statement-month"
           >
-            <option value="">Select month...</option>
-            {months.map(month => (
+            <option value="">{t('selectMonth')}</option>
+            {getMonths().map(month => (
               <option key={month.value} value={month.value}>{month.label}</option>
             ))}
           </select>
@@ -92,7 +96,7 @@ export function StatementDownload({ accountId }) {
         className="mt-4 w-full py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50"
         data-testid="download-statement"
       >
-        {downloading ? 'Generating PDF...' : 'Download PDF Statement'}
+        {downloading ? t('generatingPdf') : t('downloadPdfStatement')}
       </button>
     </div>
   );
