@@ -624,26 +624,53 @@ function KYCPage() {
 function SecurityPage() {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
+  const { t, language, setLanguage } = useLanguage();
+  const { isDark, toggleTheme } = useTheme();
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className={`min-h-screen ${isDark ? 'bg-gray-900' : 'bg-gray-50'}`}>
       {/* Header */}
-      <header className="bg-white shadow-sm">
+      <header className={`shadow-sm ${isDark ? 'bg-gray-800' : 'bg-white'}`}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center py-4">
-            <h1 className="text-2xl font-bold" style={{ fontFamily: 'Space Grotesk' }}>
+            <h1 className={`text-2xl font-bold ${isDark ? 'text-white' : 'text-gray-900'}`} style={{ fontFamily: 'Space Grotesk' }}>
               {APP_NAME}
             </h1>
             <div className="flex items-center space-x-4">
-              <span className="text-sm text-gray-600">
+              <span className={`text-sm ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
                 {user?.first_name} {user?.last_name}
               </span>
+              {/* Language Toggle */}
+              <button
+                onClick={() => setLanguage(language === 'en' ? 'it' : 'en')}
+                className={`flex items-center space-x-1 px-3 py-1.5 rounded-md text-sm font-medium transition ${isDark ? 'hover:bg-gray-700 text-gray-300' : 'hover:bg-gray-100 text-gray-700'}`}
+                title={language === 'en' ? 'Switch to Italian' : 'Passa a Inglese'}
+              >
+                <span className="text-base">{language === 'en' ? '🇬🇧' : '🇮🇹'}</span>
+                <span className="hidden sm:inline">{language === 'en' ? 'EN' : 'IT'}</span>
+              </button>
+              {/* Theme Toggle */}
+              <button
+                onClick={toggleTheme}
+                className={`p-2 rounded-md transition ${isDark ? 'hover:bg-gray-700 text-gray-300' : 'hover:bg-gray-100 text-gray-700'}`}
+                title={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
+              >
+                {isDark ? (
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+                  </svg>
+                ) : (
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+                  </svg>
+                )}
+              </button>
               <button
                 onClick={logout}
-                className="text-sm text-gray-600 hover:text-gray-900"
+                className={`text-sm ${isDark ? 'text-gray-400 hover:text-gray-200' : 'text-gray-600 hover:text-gray-900'}`}
                 data-testid="logout-button"
               >
-                Logout
+                {t('logout')}
               </button>
             </div>
           </div>
@@ -651,19 +678,19 @@ function SecurityPage() {
       </header>
 
       {/* Navigation Tabs */}
-      <div className="border-b border-gray-200 bg-white">
+      <div className={`border-b ${isDark ? 'border-gray-700 bg-gray-800' : 'border-gray-200 bg-white'}`}>
         <nav className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex space-x-8" aria-label="Tabs">
           <button
             onClick={() => navigate('/dashboard')}
-            className="py-4 px-1 border-b-2 border-transparent font-medium text-sm text-gray-500 hover:text-gray-700 hover:border-gray-300"
+            className={`py-4 px-1 border-b-2 border-transparent font-medium text-sm ${isDark ? 'text-gray-400 hover:text-gray-200 hover:border-gray-500' : 'text-gray-500 hover:text-gray-700 hover:border-gray-300'}`}
           >
-            Accounts
+            {t('accounts')}
           </button>
           <button
             onClick={() => navigate('/security')}
             className="py-4 px-1 border-b-2 border-blue-600 font-medium text-sm text-blue-600"
           >
-            Security
+            {t('securitySettings')}
           </button>
         </nav>
       </div>
