@@ -28,7 +28,6 @@ import { KYCReviewPage } from './components/KYCReviewPage';
 import { AdminTransfersQueue } from './components/AdminTransfersQueue';
 import { AdminAccountsControl } from './components/AdminAccountsControl';
 import { LandingPage } from './components/LandingPage';
-import { useLanguage, useTheme } from './contexts/AppContext';
 
 // Auth Context
 const AuthContext = React.createContext(null);
