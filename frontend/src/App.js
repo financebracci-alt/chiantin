@@ -265,8 +265,6 @@ function LoginPage() {
   const [loading, setLoading] = useState(false);
   const { login } = useAuth();
   const navigate = useNavigate();
-  const { t, language, setLanguage } = useLanguage();
-  const { isDark, toggleTheme } = useTheme();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -281,47 +279,21 @@ function LoginPage() {
         navigate('/admin');
       }
     } catch (err) {
-      setError(err.response?.data?.detail || t('loginFailed'));
+      setError(err.response?.data?.detail || 'Login failed');
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className={`min-h-screen flex items-center justify-center p-4 ${isDark ? 'bg-gray-900' : 'bg-white'}`}>
-      {/* Top right controls */}
-      <div className="fixed top-4 right-4 flex items-center space-x-2">
-        <button
-          onClick={() => setLanguage(language === 'en' ? 'it' : 'en')}
-          className={`p-2 rounded-lg transition ${isDark ? 'hover:bg-gray-800' : 'hover:bg-gray-100'}`}
-          title={language === 'en' ? 'Passa all\'Italiano' : 'Switch to English'}
-        >
-          <span className="text-lg font-medium">{language === 'en' ? 'EN' : 'IT'}</span>
-        </button>
-        <button
-          onClick={toggleTheme}
-          className={`p-2 rounded-lg transition ${isDark ? 'hover:bg-gray-800 text-yellow-400' : 'hover:bg-gray-100 text-gray-600'}`}
-          title={isDark ? t('lightMode') : t('darkMode')}
-        >
-          {isDark ? (
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
-            </svg>
-          ) : (
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
-            </svg>
-          )}
-        </button>
-      </div>
-      
+    <div className="min-h-screen bg-white flex items-center justify-center p-4">
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
-          <h1 className={`text-3xl font-semibold mb-2 ${isDark ? 'text-white' : 'text-gray-900'}`}>{APP_NAME}</h1>
-          <p className={`text-sm ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>{t('signInToAccount')}</p>
+          <h1 className="text-3xl font-semibold text-gray-900 mb-2">{APP_NAME}</h1>
+          <p className="text-sm text-gray-600">Sign in to your account</p>
         </div>
         
-        <div className={`card p-8 ${isDark ? 'bg-gray-800 border-gray-700' : ''}`}>
+        <div className="card p-8">
           <form onSubmit={handleSubmit} className="space-y-5">
             {error && (
               <div className="bg-red-50 border border-red-200 text-red-800 rounded-lg p-3 text-sm">
@@ -330,19 +302,19 @@ function LoginPage() {
             )}
             
             <div>
-              <label className={`block text-sm font-medium mb-2 ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>{t('email')}</label>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Email</label>
               <input
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
-                className={`input-field ${isDark ? 'bg-gray-700 border-gray-600 text-white' : ''}`}
+                className="input-field"
                 data-testid="email-input"
               />
             </div>
             
             <div>
-              <label className={`block text-sm font-medium mb-2 ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>{t('password')}</label>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Password</label>
               <input
                 type="password"
                 value={password}
@@ -359,23 +331,23 @@ function LoginPage() {
               className="w-full btn-primary"
               data-testid="login-button"
             >
-              {loading ? (t('loading')) : t('signIn')}
+              {loading ? 'Signing in...' : 'Sign in'}
             </button>
           </form>
 
-          <div className={`mt-6 pt-6 border-t text-center ${isDark ? 'border-gray-700' : 'border-gray-200'}`}>
-            <p className={`text-sm mb-4 ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
-              {t('dontHaveAccount')}{' '}
+          <div className="mt-6 pt-6 border-t border-gray-200 text-center">
+            <p className="text-sm text-gray-600 mb-4">
+              Don't have an account?{' '}
               <button
                 type="button"
                 onClick={() => navigate('/signup')}
                 className="font-medium text-red-600 hover:text-red-700"
                 data-testid="goto-signup"
               >
-                {t('createAccount')}
+                Create Account
               </button>
             </p>
-            <div className={`text-xs space-y-1 ${isDark ? 'text-gray-500' : 'text-gray-500'}`}>
+            <div className="text-xs text-gray-500 space-y-1">
               <p className="font-medium mb-1">Demo credentials:</p>
               <p>Customer: customer@demo.com / Demo@123456</p>
               <p>Admin: admin@atlas.local / Admin@123456</p>
