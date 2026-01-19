@@ -1,11 +1,14 @@
 // Project Atlas - Professional Landing Page (Inspired by ECOMMBANX)
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useLanguage, useTheme } from '../contexts/AppContext';
 
 export function LandingPage() {
   const navigate = useNavigate();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [activeSection, setActiveSection] = useState('');
+  const { t, language, setLanguage } = useLanguage();
+  const { isDark, toggleTheme } = useTheme();
 
   // Smooth scroll to section with animation
   const scrollToSection = (sectionId) => {
@@ -31,33 +34,33 @@ export function LandingPage() {
   const features = [
     {
       icon: '💳',
-      title: 'Personal e-Accounts',
-      description: 'Multi-currency accounts with EU IBAN, instant setup and full control',
+      title: language === 'it' ? 'Conti e-Personali' : 'Personal e-Accounts',
+      description: language === 'it' ? 'Conti multivaluta con IBAN UE, configurazione istantanea e controllo completo' : 'Multi-currency accounts with EU IBAN, instant setup and full control',
     },
     {
       icon: '🏢',
-      title: 'Business Accounts',
-      description: 'Dedicated business banking with treasury management tools',
+      title: language === 'it' ? 'Conti Aziendali' : 'Business Accounts',
+      description: language === 'it' ? 'Banking aziendale dedicato con strumenti di gestione della tesoreria' : 'Dedicated business banking with treasury management tools',
     },
     {
       icon: '💸',
-      title: 'Instant Transfers',
-      description: 'SEPA and international transfers with competitive rates',
+      title: language === 'it' ? 'Trasferimenti Istantanei' : 'Instant Transfers',
+      description: language === 'it' ? 'Trasferimenti SEPA e internazionali con tariffe competitive' : 'SEPA and international transfers with competitive rates',
     },
     {
       icon: '🎴',
-      title: 'Virtual & Physical Cards',
-      description: 'Visa debit cards for seamless payments worldwide',
+      title: language === 'it' ? 'Carte Virtuali e Fisiche' : 'Virtual & Physical Cards',
+      description: language === 'it' ? 'Carte di debito Visa per pagamenti senza problemi in tutto il mondo' : 'Visa debit cards for seamless payments worldwide',
     },
     {
       icon: '🔒',
-      title: 'Bank-Grade Security',
-      description: 'Multi-factor authentication and real-time fraud protection',
+      title: language === 'it' ? 'Sicurezza Bancaria' : 'Bank-Grade Security',
+      description: language === 'it' ? 'Autenticazione a più fattori e protezione antifrode in tempo reale' : 'Multi-factor authentication and real-time fraud protection',
     },
     {
       icon: '📊',
-      title: 'Smart Analytics',
-      description: 'Track spending, set budgets and gain financial insights',
+      title: language === 'it' ? 'Analisi Intelligenti' : 'Smart Analytics',
+      description: language === 'it' ? 'Monitora le spese, imposta budget e ottieni approfondimenti finanziari' : 'Track spending, set budgets and gain financial insights',
     },
   ];
 
