@@ -39,7 +39,7 @@ const translations = {
     // Landing Page
     heroTitle: 'A platform to',
     heroTitleHighlight: 'rule them all',
-    heroSubtitle: 'Project Atlas represents the new age of fintech, revolutionizing the way you handle global transactions with multi-currency accounts, instant transfers, and bank-grade security.',
+    heroSubtitle: 'ecommbx represents the new age of fintech, revolutionizing the way you handle global transactions with multi-currency accounts, instant transfers, and bank-grade security.',
     getStarted: 'Get Started',
     joinTheFuture: 'Join the Future',
     learnMore: 'Learn More',
