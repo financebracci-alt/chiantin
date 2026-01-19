@@ -1,48 +1,7 @@
 // PWA Install Hook - Handles the beforeinstallprompt event
 // With safe error handling for restricted browser environments (Telegram, Facebook, etc.)
 import { useState, useEffect, useCallback } from 'react';
-
-// Detect if running in a restricted in-app browser
-const isRestrictedBrowser = () => {
-  try {
-    const ua = navigator.userAgent || '';
-    const isInAppBrowser = 
-      ua.includes('FBAN') || // Facebook App
-      ua.includes('FBAV') || // Facebook App
-      ua.includes('Instagram') ||
-      ua.includes('Twitter') ||
-      ua.includes('TelegramBot') ||
-      ua.includes('Telegram') ||
-      ua.includes('Line/') ||
-      ua.includes('KAKAOTALK') ||
-      ua.includes('WhatsApp') ||
-      ua.includes('Snapchat') ||
-      // Check for generic WebView indicators
-      (ua.includes('wv') && ua.includes('Android')) ||
-      // Telegram WebView detection
-      (window.TelegramWebviewProxy !== undefined) ||
-      (window.Telegram !== undefined);
-    
-    return isInAppBrowser;
-  } catch (e) {
-    // If we can't check, assume it's safe
-    return false;
-  }
-};
-
-// Check if PWA features are supported
-const isPWASupported = () => {
-  try {
-    return (
-      typeof window !== 'undefined' &&
-      'serviceWorker' in navigator &&
-      'addEventListener' in window &&
-      !isRestrictedBrowser()
-    );
-  } catch (e) {
-    return false;
-  }
-};
+import { isRestrictedBrowser, shouldEnableServiceWorker } from '@/utils/webview-compat';
 
 export function usePWAInstall() {
   const [deferredPrompt, setDeferredPrompt] = useState(null);
@@ -50,8 +9,14 @@ export function usePWAInstall() {
   const [isInstalled, setIsInstalled] = useState(false);
 
   useEffect(() => {
+    // Skip if in a restricted browser environment
+    if (isRestrictedBrowser()) {
+      console.log('[PWA] In-app browser detected, skipping PWA install features');
+      return;
+    }
+
     // Skip if PWA is not supported in this environment
-    if (!isPWASupported()) {
+    if (!shouldEnableServiceWorker()) {
       console.log('[PWA] PWA features not supported in this browser environment');
       return;
     }
