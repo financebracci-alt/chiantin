@@ -138,6 +138,10 @@ const translations = {
     orderCard: 'Order Card',
     manageCards: 'Manage Cards',
     myCards: 'My Cards',
+    thisMonth: 'This Month',
+    totalSpending: 'Total Spending',
+    viewFullBreakdown: 'View full breakdown →',
+    viewTransactions: 'View transactions →',
     
     // Account Restricted / Tax Hold
     accountRestricted: 'Account Restricted',
