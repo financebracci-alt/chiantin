@@ -670,19 +670,19 @@ export function ProfessionalDashboard({ user, logout }) {
                     >
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2">
-                          <p className="text-sm font-medium text-gray-900 truncate">{displayType}</p>
+                          <p className="text-sm font-medium text-gray-900 truncate">{displayType === 'SEPA Transfer' ? t('sepaTransfer') : displayType}</p>
                           <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                           </svg>
                         </div>
                         {senderName && (
-                          <p className="text-xs text-gray-600">From: {senderName}</p>
+                          <p className="text-xs text-gray-600">{t('from')}: {senderName}</p>
                         )}
                         {description && (
                           <p className="text-xs text-gray-500 truncate">{description}</p>
                         )}
                         {reference && (
-                          <p className="text-xs text-gray-400 font-mono">Ref: {reference}</p>
+                          <p className="text-xs text-gray-400 font-mono">{t('ref')}: {reference}</p>
                         )}
                         {!senderName && !description && (
                           <p className="text-xs text-gray-500">{formatDate(txn.created_at)}</p>
