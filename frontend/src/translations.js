@@ -1269,6 +1269,17 @@ const translations = {
     switchToEnglish: 'Passa a Inglese',
     switchToLightMode: 'Passa a modalità chiara',
     switchToDarkMode: 'Passa a modalità scura',
+    
+    // Transaction Details
+    dateAndTime: 'Data e Ora',
+    from: 'Da',
+    senderIban: 'IBAN Mittente',
+    recipientIban: 'IBAN Destinatario',
+    bic: 'BIC',
+    reference: 'Riferimento',
+    ref: 'Rif',
+    sepaTransfer: 'Trasferimento SEPA',
+    transaction: 'Transazione',
   }
 };
 
