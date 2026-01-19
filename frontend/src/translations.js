@@ -66,7 +66,7 @@ const translations = {
     protected: 'Protected',
     
     // Features
-    whyChooseAtlas: 'Why choose Project Atlas',
+    whyChooseAtlas: 'Why choose ecommbx',
     whyChooseDesc: 'Because we know that innovative technology is only as good as the service that accompanies it — the 24/7 Atlas service.',
     // Account Types
     eurEAccount: 'EUR e-Account',
