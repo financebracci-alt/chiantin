@@ -287,6 +287,15 @@ const translations = {
     demoCredentials: 'Demo credentials',
     customer: 'Customer',
     admin: 'Admin',
+    
+    // Additional Auth
+    phone: 'Phone',
+    optional: 'Optional',
+    passwordsDoNotMatch: 'Passwords do not match',
+    passwordMinLength: 'Minimum 8 characters',
+    accountCreatedSuccess: 'Account created successfully! You can now login.',
+    signupFailed: 'Signup failed',
+    creatingAccount: 'Creating Account...',
   },
   
   it: {
