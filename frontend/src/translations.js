@@ -882,6 +882,7 @@ const translations = {
     currentBalance: 'Saldo Attuale',
     accountReference: 'Riferimento conto (per assistenza)',
     ibanCopied: 'IBAN copiato!',
+    copied: 'Copiato!',
     accountNotFound: 'Conto non trovato',
     
     // Transactions
