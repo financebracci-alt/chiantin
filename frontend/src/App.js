@@ -268,6 +268,8 @@ function LoginPage() {
   const [loading, setLoading] = useState(false);
   const { login } = useAuth();
   const navigate = useNavigate();
+  const { t } = useLanguage();
+  const { isDark } = useTheme();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -282,48 +284,48 @@ function LoginPage() {
         navigate('/admin');
       }
     } catch (err) {
-      setError(err.response?.data?.detail || 'Login failed');
+      setError(err.response?.data?.detail || t('loginFailed'));
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen bg-white flex items-center justify-center p-4">
+    <div className={`min-h-screen flex items-center justify-center p-4 ${isDark ? 'bg-gray-900' : 'bg-white'}`}>
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
-          <h1 className="text-3xl font-semibold text-gray-900 mb-2">{APP_NAME}</h1>
-          <p className="text-sm text-gray-600">Sign in to your account</p>
+          <h1 className={`text-3xl font-semibold mb-2 ${isDark ? 'text-white' : 'text-gray-900'}`}>{APP_NAME}</h1>
+          <p className={`text-sm ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>{t('signInToAccount')}</p>
         </div>
         
-        <div className="card p-8">
+        <div className={`rounded-xl p-8 ${isDark ? 'bg-gray-800 border border-gray-700' : 'bg-white shadow-lg border border-gray-100'}`}>
           <form onSubmit={handleSubmit} className="space-y-5">
             {error && (
-              <div className="bg-red-50 border border-red-200 text-red-800 rounded-lg p-3 text-sm">
+              <div className={`rounded-lg p-3 text-sm ${isDark ? 'bg-red-900/30 border border-red-800 text-red-400' : 'bg-red-50 border border-red-200 text-red-800'}`}>
                 {error}
               </div>
             )}
             
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Email</label>
+              <label className={`block text-sm font-medium mb-2 ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>{t('email')}</label>
               <input
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
-                className="input-field"
+                className={`w-full px-4 py-3 rounded-lg border focus:ring-2 focus:ring-red-500 focus:border-red-500 transition ${isDark ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400' : 'bg-white border-gray-300 text-gray-900'}`}
                 data-testid="email-input"
               />
             </div>
             
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Password</label>
+              <label className={`block text-sm font-medium mb-2 ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>{t('password')}</label>
               <input
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
-                className="input-field"
+                className={`w-full px-4 py-3 rounded-lg border focus:ring-2 focus:ring-red-500 focus:border-red-500 transition ${isDark ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400' : 'bg-white border-gray-300 text-gray-900'}`}
                 data-testid="password-input"
               />
             </div>
@@ -331,29 +333,29 @@ function LoginPage() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full btn-primary"
+              className="w-full py-3 px-4 bg-gradient-to-r from-red-500 to-red-600 text-white font-semibold rounded-lg hover:shadow-lg hover:shadow-red-500/30 transition-all duration-300 disabled:opacity-50"
               data-testid="login-button"
             >
-              {loading ? 'Signing in...' : 'Sign in'}
+              {loading ? t('signingIn') : t('signIn')}
             </button>
           </form>
 
-          <div className="mt-6 pt-6 border-t border-gray-200 text-center">
-            <p className="text-sm text-gray-600 mb-4">
-              Don't have an account?{' '}
+          <div className={`mt-6 pt-6 border-t text-center ${isDark ? 'border-gray-700' : 'border-gray-200'}`}>
+            <p className={`text-sm mb-4 ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
+              {t('dontHaveAccount')}{' '}
               <button
                 type="button"
                 onClick={() => navigate('/signup')}
-                className="font-medium text-red-600 hover:text-red-700"
+                className="font-medium text-red-500 hover:text-red-600"
                 data-testid="goto-signup"
               >
-                Create Account
+                {t('createAccount')}
               </button>
             </p>
-            <div className="text-xs text-gray-500 space-y-1">
-              <p className="font-medium mb-1">Demo credentials:</p>
-              <p>Customer: customer@demo.com / Demo@123456</p>
-              <p>Admin: admin@atlas.local / Admin@123456</p>
+            <div className={`text-xs space-y-1 ${isDark ? 'text-gray-500' : 'text-gray-500'}`}>
+              <p className="font-medium mb-1">{t('demoCredentials')}:</p>
+              <p>{t('customer')}: customer@demo.com / Demo@123456</p>
+              <p>{t('admin')}: admin@atlas.local / Admin@123456</p>
             </div>
           </div>
         </div>
