@@ -566,7 +566,7 @@ export function LandingPage() {
       </section>
 
       {/* Footer */}
-      <footer className="bg-gray-900 text-gray-400 py-16">
+      <footer className={`py-16 ${isDark ? 'bg-gray-950 text-gray-400' : 'bg-gray-900 text-gray-400'}`}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid md:grid-cols-4 gap-10">
             <div>
@@ -577,39 +577,39 @@ export function LandingPage() {
                 <span className="text-xl font-bold text-white">Project Atlas</span>
               </div>
               <p className="text-sm">
-                EU Licensed Digital Banking Platform. Revolutionizing the way you handle global transactions.
+                {t('footerDesc')}
               </p>
             </div>
             <div>
-              <h4 className="text-white font-semibold mb-4">Products</h4>
+              <h4 className="text-white font-semibold mb-4">{t('products')}</h4>
               <ul className="space-y-2 text-sm">
-                <li><a href="#" className="hover:text-white transition">Personal Accounts</a></li>
-                <li><a href="#" className="hover:text-white transition">Business Accounts</a></li>
-                <li><a href="#" className="hover:text-white transition">Cards</a></li>
-                <li><a href="#" className="hover:text-white transition">Transfers</a></li>
+                <li><a href="#" className="hover:text-white transition">{t('personalAccounts')}</a></li>
+                <li><a href="#" className="hover:text-white transition">{t('businessAccounts')}</a></li>
+                <li><a href="#" className="hover:text-white transition">{t('cards')}</a></li>
+                <li><a href="#" className="hover:text-white transition">{t('transfers')}</a></li>
               </ul>
             </div>
             <div>
-              <h4 className="text-white font-semibold mb-4">Company</h4>
+              <h4 className="text-white font-semibold mb-4">{t('company')}</h4>
               <ul className="space-y-2 text-sm">
-                <li><a href="#" className="hover:text-white transition">About Us</a></li>
-                <li><a href="#" className="hover:text-white transition">Careers</a></li>
-                <li><a href="#" className="hover:text-white transition">Press</a></li>
-                <li><a href="#" className="hover:text-white transition">Contact</a></li>
+                <li><a href="#" className="hover:text-white transition">{t('aboutUs')}</a></li>
+                <li><a href="#" className="hover:text-white transition">{t('careers')}</a></li>
+                <li><a href="#" className="hover:text-white transition">{t('press')}</a></li>
+                <li><a href="#" className="hover:text-white transition">{t('contact')}</a></li>
               </ul>
             </div>
             <div>
-              <h4 className="text-white font-semibold mb-4">Legal</h4>
+              <h4 className="text-white font-semibold mb-4">{t('legal')}</h4>
               <ul className="space-y-2 text-sm">
-                <li><a href="#" className="hover:text-white transition">Privacy Policy</a></li>
-                <li><a href="#" className="hover:text-white transition">Terms of Service</a></li>
-                <li><a href="#" className="hover:text-white transition">Cookie Policy</a></li>
-                <li><a href="#" className="hover:text-white transition">Compliance</a></li>
+                <li><a href="#" className="hover:text-white transition">{t('privacyPolicy')}</a></li>
+                <li><a href="#" className="hover:text-white transition">{t('termsOfService')}</a></li>
+                <li><a href="#" className="hover:text-white transition">{t('cookiePolicy')}</a></li>
+                <li><a href="#" className="hover:text-white transition">{t('compliance')}</a></li>
               </ul>
             </div>
           </div>
-          <div className="border-t border-gray-800 mt-12 pt-8 text-sm text-center">
-            <p>© 2026 Project Atlas. All rights reserved. Licensed by the European Banking Authority.</p>
+          <div className={`border-t mt-12 pt-8 text-sm text-center ${isDark ? 'border-gray-800' : 'border-gray-800'}`}>
+            <p>© 2026 Project Atlas. {t('allRightsReserved')} {t('licensedBy')}</p>
           </div>
         </div>
       </footer>
