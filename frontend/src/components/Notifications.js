@@ -230,20 +230,20 @@ export function NotificationBell() {
           {/* Mobile: Full-width centered dropdown */}
           <div className="sm:hidden fixed left-4 right-4 top-16 bg-white rounded-lg shadow-xl border border-gray-200 z-20 overflow-hidden max-h-[70vh]">
             <div className="p-4 border-b bg-gray-50 flex justify-between items-center sticky top-0">
-              <h3 className="font-semibold text-gray-900">Notifications</h3>
+              <h3 className="font-semibold text-gray-900">{t('notifications')}</h3>
               {unreadCount > 0 && (
                 <button
                   onClick={markAllAsRead}
                   className="text-sm text-red-600 hover:text-red-700 font-medium"
                 >
-                  Mark all read
+                  {t('markAllRead')}
                 </button>
               )}
             </div>
             <div className="overflow-y-auto max-h-[calc(70vh-56px)]">
               {notifications.length === 0 ? (
                 <div className="p-8 text-center text-gray-600">
-                  <p>No notifications</p>
+                  <p>{t('noNotifications')}</p>
                 </div>
               ) : (
                 notifications.slice(0, 10).map((notif) => (
