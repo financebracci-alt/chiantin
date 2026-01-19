@@ -126,19 +126,19 @@ export function SupportTickets({ isAdmin = false }) {
                     onClick={() => setSelectedTicket(ticket)}
                     className={`p-4 cursor-pointer hover-blue-bg ${
                       selectedTicket?.id === ticket.id ? 'bg-blue-50' : ''
-                    }`}
+                    } ${isDark ? 'hover:bg-gray-700' : ''}`}
                     data-testid={`ticket-${ticket.id}`}
                   >
-                    <p className="font-medium">{ticket.subject}</p>
+                    <p className={`font-medium ${isDark ? 'text-white' : 'text-gray-900'}`}>{ticket.subject}</p>
                     <div className="flex items-center justify-between mt-2">
-                      <TicketStatusBadge status={ticket.status} />
-                      <span className="text-xs text-gray-500">
+                      <TicketStatusBadge status={ticket.status} t={t} />
+                      <span className={`text-xs ${isDark ? 'text-gray-500' : 'text-gray-500'}`}>
                         {new Date(ticket.updated_at).toLocaleDateString()}
                       </span>
                     </div>
                     {ticket.messages && ticket.messages.length > 1 && (
-                      <p className="text-xs text-gray-500 mt-1">
-                        {ticket.messages.length} message(s)
+                      <p className={`text-xs mt-1 ${isDark ? 'text-gray-500' : 'text-gray-500'}`}>
+                        {ticket.messages.length} {t('ticketCount')}
                       </p>
                     )}
                   </div>
@@ -156,8 +156,8 @@ export function SupportTickets({ isAdmin = false }) {
                 isAdmin={isAdmin}
               />
             ) : (
-              <div className="card-blue-accent p-12 text-center">
-                <p className="text-gray-600">Select a ticket to view details</p>
+              <div className={`card-blue-accent p-12 text-center ${isDark ? 'bg-gray-800 border-gray-700' : ''}`}>
+                <p className={isDark ? 'text-gray-400' : 'text-gray-600'}>{t('selectTicketToView')}</p>
               </div>
             )}
           </div>
