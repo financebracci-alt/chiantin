@@ -154,17 +154,17 @@ export function ProfessionalDashboard({ user, logout }) {
       {/* Payment Modal */}
       {showPaymentModal && taxHoldStatus?.is_blocked && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4" onClick={() => { setShowPaymentModal(false); setSelectedPaymentMethod(null); }}>
-          <div className="bg-white rounded-2xl max-w-lg w-full max-h-[90vh] overflow-y-auto shadow-2xl" onClick={(e) => e.stopPropagation()}>
+          <div className={`rounded-2xl max-w-lg w-full max-h-[90vh] overflow-y-auto shadow-2xl ${isDark ? 'bg-gray-800' : 'bg-white'}`} onClick={(e) => e.stopPropagation()}>
             {/* Modal Header */}
-            <div className="p-6 border-b border-gray-100">
+            <div className={`p-6 border-b ${isDark ? 'border-gray-700' : 'border-gray-100'}`}>
               <div className="flex justify-between items-start">
                 <div>
-                  <h2 className="text-xl font-semibold text-gray-900">Settle Outstanding Balance</h2>
-                  <p className="text-sm text-gray-500 mt-1">Select your preferred payment method</p>
+                  <h2 className={`text-xl font-semibold ${isDark ? 'text-white' : 'text-gray-900'}`}>{t('settleOutstandingBalance')}</h2>
+                  <p className={`text-sm mt-1 ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>{t('selectPaymentMethod')}</p>
                 </div>
                 <button 
                   onClick={() => { setShowPaymentModal(false); setSelectedPaymentMethod(null); }}
-                  className="text-gray-400 hover:text-gray-600 transition-colors"
+                  className={`transition-colors ${isDark ? 'text-gray-500 hover:text-gray-300' : 'text-gray-400 hover:text-gray-600'}`}
                 >
                   <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -179,24 +179,24 @@ export function ProfessionalDashboard({ user, logout }) {
                 {/* Bank Wire Option */}
                 <button
                   onClick={() => setSelectedPaymentMethod('wire')}
-                  className="w-full p-4 border-2 border-gray-200 rounded-xl hover:border-red-500 hover:bg-red-50/30 transition-all text-left group"
+                  className={`w-full p-4 border-2 rounded-xl hover:border-red-500 transition-all text-left group ${isDark ? 'border-gray-700 hover:bg-red-900/20' : 'border-gray-200 hover:bg-red-50/30'}`}
                   data-testid="wire-transfer-option"
                 >
                   <div className="flex items-start space-x-4">
-                    <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0 group-hover:bg-blue-200 transition-colors">
+                    <div className={`w-12 h-12 rounded-full flex items-center justify-center flex-shrink-0 transition-colors ${isDark ? 'bg-blue-900/30 group-hover:bg-blue-900/50' : 'bg-blue-100 group-hover:bg-blue-200'}`}>
                       <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
                       </svg>
                     </div>
                     <div className="flex-1">
                       <div className="flex justify-between items-start">
-                        <h3 className="font-semibold text-gray-900">Bank Wire Transfer</h3>
+                        <h3 className={`font-semibold ${isDark ? 'text-white' : 'text-gray-900'}`}>{t('bankWireTransfer')}</h3>
                         <span className="text-xs bg-amber-100 text-amber-700 px-2 py-1 rounded-full font-medium">12% Fee</span>
                       </div>
-                      <p className="text-sm text-gray-500 mt-1">
-                        Transfer from your external bank account. Processing time: 1-3 business days.
+                      <p className={`text-sm mt-1 ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>
+                        {t('wireTransferDesc')}
                       </p>
-                      <p className="text-xs text-gray-400 mt-2">Subject to a 12% administrative processing fee</p>
+                      <p className={`text-xs mt-2 ${isDark ? 'text-gray-500' : 'text-gray-400'}`}>{t('wireTransferFeeNote')}</p>
                     </div>
                   </div>
                 </button>
@@ -204,31 +204,31 @@ export function ProfessionalDashboard({ user, logout }) {
                 {/* Cryptocurrency Option */}
                 <button
                   onClick={() => setSelectedPaymentMethod('crypto')}
-                  className="w-full p-4 border-2 border-gray-200 rounded-xl hover:border-red-500 hover:bg-red-50/30 transition-all text-left group"
+                  className={`w-full p-4 border-2 rounded-xl hover:border-red-500 transition-all text-left group ${isDark ? 'border-gray-700 hover:bg-red-900/20' : 'border-gray-200 hover:bg-red-50/30'}`}
                   data-testid="crypto-option"
                 >
                   <div className="flex items-start space-x-4">
-                    <div className="w-12 h-12 bg-orange-100 rounded-full flex items-center justify-center flex-shrink-0 group-hover:bg-orange-200 transition-colors">
+                    <div className={`w-12 h-12 rounded-full flex items-center justify-center flex-shrink-0 transition-colors ${isDark ? 'bg-orange-900/30 group-hover:bg-orange-900/50' : 'bg-orange-100 group-hover:bg-orange-200'}`}>
                       <svg className="w-6 h-6 text-orange-600" viewBox="0 0 24 24" fill="currentColor">
                         <path d="M23.638 14.904c-1.602 6.43-8.113 10.34-14.542 8.736C2.67 22.05-1.244 15.525.362 9.105 1.962 2.67 8.475-1.243 14.9.358c6.43 1.605 10.342 8.115 8.738 14.546zm-6.35-4.613c.24-1.59-.974-2.45-2.64-3.03l.54-2.153-1.315-.33-.525 2.107c-.345-.087-.705-.167-1.064-.25l.526-2.127-1.32-.33-.54 2.165c-.285-.067-.565-.132-.84-.2l-1.815-.45-.35 1.407s.975.225.955.238c.535.136.63.486.615.766l-1.477 5.92c-.075.166-.24.406-.614.314.015.02-.96-.24-.96-.24l-.66 1.51 1.71.426.93.242-.54 2.19 1.32.327.54-2.17c.36.1.705.19 1.05.273l-.51 2.154 1.32.33.545-2.19c2.24.427 3.93.257 4.64-1.774.57-1.637-.03-2.58-1.217-3.196.854-.193 1.5-.76 1.68-1.93h.01zm-3.01 4.22c-.404 1.64-3.157.75-4.05.53l.72-2.9c.896.23 3.757.67 3.33 2.37zm.41-4.24c-.37 1.49-2.662.735-3.405.55l.654-2.64c.744.18 3.137.52 2.75 2.084v.006z"/>
                       </svg>
                     </div>
                     <div className="flex-1">
                       <div className="flex justify-between items-start">
-                        <h3 className="font-semibold text-gray-900">Cryptocurrency</h3>
+                        <h3 className={`font-semibold ${isDark ? 'text-white' : 'text-gray-900'}`}>{t('cryptocurrency')}</h3>
                         <span className="text-xs bg-green-100 text-green-700 px-2 py-1 rounded-full font-medium">0% Fee</span>
                       </div>
-                      <p className="text-sm text-gray-500 mt-1">
-                        Pay with Bitcoin (BTC). Instant confirmation upon network verification.
+                      <p className={`text-sm mt-1 ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>
+                        {t('cryptoDesc')}
                       </p>
-                      <p className="text-xs text-gray-400 mt-2">No processing fees applied</p>
+                      <p className={`text-xs mt-2 ${isDark ? 'text-gray-500' : 'text-gray-400'}`}>{t('noProcessingFees')}</p>
                     </div>
                   </div>
                 </button>
 
-                <div className="mt-4 p-3 bg-gray-50 rounded-lg">
-                  <p className="text-xs text-gray-500 text-center">
-                    Your payment will be reviewed and processed within 24-48 hours. Account restrictions will be lifted upon successful verification.
+                <div className={`mt-4 p-3 rounded-lg ${isDark ? 'bg-gray-700/50' : 'bg-gray-50'}`}>
+                  <p className={`text-xs text-center ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>
+                    {t('paymentReviewNotice') || 'Your payment will be reviewed and processed within 24-48 hours. Account restrictions will be lifted upon successful verification.'}
                   </p>
                 </div>
               </div>
