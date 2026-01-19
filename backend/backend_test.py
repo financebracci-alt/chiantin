@@ -5,7 +5,7 @@ import sys
 from datetime import datetime
 
 class AtlasBankingAPITester:
-    def __init__(self, base_url="https://lang-theme-atlas.preview.emergentagent.com"):
+    def __init__(self, base_url="https://atlas-dark-mode.preview.emergentagent.com"):
         self.base_url = base_url
         self.customer_token = None
         self.admin_token = None

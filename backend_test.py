@@ -8,8 +8,8 @@ import sys
 from datetime import datetime
 
 # Backend URL from environment
-BASE_URL = "https://lang-theme-atlas.preview.emergentagent.com/api/v1"
-HEALTH_URL = "https://lang-theme-atlas.preview.emergentagent.com/api/health"
+BASE_URL = "https://atlas-dark-mode.preview.emergentagent.com/api/v1"
+HEALTH_URL = "https://atlas-dark-mode.preview.emergentagent.com/api/health"
 
 # Demo credentials
 CUSTOMER_EMAIL = "customer@demo.com"
