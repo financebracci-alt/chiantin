@@ -38,35 +38,8 @@
     --border-light: #F5F5F5;
   }
   
-  /* Dark Mode Variables */
-  .dark {
-    --accent-red: #EF5350;
-    --accent-red-hover: #F44336;
-    --accent-red-light: #3D2020;
-    
-    --gray-50: #1A1A1A;
-    --gray-100: #212121;
-    --gray-200: #2D2D2D;
-    --gray-300: #3D3D3D;
-    --gray-400: #5C5C5C;
-    --gray-500: #7A7A7A;
-    --gray-600: #9E9E9E;
-    --gray-700: #BDBDBD;
-    --gray-800: #E0E0E0;
-    --gray-900: #F5F5F5;
-    
-    --background: #121212;
-    --foreground: #F5F5F5;
-    --border: #2D2D2D;
-    --border-light: #1F1F1F;
-  }
-  
   * {
     @apply border-gray-200;
-  }
-  
-  .dark * {
-    border-color: #2D2D2D;
   }
   
   body {
@@ -74,23 +47,6 @@
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
     font-size: 14px;
     line-height: 1.5;
-    -webkit-text-size-adjust: 100%;
-    text-size-adjust: 100%;
-  }
-  
-  .dark body {
-    @apply bg-[#121212] text-gray-100;
-  }
-  
-  /* Prevent iOS zoom on form inputs */
-  input, select, textarea {
-    font-size: 16px !important;
-  }
-  
-  @media screen and (min-width: 768px) {
-    input, select, textarea {
-      font-size: 14px !important;
-    }
   }
   
   h1, h2, h3, h4, h5, h6 {

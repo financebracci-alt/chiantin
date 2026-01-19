@@ -1,14 +1,11 @@
 // Project Atlas - Professional Landing Page (Inspired by ECOMMBANX)
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useLanguage, useTheme } from '../contexts/AppContext';
 
 export function LandingPage() {
   const navigate = useNavigate();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [activeSection, setActiveSection] = useState('');
-  const { t, language, setLanguage } = useLanguage();
-  const { isDark, toggleTheme } = useTheme();
 
   // Smooth scroll to section with animation
   const scrollToSection = (sectionId) => {
@@ -34,47 +31,47 @@ export function LandingPage() {
   const features = [
     {
       icon: '💳',
-      title: language === 'it' ? 'Conti e-Personali' : 'Personal e-Accounts',
-      description: language === 'it' ? 'Conti multivaluta con IBAN UE, configurazione istantanea e controllo completo' : 'Multi-currency accounts with EU IBAN, instant setup and full control',
+      title: 'Personal e-Accounts',
+      description: 'Multi-currency accounts with EU IBAN, instant setup and full control',
     },
     {
       icon: '🏢',
-      title: language === 'it' ? 'Conti Aziendali' : 'Business Accounts',
-      description: language === 'it' ? 'Banking aziendale dedicato con strumenti di gestione della tesoreria' : 'Dedicated business banking with treasury management tools',
+      title: 'Business Accounts',
+      description: 'Dedicated business banking with treasury management tools',
     },
     {
       icon: '💸',
-      title: language === 'it' ? 'Trasferimenti Istantanei' : 'Instant Transfers',
-      description: language === 'it' ? 'Trasferimenti SEPA e internazionali con tariffe competitive' : 'SEPA and international transfers with competitive rates',
+      title: 'Instant Transfers',
+      description: 'SEPA and international transfers with competitive rates',
     },
     {
       icon: '🎴',
-      title: language === 'it' ? 'Carte Virtuali e Fisiche' : 'Virtual & Physical Cards',
-      description: language === 'it' ? 'Carte di debito Visa per pagamenti senza problemi in tutto il mondo' : 'Visa debit cards for seamless payments worldwide',
+      title: 'Virtual & Physical Cards',
+      description: 'Visa debit cards for seamless payments worldwide',
     },
     {
       icon: '🔒',
-      title: language === 'it' ? 'Sicurezza Bancaria' : 'Bank-Grade Security',
-      description: language === 'it' ? 'Autenticazione a più fattori e protezione antifrode in tempo reale' : 'Multi-factor authentication and real-time fraud protection',
+      title: 'Bank-Grade Security',
+      description: 'Multi-factor authentication and real-time fraud protection',
     },
     {
       icon: '📊',
-      title: language === 'it' ? 'Analisi Intelligenti' : 'Smart Analytics',
-      description: language === 'it' ? 'Monitora le spese, imposta budget e ottieni approfondimenti finanziari' : 'Track spending, set budgets and gain financial insights',
+      title: 'Smart Analytics',
+      description: 'Track spending, set budgets and gain financial insights',
     },
   ];
 
   const stats = [
-    { value: '50K+', label: language === 'it' ? 'Utenti Attivi' : 'Active Users' },
-    { value: '€2B+', label: language === 'it' ? 'Elaborati Annualmente' : 'Processed Annually' },
-    { value: '99.9%', label: language === 'it' ? 'Uptime' : 'Uptime' },
-    { value: '24/7', label: language === 'it' ? 'Supporto' : 'Support' },
+    { value: '50K+', label: 'Active Users' },
+    { value: '€2B+', label: 'Processed Annually' },
+    { value: '99.9%', label: 'Uptime' },
+    { value: '24/7', label: 'Support' },
   ];
 
   return (
-    <div className={`min-h-screen ${isDark ? 'bg-gray-900' : 'bg-white'}`}>
+    <div className="min-h-screen bg-white">
       {/* Navigation */}
-      <nav className={`fixed top-0 left-0 right-0 ${isDark ? 'bg-gray-900/95 border-gray-800' : 'bg-white/95 border-gray-100'} backdrop-blur-sm border-b z-50`}>
+      <nav className="fixed top-0 left-0 right-0 bg-white/95 backdrop-blur-sm border-b border-gray-100 z-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16 sm:h-20">
             {/* Logo */}
@@ -82,104 +79,52 @@ export function LandingPage() {
               <div className="w-10 h-10 bg-gradient-to-br from-red-500 to-red-600 rounded-xl flex items-center justify-center">
                 <span className="text-white font-bold text-lg">A</span>
               </div>
-              <span className={`text-xl sm:text-2xl font-bold ${isDark ? 'text-white' : 'text-gray-900'}`}>Project Atlas</span>
+              <span className="text-xl sm:text-2xl font-bold text-gray-900">Project Atlas</span>
             </div>
 
             {/* Desktop Menu */}
-            <div className="hidden md:flex items-center space-x-6">
+            <div className="hidden md:flex items-center space-x-8">
               <button
                 onClick={() => scrollToSection('features')}
-                className={`font-medium transition-all duration-300 ${activeSection === 'features' ? 'text-red-500 scale-105' : isDark ? 'text-gray-300 hover:text-white' : 'text-gray-600 hover:text-gray-900'}`}
+                className={`font-medium transition-all duration-300 ${activeSection === 'features' ? 'text-red-600 scale-105' : 'text-gray-600 hover:text-gray-900'}`}
               >
-                {language === 'it' ? 'Funzionalità' : 'Features'}
+                Features
               </button>
               <button
                 onClick={() => scrollToSection('about')}
-                className={`font-medium transition-all duration-300 ${activeSection === 'about' ? 'text-red-500 scale-105' : isDark ? 'text-gray-300 hover:text-white' : 'text-gray-600 hover:text-gray-900'}`}
+                className={`font-medium transition-all duration-300 ${activeSection === 'about' ? 'text-red-600 scale-105' : 'text-gray-600 hover:text-gray-900'}`}
               >
-                {language === 'it' ? 'Chi Siamo' : 'About'}
+                About
               </button>
               <button
                 onClick={() => scrollToSection('security')}
-                className={`font-medium transition-all duration-300 ${activeSection === 'security' ? 'text-red-500 scale-105' : isDark ? 'text-gray-300 hover:text-white' : 'text-gray-600 hover:text-gray-900'}`}
+                className={`font-medium transition-all duration-300 ${activeSection === 'security' ? 'text-red-600 scale-105' : 'text-gray-600 hover:text-gray-900'}`}
               >
-                {language === 'it' ? 'Sicurezza' : 'Security'}
+                Security
               </button>
-              
-              {/* Language Toggle */}
-              <button
-                onClick={() => setLanguage(language === 'en' ? 'it' : 'en')}
-                className={`p-2 rounded-lg transition ${isDark ? 'hover:bg-gray-800' : 'hover:bg-gray-100'}`}
-                title={language === 'en' ? 'Switch to Italian' : 'Passa all\'Inglese'}
-              >
-                <span className="text-lg">{language === 'en' ? '🇬🇧' : '🇮🇹'}</span>
-              </button>
-              
-              {/* Theme Toggle */}
-              <button
-                onClick={toggleTheme}
-                className={`p-2 rounded-lg transition ${isDark ? 'hover:bg-gray-800 text-yellow-400' : 'hover:bg-gray-100 text-gray-600'}`}
-                title={isDark ? (language === 'it' ? 'Modalità Chiara' : 'Light Mode') : (language === 'it' ? 'Modalità Scura' : 'Dark Mode')}
-              >
-                {isDark ? (
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
-                  </svg>
-                ) : (
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
-                  </svg>
-                )}
-              </button>
-              
               <button
                 onClick={() => navigate('/login')}
-                className={`font-medium transition ${isDark ? 'text-gray-300 hover:text-white' : 'text-gray-700 hover:text-gray-900'}`}
+                className="text-gray-700 hover:text-gray-900 font-medium transition"
               >
-                {t('signIn')}
+                Sign In
               </button>
               <button
                 onClick={() => navigate('/signup')}
                 className="px-6 py-2.5 bg-gradient-to-r from-red-500 to-red-600 text-white font-semibold rounded-full hover:shadow-lg hover:shadow-red-500/30 transition-all duration-300"
               >
-                {t('getStarted')}
+                Get Started
               </button>
             </div>
 
             {/* Mobile Menu Button */}
-            <div className="flex items-center space-x-2 md:hidden">
-              {/* Mobile Theme Toggle */}
-              <button
-                onClick={toggleTheme}
-                className={`p-2 rounded-lg ${isDark ? 'text-yellow-400' : 'text-gray-600'}`}
-              >
-                {isDark ? (
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
-                  </svg>
-                ) : (
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
-                  </svg>
-                )}
-              </button>
-              
-              {/* Mobile Language Toggle */}
-              <button
-                onClick={() => setLanguage(language === 'en' ? 'it' : 'en')}
-                className="p-2"
-              >
-                <span className="text-lg">{language === 'en' ? '🇬🇧' : '🇮🇹'}</span>
-              </button>
-              
-              <button
-                onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-                className={`p-2 ${isDark ? 'text-gray-300' : 'text-gray-600'}`}
-              >
-                {mobileMenuOpen ? (
-                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                  </svg>
+            <button
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              className="md:hidden p-2 text-gray-600"
+            >
+              {mobileMenuOpen ? (
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
               ) : (
                 <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
@@ -190,37 +135,37 @@ export function LandingPage() {
 
           {/* Mobile Menu */}
           {mobileMenuOpen && (
-            <div className={`md:hidden py-4 border-t ${isDark ? 'border-gray-800' : 'border-gray-100'} animate-slideDown`}>
+            <div className="md:hidden py-4 border-t border-gray-100 animate-slideDown">
               <div className="flex flex-col space-y-4">
                 <button
                   onClick={() => scrollToSection('features')}
-                  className={`text-left font-medium transition-colors ${isDark ? 'text-gray-300 hover:text-red-400' : 'text-gray-600 hover:text-red-600'}`}
+                  className="text-left text-gray-600 hover:text-red-600 font-medium transition-colors"
                 >
-                  {language === 'it' ? 'Funzionalità' : 'Features'}
+                  Features
                 </button>
                 <button
                   onClick={() => scrollToSection('about')}
-                  className={`text-left font-medium transition-colors ${isDark ? 'text-gray-300 hover:text-red-400' : 'text-gray-600 hover:text-red-600'}`}
+                  className="text-left text-gray-600 hover:text-red-600 font-medium transition-colors"
                 >
-                  {language === 'it' ? 'Chi Siamo' : 'About'}
+                  About
                 </button>
                 <button
                   onClick={() => scrollToSection('security')}
-                  className={`text-left font-medium transition-colors ${isDark ? 'text-gray-300 hover:text-red-400' : 'text-gray-600 hover:text-red-600'}`}
+                  className="text-left text-gray-600 hover:text-red-600 font-medium transition-colors"
                 >
-                  {language === 'it' ? 'Sicurezza' : 'Security'}
+                  Security
                 </button>
                 <button
                   onClick={() => navigate('/login')}
-                  className={`text-left font-medium ${isDark ? 'text-gray-300 hover:text-white' : 'text-gray-700 hover:text-gray-900'}`}
+                  className="text-left text-gray-700 hover:text-gray-900 font-medium"
                 >
-                  {t('signIn')}
+                  Sign In
                 </button>
                 <button
                   onClick={() => navigate('/signup')}
                   className="w-full py-3 bg-gradient-to-r from-red-500 to-red-600 text-white font-semibold rounded-full"
                 >
-                  {t('getStarted')}
+                  Get Started
                 </button>
               </div>
             </div>
@@ -240,25 +185,23 @@ export function LandingPage() {
           <div className="grid lg:grid-cols-2 gap-12 items-center">
             {/* Left Content */}
             <div className="text-center lg:text-left">
-              <div className={`inline-flex items-center space-x-2 ${isDark ? 'bg-red-900/30 text-red-400' : 'bg-red-50 text-red-600'} px-4 py-2 rounded-full text-sm font-medium mb-6`}>
+              <div className="inline-flex items-center space-x-2 bg-red-50 text-red-600 px-4 py-2 rounded-full text-sm font-medium mb-6">
                 <span className="relative flex h-2 w-2">
                   <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
                   <span className="relative inline-flex rounded-full h-2 w-2 bg-red-500"></span>
                 </span>
-                <span>{language === 'it' ? 'Banca Digitale con Licenza UE' : 'EU Licensed Digital Bank'}</span>
+                <span>EU Licensed Digital Bank</span>
               </div>
               
-              <h1 className={`text-4xl sm:text-5xl lg:text-6xl font-bold leading-tight mb-6 ${isDark ? 'text-white' : 'text-gray-900'}`}>
-                {language === 'it' ? 'Una piattaforma per' : 'A platform to'}{' '}
+              <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-gray-900 leading-tight mb-6">
+                A platform to{' '}
                 <span className="text-transparent bg-clip-text bg-gradient-to-r from-red-500 to-red-600">
-                  {language === 'it' ? 'governarle tutte' : 'rule them all'}
+                  rule them all
                 </span>
               </h1>
               
-              <p className={`text-lg sm:text-xl mb-8 max-w-xl mx-auto lg:mx-0 ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
-                {language === 'it' 
-                  ? 'Project Atlas rappresenta la nuova era del fintech, rivoluzionando il modo in cui gestisci le transazioni globali con conti multivaluta, trasferimenti istantanei e sicurezza bancaria.'
-                  : 'Project Atlas represents the new age of fintech, revolutionizing the way you handle global transactions with multi-currency accounts, instant transfers, and bank-grade security.'}
+              <p className="text-lg sm:text-xl text-gray-600 mb-8 max-w-xl mx-auto lg:mx-0">
+                Project Atlas represents the new age of fintech, revolutionizing the way you handle global transactions with multi-currency accounts, instant transfers, and bank-grade security.
               </p>
 
               <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
@@ -266,35 +209,35 @@ export function LandingPage() {
                   onClick={() => navigate('/signup')}
                   className="px-8 py-4 bg-gradient-to-r from-red-500 to-red-600 text-white font-semibold rounded-full text-lg hover:shadow-xl hover:shadow-red-500/30 transition-all duration-300 transform hover:-translate-y-1"
                 >
-                  {language === 'it' ? 'Unisciti al Futuro' : 'Join the Future'}
+                  Join the Future
                 </button>
                 <button
                   onClick={() => navigate('/login')}
-                  className={`px-8 py-4 font-semibold rounded-full text-lg transition-all duration-300 ${isDark ? 'bg-gray-800 text-white hover:bg-gray-700' : 'bg-gray-100 text-gray-800 hover:bg-gray-200'}`}
+                  className="px-8 py-4 bg-gray-100 text-gray-800 font-semibold rounded-full text-lg hover:bg-gray-200 transition-all duration-300"
                 >
-                  {t('signIn')}
+                  Sign In
                 </button>
               </div>
 
               {/* Trust Badges */}
-              <div className={`mt-10 flex flex-wrap items-center justify-center lg:justify-start gap-6 text-sm ${isDark ? 'text-gray-500' : 'text-gray-500'}`}>
+              <div className="mt-10 flex flex-wrap items-center justify-center lg:justify-start gap-6 text-sm text-gray-500">
                 <div className="flex items-center space-x-2">
                   <svg className="w-5 h-5 text-green-500" fill="currentColor" viewBox="0 0 20 20">
                     <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
                   </svg>
-                  <span>{language === 'it' ? 'Conforme GDPR' : 'GDPR Compliant'}</span>
+                  <span>GDPR Compliant</span>
                 </div>
                 <div className="flex items-center space-x-2">
                   <svg className="w-5 h-5 text-green-500" fill="currentColor" viewBox="0 0 20 20">
                     <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
                   </svg>
-                  <span>{language === 'it' ? 'Certificato PSD2' : 'PSD2 Certified'}</span>
+                  <span>PSD2 Certified</span>
                 </div>
                 <div className="flex items-center space-x-2">
                   <svg className="w-5 h-5 text-green-500" fill="currentColor" viewBox="0 0 20 20">
                     <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
                   </svg>
-                  <span>{language === 'it' ? 'Crittografia 256-bit' : '256-bit Encryption'}</span>
+                  <span>256-bit Encryption</span>
                 </div>
               </div>
             </div>
@@ -304,9 +247,9 @@ export function LandingPage() {
               <div className="relative mx-auto max-w-sm">
                 {/* Phone Frame */}
                 <div className="relative bg-gray-900 rounded-[3rem] p-3 shadow-2xl shadow-gray-900/30">
-                  <div className={`rounded-[2.5rem] overflow-hidden ${isDark ? 'bg-gray-800' : 'bg-white'}`}>
+                  <div className="bg-white rounded-[2.5rem] overflow-hidden">
                     {/* App Screen Preview */}
-                    <div className={`p-6 h-[500px] ${isDark ? 'bg-gradient-to-br from-gray-800 to-gray-900' : 'bg-gradient-to-br from-gray-50 to-white'}`}>
+                    <div className="bg-gradient-to-br from-gray-50 to-white p-6 h-[500px]">
                       {/* Mini Header */}
                       <div className="flex items-center justify-between mb-8">
                         <div>
