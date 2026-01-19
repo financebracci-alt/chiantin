@@ -767,6 +767,7 @@ const translations = {
     orderCard: 'Ordina Carta',
     manageCards: 'Gestisci Carte',
     myCards: 'Le Mie Carte',
+    viewAllCards: 'Visualizza tutte le carte',
     thisMonth: 'Questo Mese',
     totalSpending: 'Spesa Totale',
     viewFullBreakdown: 'Visualizza dettagli →',
