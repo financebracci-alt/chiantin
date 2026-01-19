@@ -614,7 +614,7 @@ export function LandingPage() {
             </div>
           </div>
           <div className={`border-t mt-12 pt-8 text-sm text-center ${isDark ? 'border-gray-800' : 'border-gray-800'}`}>
-            <p>© 2026 Project Atlas. {t('allRightsReserved')} {t('licensedBy')}</p>
+            <p>© 2026 ecommbx. {t('allRightsReserved')} {t('licensedBy')}</p>
           </div>
         </div>
       </footer>
