@@ -177,21 +177,21 @@ export function NotificationBell() {
           {/* Desktop: absolute right-0, Mobile: fixed centered */}
           <div className="hidden sm:block absolute right-0 mt-2 w-96 bg-white rounded-lg shadow-blue border border-blue-100 z-20 overflow-hidden">
             <div className="p-4 border-b bg-blue-50/50 flex justify-between items-center">
-              <h3 className="font-semibold">Notifications</h3>
+              <h3 className="font-semibold">{t('notifications')}</h3>
               {unreadCount > 0 && (
                 <button
                   onClick={markAllAsRead}
                   className="text-sm text-blue-600 hover:text-blue-700"
                   data-testid="mark-all-read"
                 >
-                  Mark all as read
+                  {t('markAllAsRead')}
                 </button>
               )}
             </div>
             <div className="max-h-96 overflow-y-auto">
               {notifications.length === 0 ? (
                 <div className="p-8 text-center text-gray-600">
-                  <p>No notifications</p>
+                  <p>{t('noNotifications')}</p>
                 </div>
               ) : (
                 notifications.slice(0, 10).map((notif) => (
