@@ -305,13 +305,13 @@ export function NotificationBell() {
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center justify-between">
                           <p className={`text-sm font-medium ${!notif.read ? 'text-gray-900' : 'text-gray-700'}`}>
-                            {notif.title}
+                            {translateNotificationTitle(notif.title)}
                           </p>
                           {!notif.read && (
                             <span className="ml-2 h-2 w-2 bg-red-500 rounded-full flex-shrink-0"></span>
                           )}
                         </div>
-                        <p className="text-sm text-gray-600 mt-1 line-clamp-2">{notif.message}</p>
+                        <p className="text-sm text-gray-600 mt-1 line-clamp-2">{translateNotificationMessage(notif.message, notif.title)}</p>
                         <div className="flex items-center justify-between mt-2">
                           <p className="text-xs text-gray-500">{formatTime(notif.created_at)}</p>
                           <p className="text-xs text-red-600 font-medium">{getClickHint(notif)}</p>
