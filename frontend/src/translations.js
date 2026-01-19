@@ -378,6 +378,20 @@ const translations = {
     psd2Certified: 'Certificato PSD2',
     encryption256: 'Crittografia 256-bit',
     
+    // Phone Mockup
+    goodMorning: 'Buongiorno',
+    totalBalance: 'Saldo Totale',
+    vsLastMonth: 'vs mese scorso',
+    send: 'Invia',
+    request: 'Richiedi',
+    more: 'Altro',
+    shopping: 'Acquisti',
+    income: 'Entrate',
+    salary: 'Stipendio',
+    transfer: 'Trasferimento',
+    complete: 'Completato',
+    protected: 'Protetto',
+    
     // Features
     whyChooseAtlas: 'Perché scegliere Project Atlas',
     whyChooseDesc: 'Perché sappiamo che la tecnologia innovativa è valida solo quanto il servizio che la accompagna — il servizio Atlas 24/7.',
