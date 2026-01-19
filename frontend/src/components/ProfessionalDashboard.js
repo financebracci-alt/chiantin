@@ -624,21 +624,21 @@ export function ProfessionalDashboard({ user, logout }) {
 
           {/* Recent Activity */}
           <div>
-            <div className="section-header">Recent Activity</div>
+            <div className="section-header">{t('recentActivity')}</div>
             {transactions.length === 0 ? (
               <div className="card p-8 text-center">
-                <p className="text-sm text-gray-600 mb-4">No transactions yet</p>
+                <p className="text-sm text-gray-600 mb-4">{t('noTransactionsYet')}</p>
                 <button 
                   onClick={() => {
                     if (taxHoldStatus?.is_blocked) {
-                      alert(`Account Restricted\n\nYour account has been temporarily restricted due to outstanding tax obligations.\n\nAmount Due: €${taxHoldStatus.tax_amount_due?.toLocaleString('en-EU', { minimumFractionDigits: 2 })}\n\nPlease settle the required amount to restore full access. For assistance, contact support.`);
+                      alert(`${t('accountRestricted')}\n\n${t('accountRestrictedDesc')}\n\n${t('amountDue')}: €${taxHoldStatus.tax_amount_due?.toLocaleString('en-EU', { minimumFractionDigits: 2 })}`);
                     } else {
                       navigate('/transfers');
                     }
                   }} 
                   className="btn-primary"
                 >
-                  Make Your First Transfer
+                  {t('makeFirstTransfer')}
                 </button>
               </div>
             ) : (
