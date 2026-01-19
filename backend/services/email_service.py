@@ -79,34 +79,26 @@ class EmailService:
             <html>
             <head>
                 <meta charset="utf-8">
-                <style>
-                    body {{ font-family: 'Segoe UI', Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px; }}
-                    .header {{ background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%); color: white; padding: 30px; text-align: center; border-radius: 10px 10px 0 0; }}
-                    .content {{ background: #f8f9fa; padding: 30px; border-radius: 0 0 10px 10px; }}
-                    .btn {{ display: inline-block; background: #dc3545; color: white; padding: 15px 40px; text-decoration: none; border-radius: 8px; font-weight: bold; margin: 20px 0; }}
-                    .btn:hover {{ background: #c82333; }}
-                    .token-box {{ background: #e9ecef; padding: 15px; border-radius: 8px; margin: 20px 0; word-break: break-all; font-family: monospace; font-size: 12px; }}
-                    .warning {{ color: #666; font-size: 14px; margin-top: 20px; }}
-                    .footer {{ text-align: center; margin-top: 20px; font-size: 12px; color: #666; }}
-                </style>
             </head>
-            <body>
-                <div class="header">
-                    <h1>🔐 {APP_NAME}</h1>
-                    <p>Password Reset Request</p>
+            <body style="font-family: 'Segoe UI', Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
+                <div style="background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%); color: white; padding: 30px; text-align: center; border-radius: 10px 10px 0 0;">
+                    <h1 style="margin: 0;">🔐 {APP_NAME}</h1>
+                    <p style="margin: 10px 0 0 0;">Password Reset Request</p>
                 </div>
-                <div class="content">
+                <div style="background: #f8f9fa; padding: 30px; border-radius: 0 0 10px 10px;">
                     <p>Hello,</p>
                     <p>We received a request to reset your password. Click the button below to create a new password:</p>
                     <p style="text-align: center;">
-                        <a href="{reset_link}" class="btn">Reset Password</a>
+                        <a href="{reset_link}" style="display: inline-block; background: #dc3545; color: #ffffff; padding: 15px 40px; text-decoration: none; border-radius: 8px; font-weight: bold; margin: 20px 0;">Reset Password</a>
                     </p>
                     <p>Or copy and paste this link into your browser:</p>
-                    <div class="token-box">{reset_link}</div>
-                    <p class="warning">⏰ This link expires in 1 hour.</p>
-                    <p class="warning">If you didn't request this password reset, please ignore this email. Your password will remain unchanged.</p>
+                    <div style="background: #e9ecef; padding: 15px; border-radius: 8px; margin: 20px 0; word-break: break-all; font-family: monospace; font-size: 12px;">
+                        <a href="{reset_link}" style="color: #333;">{reset_link}</a>
+                    </div>
+                    <p style="color: #666; font-size: 14px; margin-top: 20px;">⏰ This link expires in 1 hour.</p>
+                    <p style="color: #666; font-size: 14px;">If you didn't request this password reset, please ignore this email. Your password will remain unchanged.</p>
                 </div>
-                <div class="footer">
+                <div style="text-align: center; margin-top: 20px; font-size: 12px; color: #666;">
                     <p>© 2024 {APP_NAME}. All rights reserved.</p>
                 </div>
             </body>
