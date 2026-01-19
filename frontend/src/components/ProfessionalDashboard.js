@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../api';
+import { useLanguage, useTheme } from '../contexts/AppContext';
 
 export function ProfessionalDashboard({ user, logout }) {
   const navigate = useNavigate();
@@ -17,6 +18,8 @@ export function ProfessionalDashboard({ user, logout }) {
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const [selectedPaymentMethod, setSelectedPaymentMethod] = useState(null);
   const [cryptoTxHash, setCryptoTxHash] = useState('');
+  const { t } = useLanguage();
+  const { isDark } = useTheme();
 
   useEffect(() => {
     fetchDashboardData();
