@@ -265,6 +265,8 @@ function CreateTicketForm({ onClose, onSuccess }) {
 function TicketDetails({ ticket, onUpdate, isAdmin = false }) {
   const [newMessage, setNewMessage] = useState('');
   const [sending, setSending] = useState(false);
+  const { t } = useLanguage();
+  const { isDark } = useTheme();
 
   const handleSendMessage = async () => {
     if (!newMessage.trim()) return;
@@ -292,23 +294,23 @@ function TicketDetails({ ticket, onUpdate, isAdmin = false }) {
   };
 
   return (
-    <div className="card-enhanced space-y-4">
+    <div className={`card-enhanced space-y-4 ${isDark ? 'bg-gray-800 border-gray-700' : ''}`}>
       {/* Header */}
-      <div className="p-6 border-b bg-blue-50/30">
+      <div className={`p-6 border-b ${isDark ? 'bg-gray-700/50 border-gray-600' : 'bg-blue-50/30'}`}>
         <div className="flex justify-between items-start">
           <div>
-            <h3 className="text-lg font-semibold">{ticket.subject}</h3>
-            <p className="text-sm text-gray-600 mt-1">
-              Created {new Date(ticket.created_at).toLocaleString()}
+            <h3 className={`text-lg font-semibold ${isDark ? 'text-white' : 'text-gray-900'}`}>{ticket.subject}</h3>
+            <p className={`text-sm mt-1 ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
+              {t('created')} {new Date(ticket.created_at).toLocaleString()}
             </p>
             {isAdmin && ticket.user_id && (
-              <p className="text-xs text-gray-500 mt-1">
+              <p className={`text-xs mt-1 ${isDark ? 'text-gray-500' : 'text-gray-500'}`}>
                 Customer ID: {ticket.user_id}
               </p>
             )}
           </div>
           <div className="text-right">
-            <TicketStatusBadge status={ticket.status} />
+            <TicketStatusBadge status={ticket.status} t={t} />
             {isAdmin && (
               <div className="mt-2 flex flex-col space-y-1">
                 <button
@@ -345,13 +347,13 @@ function TicketDetails({ ticket, onUpdate, isAdmin = false }) {
             key={idx}
             className={`p-4 rounded-lg ${
               msg.is_staff 
-                ? 'bg-blue-50 border border-blue-200' 
-                : 'bg-gray-50 border border-gray-200'
+                ? (isDark ? 'bg-blue-900/30 border border-blue-700' : 'bg-blue-50 border border-blue-200')
+                : (isDark ? 'bg-gray-700 border border-gray-600' : 'bg-gray-50 border border-gray-200')
             }`}
             data-testid={`message-${idx}`}
           >
             <div className="flex items-center justify-between mb-2">
-              <span className="text-sm font-medium">
+              <span className={`text-sm font-medium ${isDark ? 'text-white' : 'text-gray-900'}`}>
                 {msg.sender_name}
                 {msg.is_staff && (
                   <span className="ml-2 text-xs bg-blue-600 text-white px-2 py-1 rounded">
@@ -359,25 +361,25 @@ function TicketDetails({ ticket, onUpdate, isAdmin = false }) {
                   </span>
                 )}
               </span>
-              <span className="text-xs text-gray-500">
+              <span className={`text-xs ${isDark ? 'text-gray-500' : 'text-gray-500'}`}>
                 {new Date(msg.created_at).toLocaleString()}
               </span>
             </div>
-            <p className="text-sm text-gray-700">{msg.content}</p>
+            <p className={`text-sm ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>{msg.content}</p>
           </div>
         ))}
       </div>
 
       {/* Reply */}
       {ticket.status !== 'CLOSED' && ticket.status !== 'RESOLVED' && (
-        <div className="p-6 border-t bg-gray-50/50">
+        <div className={`p-6 border-t ${isDark ? 'bg-gray-700/30 border-gray-600' : 'bg-gray-50/50'}`}>
           <div className="space-y-3">
             <textarea
               value={newMessage}
               onChange={(e) => setNewMessage(e.target.value)}
               rows={3}
-              placeholder="Type your message..."
-              className="input-enhanced w-full"
+              placeholder={t('typeYourMessage')}
+              className={`input-enhanced w-full ${isDark ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400' : ''}`}
               data-testid="ticket-reply"
             />
             <button
@@ -386,7 +388,7 @@ function TicketDetails({ ticket, onUpdate, isAdmin = false }) {
               className="btn-primary btn-glow"
               data-testid="send-message"
             >
-              {sending ? 'Sending...' : 'Send Message'}
+              {sending ? t('sending') : t('sendMessage')}
             </button>
           </div>
         </div>
