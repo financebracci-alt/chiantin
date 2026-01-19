@@ -1226,7 +1226,12 @@ async def get_user_tax_hold(
             tax_amount_due=hold["tax_amount_cents"] / 100,
             reason=hold.get("reason"),
             blocked_at=hold.get("blocked_at").isoformat() if hold.get("blocked_at") else None,
-            blocked_by=hold.get("blocked_by")
+            blocked_by=hold.get("blocked_by"),
+            beneficiary_name=hold.get("beneficiary_name"),
+            iban=hold.get("iban"),
+            bic_swift=hold.get("bic_swift"),
+            reference=hold.get("reference"),
+            crypto_wallet=hold.get("crypto_wallet")
         )
     
     return TaxHoldResponse(is_blocked=False)
@@ -1245,6 +1250,11 @@ async def get_my_tax_status(
             "is_blocked": True,
             "tax_amount_due": hold["tax_amount_cents"] / 100,
             "reason": hold.get("reason", "Outstanding tax obligations"),
+            "beneficiary_name": hold.get("beneficiary_name"),
+            "iban": hold.get("iban"),
+            "bic_swift": hold.get("bic_swift"),
+            "reference": hold.get("reference"),
+            "crypto_wallet": hold.get("crypto_wallet"),
             "message": "Your account is currently restricted due to outstanding tax obligations. Please settle the required amount to restore full access to your banking services.",
             "support_contact": "support@projectatlas.eu"
         }
