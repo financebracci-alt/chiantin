@@ -589,7 +589,7 @@ export function LandingPage() {
               onClick={() => navigate('/login')}
               className="px-8 py-4 bg-transparent border-2 border-white text-white font-semibold rounded-full text-lg hover:bg-white/10 transition-all duration-300"
             >
-              Sign In
+              {t('signIn')}
             </button>
           </div>
         </div>
@@ -607,34 +607,36 @@ export function LandingPage() {
                 <span className="text-xl font-bold text-white">Project Atlas</span>
               </div>
               <p className="text-sm">
-                EU Licensed Digital Banking Platform. Revolutionizing the way you handle global transactions.
+                {language === 'it' 
+                  ? 'Piattaforma di Banking Digitale con Licenza UE. Rivoluzionando il modo in cui gestisci le transazioni globali.'
+                  : 'EU Licensed Digital Banking Platform. Revolutionizing the way you handle global transactions.'}
               </p>
             </div>
             <div>
-              <h4 className="text-white font-semibold mb-4">Products</h4>
+              <h4 className="text-white font-semibold mb-4">{language === 'it' ? 'Prodotti' : 'Products'}</h4>
               <ul className="space-y-2 text-sm">
-                <li><a href="#" className="hover:text-white transition">Personal Accounts</a></li>
-                <li><a href="#" className="hover:text-white transition">Business Accounts</a></li>
-                <li><a href="#" className="hover:text-white transition">Cards</a></li>
-                <li><a href="#" className="hover:text-white transition">Transfers</a></li>
+                <li><a href="#" className="hover:text-white transition">{language === 'it' ? 'Conti Personali' : 'Personal Accounts'}</a></li>
+                <li><a href="#" className="hover:text-white transition">{language === 'it' ? 'Conti Aziendali' : 'Business Accounts'}</a></li>
+                <li><a href="#" className="hover:text-white transition">{language === 'it' ? 'Carte' : 'Cards'}</a></li>
+                <li><a href="#" className="hover:text-white transition">{language === 'it' ? 'Trasferimenti' : 'Transfers'}</a></li>
               </ul>
             </div>
             <div>
-              <h4 className="text-white font-semibold mb-4">Company</h4>
+              <h4 className="text-white font-semibold mb-4">{language === 'it' ? 'Azienda' : 'Company'}</h4>
               <ul className="space-y-2 text-sm">
-                <li><a href="#" className="hover:text-white transition">About Us</a></li>
-                <li><a href="#" className="hover:text-white transition">Careers</a></li>
-                <li><a href="#" className="hover:text-white transition">Press</a></li>
-                <li><a href="#" className="hover:text-white transition">Contact</a></li>
+                <li><a href="#" className="hover:text-white transition">{language === 'it' ? 'Chi Siamo' : 'About Us'}</a></li>
+                <li><a href="#" className="hover:text-white transition">{language === 'it' ? 'Lavora con Noi' : 'Careers'}</a></li>
+                <li><a href="#" className="hover:text-white transition">{language === 'it' ? 'Stampa' : 'Press'}</a></li>
+                <li><a href="#" className="hover:text-white transition">{language === 'it' ? 'Contatti' : 'Contact'}</a></li>
               </ul>
             </div>
             <div>
-              <h4 className="text-white font-semibold mb-4">Legal</h4>
+              <h4 className="text-white font-semibold mb-4">{language === 'it' ? 'Legale' : 'Legal'}</h4>
               <ul className="space-y-2 text-sm">
-                <li><a href="#" className="hover:text-white transition">Privacy Policy</a></li>
-                <li><a href="#" className="hover:text-white transition">Terms of Service</a></li>
-                <li><a href="#" className="hover:text-white transition">Cookie Policy</a></li>
-                <li><a href="#" className="hover:text-white transition">Compliance</a></li>
+                <li><a href="#" className="hover:text-white transition">{language === 'it' ? 'Privacy Policy' : 'Privacy Policy'}</a></li>
+                <li><a href="#" className="hover:text-white transition">{language === 'it' ? 'Termini di Servizio' : 'Terms of Service'}</a></li>
+                <li><a href="#" className="hover:text-white transition">{language === 'it' ? 'Cookie Policy' : 'Cookie Policy'}</a></li>
+                <li><a href="#" className="hover:text-white transition">{language === 'it' ? 'Conformità' : 'Compliance'}</a></li>
               </ul>
             </div>
           </div>
