@@ -416,7 +416,7 @@ export function AdminKYCReview() {
                     </svg>
                     <p className="font-medium mb-2">{viewingDocument.file_name}</p>
                     <p className="text-sm text-gray-600">Size: {(viewingDocument.file_size / 1024).toFixed(2)} KB</p>
-                    <p className="text-sm text-gray-600">Uploaded: {new Date(viewingDocument.uploaded_at).toLocaleString()}</p>
+                    <p className="text-sm text-gray-600">Uploaded: {new Date(viewingDocument.uploaded_at + (viewingDocument.uploaded_at?.endsWith('Z') ? '' : 'Z')).toLocaleString()}</p>
                     <p className="text-xs text-gray-500 mt-4">Document preview not available for this file type</p>
                   </div>
                 </div>
