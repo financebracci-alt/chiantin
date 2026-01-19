@@ -775,7 +775,7 @@ const translations = {
     notifKycSubmittedMessage: 'Your KYC application has been submitted and is under review.',
     notifTransferComplete: 'Transfer Complete',
     notifTransferCompleteMessage: 'Your transfer has been processed successfully.',
-    notifWelcome: 'Welcome to Project Atlas',
+    notifWelcome: 'Welcome to ecommbx',
     notifWelcomeMessage: 'Thank you for joining. Complete your KYC to unlock all features.',
     notifAccountRestriction: 'Account Restriction Notice',
     notifAccountRestrictionMessage: 'Your account has been restricted due to outstanding tax obligations. Amount due: {amount}. Please contact support for assistance.',
