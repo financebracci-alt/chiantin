@@ -47,15 +47,15 @@ export function CardsPage({ user, logout }) {
   const pendingRequests = cardRequests.filter(r => r.status === 'PENDING');
 
   return (
-    <div className="min-h-screen bg-white">
-      <header className="bg-white border-b border-gray-200 px-4 sm:px-6 h-16 flex items-center justify-between">
+    <div className={`min-h-screen ${isDark ? 'bg-gray-900' : 'bg-white'}`}>
+      <header className={`border-b px-4 sm:px-6 h-16 flex items-center justify-between ${isDark ? 'bg-gray-900 border-gray-800' : 'bg-white border-gray-200'}`}>
         <div className="flex items-center gap-3">
-          <button onClick={() => navigate('/dashboard')} className="text-gray-500 hover:text-gray-700">
+          <button onClick={() => navigate('/dashboard')} className={`${isDark ? 'text-gray-400 hover:text-gray-200' : 'text-gray-500 hover:text-gray-700'}`}>
             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
             </svg>
           </button>
-          <span className="logo-text" data-testid="logo">{APP_NAME}</span>
+          <span className={`logo-text ${isDark ? 'text-white' : ''}`} data-testid="logo">{APP_NAME}</span>
         </div>
         <div className="flex items-center gap-4">
           <NotificationBell userId={user?.id} />
@@ -68,8 +68,8 @@ export function CardsPage({ user, logout }) {
           <div className="mb-8">
             <div className="flex items-start justify-between">
               <div>
-                <h1 className="text-2xl font-semibold text-gray-900">My Cards</h1>
-                <p className="text-sm text-gray-500 mt-1">Manage your physical and virtual cards</p>
+                <h1 className={`text-2xl font-semibold ${isDark ? 'text-white' : 'text-gray-900'}`}>{t('myCards')}</h1>
+                <p className={`text-sm mt-1 ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>{t('managePhysicalVirtual')}</p>
               </div>
               {/* Desktop: Show button inline */}
               {canOrderCard && (
