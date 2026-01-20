@@ -110,6 +110,8 @@ function SignupPage() {
   });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [signupSuccess, setSignupSuccess] = useState(false);
+  const [registeredEmail, setRegisteredEmail] = useState('');
   const { signup } = useAuth();
   const navigate = useNavigate();
   const toast = useToast();
@@ -138,16 +140,64 @@ function SignupPage() {
         password: formData.password,
         first_name: formData.first_name,
         last_name: formData.last_name,
-        phone: formData.phone || undefined
+        phone: formData.phone || undefined,
+        language: language
       });
-      toast.success(t('accountCreatedSuccess') || 'Account created successfully! You can now login.');
-      navigate('/login');
+      setRegisteredEmail(formData.email);
+      setSignupSuccess(true);
     } catch (err) {
       setError(err.response?.data?.detail || t('signupFailed') || 'Signup failed');
     } finally {
       setLoading(false);
     }
   };
+
+  // Show success screen after signup
+  if (signupSuccess) {
+    return (
+      <div className={`min-h-screen flex flex-col ${isDark ? 'bg-gray-900' : 'bg-white'}`}>
+        <div className={`flex justify-end items-center p-4 space-x-2`}>
+          <button
+            onClick={() => setLanguage(language === 'en' ? 'it' : 'en')}
+            className={`px-3 py-1.5 rounded-lg font-bold text-sm transition ${isDark ? 'bg-gray-800 hover:bg-gray-700 text-gray-300' : 'bg-gray-100 hover:bg-gray-200 text-gray-700'}`}
+          >
+            {language === 'en' ? '🇬🇧 EN' : '🇮🇹 IT'}
+          </button>
+          <button
+            onClick={toggleTheme}
+            className={`p-2 rounded-lg transition ${isDark ? 'hover:bg-gray-800 text-yellow-400' : 'hover:bg-gray-100 text-gray-600'}`}
+          >
+            {isDark ? <Sun size={20} /> : <Moon size={20} />}
+          </button>
+        </div>
+        <div className="flex-1 flex items-center justify-center p-4">
+          <div className={`w-full max-w-md rounded-xl shadow-xl p-8 text-center ${isDark ? 'bg-gray-800 border border-gray-700' : 'bg-white'}`}>
+            <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
+              <Mail className="w-8 h-8 text-green-600" />
+            </div>
+            <h2 className={`text-2xl font-bold mb-2 ${isDark ? 'text-white' : 'text-gray-900'}`}>
+              {t('checkYourEmail')}
+            </h2>
+            <p className={`mb-6 ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
+              {t('checkYourEmailDesc')}
+            </p>
+            <div className={`p-4 rounded-lg mb-6 ${isDark ? 'bg-gray-700' : 'bg-gray-100'}`}>
+              <p className={`font-medium ${isDark ? 'text-white' : 'text-gray-900'}`}>{registeredEmail}</p>
+            </div>
+            <p className={`text-sm mb-6 ${isDark ? 'text-gray-500' : 'text-gray-500'}`}>
+              {t('dontSeeEmail')}
+            </p>
+            <button
+              onClick={() => navigate('/login')}
+              className="w-full bg-[#dc3545] hover:bg-[#c82333] text-white py-3 rounded-lg font-semibold transition"
+            >
+              {t('goToLogin')}
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className={`min-h-screen flex flex-col ${isDark ? 'bg-gray-900' : 'bg-white'}`}>
