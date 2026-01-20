@@ -4,6 +4,7 @@ from motor.motor_asyncio import AsyncIOMotorClient, AsyncIOMotorDatabase
 from typing import Optional
 from config import settings
 import logging
+import asyncio
 
 logger = logging.getLogger(__name__)
 
@@ -12,23 +13,48 @@ _client: Optional[AsyncIOMotorClient] = None
 _database: Optional[AsyncIOMotorDatabase] = None
 
 
-async def connect_db():
-    """Connect to MongoDB."""
+async def connect_db(max_retries: int = 5, retry_delay: float = 2.0):
+    """Connect to MongoDB with retry logic for production resilience."""
     global _client, _database
     
     logger.info(f"Connecting to MongoDB: {settings.DATABASE_NAME}")
+    logger.info(f"MongoDB URL: {settings.MONGO_URL[:50]}...")
     
+    # Create client with production-ready settings
     _client = AsyncIOMotorClient(
         settings.MONGO_URL,
-        serverSelectionTimeoutMS=5000
+        serverSelectionTimeoutMS=10000,  # 10 second timeout
+        connectTimeoutMS=10000,
+        socketTimeoutMS=30000,
+        retryWrites=True,
+        retryReads=True,
     )
     
     _database = _client[settings.DATABASE_NAME]
     
-    # Create indexes
-    await create_indexes()
+    # Try to verify connection with retries
+    for attempt in range(max_retries):
+        try:
+            # Ping the database to verify connection
+            await _client.admin.command('ping')
+            logger.info("MongoDB connection verified successfully")
+            break
+        except Exception as e:
+            if attempt < max_retries - 1:
+                logger.warning(f"MongoDB connection attempt {attempt + 1} failed: {e}. Retrying in {retry_delay}s...")
+                await asyncio.sleep(retry_delay)
+            else:
+                logger.error(f"MongoDB connection failed after {max_retries} attempts: {e}")
+                # Don't crash - let the app start and handle DB errors gracefully
+                logger.warning("App will start but database operations may fail")
     
-    logger.info("MongoDB connected successfully")
+    # Try to create indexes (non-blocking, with error handling)
+    try:
+        await create_indexes()
+    except Exception as e:
+        logger.warning(f"Index creation failed (will retry on next startup): {e}")
+    
+    logger.info("MongoDB startup complete")
 
 
 async def disconnect_db():
@@ -48,48 +74,72 @@ def get_database() -> AsyncIOMotorDatabase:
 
 
 async def create_indexes():
-    """Create database indexes."""
+    """Create database indexes with error handling."""
     db = get_database()
     
-    # Users
-    await db.users.create_index("email", unique=True)
-    await db.users.create_index("phone")
+    indexes = [
+        # Users
+        ("users", "email", {"unique": True}),
+        ("users", "phone", {}),
+        
+        # Sessions
+        ("sessions", "user_id", {}),
+        ("sessions", "refresh_token_hash", {"unique": True, "sparse": True}),
+        ("sessions", "expires_at", {"expireAfterSeconds": 0}),
+        
+        # KYC Applications
+        ("kyc_applications", "user_id", {}),
+        ("kyc_applications", "status", {}),
+        
+        # Bank Accounts
+        ("bank_accounts", "user_id", {}),
+        ("bank_accounts", "iban", {"unique": True, "sparse": True}),
+        
+        # Ledger
+        ("ledger_accounts", "user_id", {}),
+        ("ledger_accounts", "account_type", {}),
+        ("ledger_transactions", "external_id", {"unique": True, "sparse": True}),
+        ("ledger_transactions", "created_at", {}),
+        ("ledger_transactions", "status", {}),
+        ("ledger_entries", "transaction_id", {}),
+        ("ledger_entries", "account_id", {}),
+        
+        # Audit Logs
+        ("audit_logs", "performed_by", {}),
+        ("audit_logs", "entity_type", {}),
+        ("audit_logs", "created_at", {}),
+        
+        # Support Tickets
+        ("tickets", "user_id", {}),
+        ("tickets", "status", {}),
+        
+        # Idempotency
+        ("idempotency_keys", "key", {"unique": True, "expireAfterSeconds": 86400}),
+    ]
     
-    # Sessions
-    await db.sessions.create_index("user_id")
-    await db.sessions.create_index("refresh_token_hash", unique=True, sparse=True)
-    await db.sessions.create_index("expires_at", expireAfterSeconds=0)  # TTL index
+    # Also create compound indexes
+    compound_indexes = [
+        ("ledger_entries", [('account_id', 1), ('created_at', 1)], {}),
+    ]
     
-    # KYC Applications
-    await db.kyc_applications.create_index("user_id")
-    await db.kyc_applications.create_index("status")
+    created = 0
+    failed = 0
     
-    # Bank Accounts
-    await db.bank_accounts.create_index("user_id")
-    await db.bank_accounts.create_index("iban", unique=True, sparse=True)
+    for collection, field, options in indexes:
+        try:
+            await db[collection].create_index(field, **options)
+            created += 1
+        except Exception as e:
+            # Index might already exist or there could be a conflict - log but continue
+            logger.debug(f"Index {collection}.{field}: {e}")
+            failed += 1
     
-    # Ledger
-    await db.ledger_accounts.create_index("user_id")
-    await db.ledger_accounts.create_index("account_type")
-    await db.ledger_transactions.create_index("external_id", unique=True, sparse=True)
-    await db.ledger_transactions.create_index("created_at")
-    await db.ledger_transactions.create_index("status")
-    await db.ledger_entries.create_index("transaction_id")
-    await db.ledger_entries.create_index("account_id")
-    await db.ledger_entries.create_index([('account_id', 1), ('created_at', 1)])
+    for collection, fields, options in compound_indexes:
+        try:
+            await db[collection].create_index(fields, **options)
+            created += 1
+        except Exception as e:
+            logger.debug(f"Compound index {collection}.{fields}: {e}")
+            failed += 1
     
-    # Audit Logs
-    await db.audit_logs.create_index("performed_by")
-    await db.audit_logs.create_index("entity_type")
-    await db.audit_logs.create_index("created_at")
-    
-    # Support Tickets
-    await db.tickets.create_index("user_id")
-    await db.tickets.create_index("status")
-    
-    # Idempotency
-    await db.idempotency_keys.create_index(
-        "key", unique=True, expireAfterSeconds=86400  # 24 hours TTL
-    )
-    
-    logger.info("Database indexes created")
+    logger.info(f"Database indexes: {created} created/verified, {failed} skipped")
