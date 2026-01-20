@@ -35,16 +35,40 @@ async def connect_db(max_retries: int = 5, retry_delay: float = 2.0):
     # Try to get database name from URL first
     db_name_from_url = get_database_name_from_url(settings.MONGO_URL)
     
+    # Try to extract username from MongoDB URL (often the database name matches)
+    db_name_from_username = None
+    try:
+        if 'mongodb+srv://' in settings.MONGO_URL or 'mongodb://' in settings.MONGO_URL:
+            # Extract username from URL like mongodb+srv://username:password@...
+            url_part = settings.MONGO_URL.replace('mongodb+srv://', '').replace('mongodb://', '')
+            if ':' in url_part and '@' in url_part:
+                db_name_from_username = url_part.split(':')[0]
+                logger.info(f"Extracted potential database name from username: {db_name_from_username}")
+    except Exception:
+        pass
+    
     # List of database names to try (in order of priority)
-    # 1. From URL path (most reliable for managed MongoDB)
-    # 2. 'emergent' (Emergent platform default)
-    # 3. From DATABASE_NAME setting
+    # 1. From DATABASE_NAME setting (user explicitly set this)
+    # 2. From URL path (most reliable for managed MongoDB)
+    # 3. From username (MongoDB Atlas often uses username as db name)
+    # 4. 'emergent' (Emergent platform default)
     db_names_to_try = []
-    if db_name_from_url:
-        db_names_to_try.append(db_name_from_url)
-    db_names_to_try.append('emergent')  # Emergent platform default
-    if settings.DATABASE_NAME not in db_names_to_try:
+    
+    # First priority: what user set
+    if settings.DATABASE_NAME:
         db_names_to_try.append(settings.DATABASE_NAME)
+    
+    # Second: from URL path
+    if db_name_from_url and db_name_from_url not in db_names_to_try:
+        db_names_to_try.append(db_name_from_url)
+    
+    # Third: from username (common in MongoDB Atlas)
+    if db_name_from_username and db_name_from_username not in db_names_to_try:
+        db_names_to_try.append(db_name_from_username)
+    
+    # Fourth: emergent default
+    if 'emergent' not in db_names_to_try:
+        db_names_to_try.append('emergent')
     
     logger.info(f"Will try database names in order: {db_names_to_try}")
     logger.info(f"MongoDB URL: {settings.MONGO_URL[:50]}...")
