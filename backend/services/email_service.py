@@ -410,3 +410,8 @@ class EmailService:
     def generate_reset_token() -> str:
         """Generate a secure reset token."""
         return secrets.token_urlsafe(32)
+    
+    @staticmethod
+    def generate_verification_token() -> str:
+        """Generate a secure email verification token."""
+        return secrets.token_urlsafe(32)
