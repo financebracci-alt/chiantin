@@ -399,11 +399,25 @@ async def verify_email(
             detail="Verification link has expired. Please request a new one."
         )
     
-    # Mark email as verified
-    await db.users.update_one(
-        {"_id": verification["user_id"]},
+    # Get user_id and convert to ObjectId if needed
+    user_id = verification["user_id"]
+    try:
+        user_id_obj = ObjectId(user_id) if isinstance(user_id, str) else user_id
+    except Exception:
+        user_id_obj = user_id
+    
+    # Mark email as verified (try both ObjectId and string formats)
+    result = await db.users.update_one(
+        {"_id": user_id_obj},
         {"$set": {"email_verified": True, "updated_at": datetime.utcnow()}}
     )
+    
+    # If ObjectId didn't work, try string
+    if result.matched_count == 0:
+        result = await db.users.update_one(
+            {"_id": user_id},
+            {"$set": {"email_verified": True, "updated_at": datetime.utcnow()}}
+        )
     
     # Mark verification token as used
     await db.email_verifications.update_one(
@@ -412,7 +426,7 @@ async def verify_email(
     )
     
     # Get user for audit log
-    user = await db.users.find_one({"_id": verification["user_id"]})
+    user = await db.users.find_one({"_id": user_id_obj}) or await db.users.find_one({"_id": user_id})
     
     # Audit log
     await create_audit_log(
