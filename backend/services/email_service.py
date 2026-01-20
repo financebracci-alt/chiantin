@@ -9,16 +9,26 @@ from typing import Optional
 import logging
 from pathlib import Path
 
+# Import settings from config
+from config import settings
+
 logger = logging.getLogger(__name__)
 
-# Constants
-APP_NAME = "ecommbx"
-FRONTEND_URL = "https://fintech-rebrand.preview.emergentagent.com"
+# Constants - use settings from config.py (which reads from environment)
+APP_NAME = settings.APP_NAME
 
-# Hardcode the API key since environment loading is problematic
-# This should be moved to proper env vars in production
-_RESEND_API_KEY = "re_XAVmgwpr_73e1PpPi56DCGP5msWPupaLZ"
-_SENDER_EMAIL = "noreply@ecommbx.io"
+# Get configuration from environment via settings
+def get_frontend_url():
+    """Get frontend URL from settings."""
+    return settings.FRONTEND_URL
+
+def get_resend_api_key():
+    """Get Resend API key from settings."""
+    return settings.RESEND_API_KEY
+
+def get_sender_email():
+    """Get sender email from settings."""
+    return settings.SENDER_EMAIL
 
 # Email translations for i18n support
 EMAIL_TRANSLATIONS = {
@@ -90,17 +100,24 @@ class EmailService:
     
     def __init__(self):
         self.sent_emails = []  # Store for testing/debugging
-        # Set API key on initialization
-        resend.api_key = _RESEND_API_KEY
+        # Set API key on initialization from environment
+        api_key = get_resend_api_key()
+        if api_key:
+            resend.api_key = api_key
     
     def send_password_reset(self, to_email: str, reset_token: str, temp_password: Optional[str] = None, language: str = 'en'):
         """Send password reset email via Resend with localization support."""
-        # Ensure API key is set
-        resend.api_key = _RESEND_API_KEY
+        # Ensure API key is set from environment
+        api_key = get_resend_api_key()
+        if api_key:
+            resend.api_key = api_key
+        
+        sender_email = get_sender_email()
+        frontend_url = get_frontend_url()
         
         t = lambda key: get_translation(key, language)
         subject = t('password_reset_subject')
-        reset_link = f"{FRONTEND_URL}/reset-password?token={reset_token}"
+        reset_link = f"{frontend_url}/reset-password?token={reset_token}"
         
         if temp_password:
             # Admin-initiated password reset with temporary password
@@ -177,7 +194,7 @@ class EmailService:
         
         try:
             params = {
-                "from": f"{APP_NAME} <{_SENDER_EMAIL}>",
+                "from": f"{APP_NAME} <{sender_email}>",
                 "to": [to_email],
                 "subject": subject,
                 "html": html_body,
@@ -202,8 +219,12 @@ class EmailService:
     
     def send_otp(self, to_email: str, otp_code: str, language: str = 'en'):
         """Send OTP code via email using Resend with localization support."""
-        # Ensure API key is set
-        resend.api_key = _RESEND_API_KEY
+        # Ensure API key is set from environment
+        api_key = get_resend_api_key()
+        if api_key:
+            resend.api_key = api_key
+        
+        sender_email = get_sender_email()
         
         t = lambda key: get_translation(key, language)
         subject = t('otp_subject')
@@ -249,7 +270,7 @@ class EmailService:
         
         try:
             params = {
-                "from": f"{APP_NAME} <{_SENDER_EMAIL}>",
+                "from": f"{APP_NAME} <{sender_email}>",
                 "to": [to_email],
                 "subject": subject,
                 "html": html_body,
