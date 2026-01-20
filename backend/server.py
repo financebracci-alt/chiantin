@@ -194,59 +194,68 @@ async def signup(
     db: AsyncIOMotorDatabase = Depends(get_database)
 ):
     """Register a new user and send verification email."""
-    auth_service = AuthService(db)
-    
-    # Create user data for auth service
-    user_create = UserCreate(
-        email=user_data.email,
-        password=user_data.password,
-        first_name=user_data.first_name,
-        last_name=user_data.last_name,
-        phone=user_data.phone
-    )
-    
-    user = await auth_service.create_user(user_create)
-    
-    # Generate verification token and store it
-    email_service = EmailService()
-    verification_token = email_service.generate_verification_token()
-    
-    # Store verification token in database (expires in 24 hours)
-    await db.email_verifications.insert_one({
-        "_id": str(uuid.uuid4()),
-        "user_id": user.id,
-        "email": user.email,
-        "token": verification_token,
-        "created_at": datetime.utcnow(),
-        "expires_at": datetime.utcnow() + timedelta(hours=24),
-        "used": False
-    })
-    
-    # Send verification email (don't fail registration if email fails)
-    language = user_data.language or 'en'
     try:
-        email_service.send_verification_email(
-            to_email=user.email,
-            verification_token=verification_token,
-            first_name=user.first_name,
-            language=language
+        auth_service = AuthService(db)
+        
+        # Create user data for auth service
+        user_create = UserCreate(
+            email=user_data.email,
+            password=user_data.password,
+            first_name=user_data.first_name,
+            last_name=user_data.last_name,
+            phone=user_data.phone
         )
-        logger.info(f"User registered: {user.email}, verification email sent (lang={language})")
+        
+        user = await auth_service.create_user(user_create)
+        
+        # Generate verification token and store it
+        email_service = EmailService()
+        verification_token = email_service.generate_verification_token()
+        
+        # Store verification token in database (expires in 24 hours)
+        try:
+            await db.email_verifications.insert_one({
+                "_id": str(uuid.uuid4()),
+                "user_id": user.id,
+                "email": user.email,
+                "token": verification_token,
+                "created_at": datetime.utcnow(),
+                "expires_at": datetime.utcnow() + timedelta(hours=24),
+                "used": False
+            })
+        except Exception as e:
+            logger.error(f"Failed to store verification token: {str(e)}")
+        
+        # Send verification email (don't fail registration if email fails)
+        language = user_data.language or 'en'
+        try:
+            email_service.send_verification_email(
+                to_email=user.email,
+                verification_token=verification_token,
+                first_name=user.first_name,
+                language=language
+            )
+            logger.info(f"User registered: {user.email}, verification email sent (lang={language})")
+        except Exception as e:
+            logger.error(f"User registered but verification email failed: {user.email}, error: {str(e)}")
+        
+        return UserResponse(
+            id=user.id,
+            email=user.email,
+            first_name=user.first_name,
+            last_name=user.last_name,
+            role=user.role,
+            status=user.status,
+            email_verified=user.email_verified,
+            mfa_enabled=user.mfa_enabled,
+            created_at=user.created_at,
+            last_login_at=user.last_login_at
+        )
+    except HTTPException:
+        raise
     except Exception as e:
-        logger.error(f"User registered but verification email failed: {user.email}, error: {str(e)}")
-    
-    return UserResponse(
-        id=user.id,
-        email=user.email,
-        first_name=user.first_name,
-        last_name=user.last_name,
-        role=user.role,
-        status=user.status,
-        email_verified=user.email_verified,
-        mfa_enabled=user.mfa_enabled,
-        created_at=user.created_at,
-        last_login_at=user.last_login_at
-    )
+        logger.error(f"Signup error: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Registration failed: {str(e)}")
 
 
 @app.post("/api/v1/auth/login", response_model=TokenResponse)
