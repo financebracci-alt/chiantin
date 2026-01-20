@@ -485,16 +485,18 @@ async def resend_verification_email(
         "used": False
     })
     
-    # Send verification email
+    # Send verification email (don't fail if email fails)
     language = request_data.language or 'en'
-    email_service.send_verification_email(
-        to_email=user["email"],
-        verification_token=verification_token,
-        first_name=user.get("first_name", ""),
-        language=language
-    )
-    
-    logger.info(f"Verification email resent to: {user['email']} (lang={language})")
+    try:
+        email_service.send_verification_email(
+            to_email=user["email"],
+            verification_token=verification_token,
+            first_name=user.get("first_name", ""),
+            language=language
+        )
+        logger.info(f"Verification email resent to: {user['email']} (lang={language})")
+    except Exception as e:
+        logger.error(f"Failed to resend verification email to {user['email']}: {str(e)}")
     
     return {"message": "Verification email sent. Please check your inbox.", "success": True}
 
