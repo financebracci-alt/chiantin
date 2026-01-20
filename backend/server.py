@@ -201,12 +201,12 @@ async def debug_db_status():
     result = {
         "database_name_env": os.environ.get("DATABASE_NAME", "NOT SET"),
         "mongo_url_prefix": os.environ.get("MONGO_URL", "NOT SET")[:50] + "..." if os.environ.get("MONGO_URL") else "NOT SET",
-        "connected_database": _database.name if _database else "NOT CONNECTED",
-        "client_status": "CONNECTED" if _client else "NOT CONNECTED"
+        "connected_database": _database.name if _database is not None else "NOT CONNECTED",
+        "client_status": "CONNECTED" if _client is not None else "NOT CONNECTED"
     }
     
     # Try to actually query the database
-    if _database:
+    if _database is not None:
         try:
             # Try to list collections
             collections = await _database.list_collection_names()
