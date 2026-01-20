@@ -32,15 +32,21 @@ async def connect_db(max_retries: int = 5, retry_delay: float = 2.0):
     """Connect to MongoDB with retry logic for production resilience."""
     global _client, _database
     
-    # Try to get database name from URL first, then fall back to settings
+    # Try to get database name from URL first
     db_name_from_url = get_database_name_from_url(settings.MONGO_URL)
-    database_name = db_name_from_url or settings.DATABASE_NAME
     
-    logger.info(f"Connecting to MongoDB database: {database_name}")
+    # List of database names to try (in order of priority)
+    # 1. From URL path (most reliable for managed MongoDB)
+    # 2. 'emergent' (Emergent platform default)
+    # 3. From DATABASE_NAME setting
+    db_names_to_try = []
     if db_name_from_url:
-        logger.info(f"Database name extracted from MONGO_URL: {db_name_from_url}")
-    else:
-        logger.info(f"Using DATABASE_NAME from settings: {settings.DATABASE_NAME}")
+        db_names_to_try.append(db_name_from_url)
+    db_names_to_try.append('emergent')  # Emergent platform default
+    if settings.DATABASE_NAME not in db_names_to_try:
+        db_names_to_try.append(settings.DATABASE_NAME)
+    
+    logger.info(f"Will try database names in order: {db_names_to_try}")
     logger.info(f"MongoDB URL: {settings.MONGO_URL[:50]}...")
     
     # Create client with production-ready settings
@@ -53,31 +59,44 @@ async def connect_db(max_retries: int = 5, retry_delay: float = 2.0):
         retryReads=True,
     )
     
-    _database = _client[database_name]
+    # Try each database name until one works
+    last_error = None
+    for database_name in db_names_to_try:
+        logger.info(f"Trying database: {database_name}")
+        _database = _client[database_name]
+        
+        # Try to verify connection with a simple operation
+        for attempt in range(max_retries):
+            try:
+                # Try to list collections - this will fail if not authorized
+                await _database.list_collection_names()
+                logger.info(f"Successfully connected to database: {database_name}")
+                
+                # Try to create indexes
+                try:
+                    await create_indexes()
+                except Exception as e:
+                    logger.warning(f"Index creation failed (will retry on next startup): {e}")
+                
+                logger.info("MongoDB startup complete")
+                return  # Success!
+                
+            except Exception as e:
+                last_error = e
+                error_str = str(e).lower()
+                if 'not authorized' in error_str or 'unauthorized' in error_str:
+                    logger.warning(f"Not authorized for database '{database_name}', trying next...")
+                    break  # Try next database name
+                elif attempt < max_retries - 1:
+                    logger.warning(f"Connection attempt {attempt + 1} failed: {e}. Retrying in {retry_delay}s...")
+                    await asyncio.sleep(retry_delay)
+                else:
+                    logger.warning(f"Failed to connect to '{database_name}' after {max_retries} attempts")
+                    break  # Try next database name
     
-    # Try to verify connection with retries
-    for attempt in range(max_retries):
-        try:
-            # Ping the database to verify connection
-            await _client.admin.command('ping')
-            logger.info("MongoDB connection verified successfully")
-            break
-        except Exception as e:
-            if attempt < max_retries - 1:
-                logger.warning(f"MongoDB connection attempt {attempt + 1} failed: {e}. Retrying in {retry_delay}s...")
-                await asyncio.sleep(retry_delay)
-            else:
-                logger.error(f"MongoDB connection failed after {max_retries} attempts: {e}")
-                # Don't crash - let the app start and handle DB errors gracefully
-                logger.warning("App will start but database operations may fail")
-    
-    # Try to create indexes (non-blocking, with error handling)
-    try:
-        await create_indexes()
-    except Exception as e:
-        logger.warning(f"Index creation failed (will retry on next startup): {e}")
-    
-    logger.info("MongoDB startup complete")
+    # If we get here, none of the database names worked
+    logger.error(f"Could not connect to any database. Last error: {last_error}")
+    logger.warning("App will start but database operations may fail")
 
 
 async def disconnect_db():
