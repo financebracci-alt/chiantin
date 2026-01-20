@@ -8,8 +8,8 @@ import sys
 from datetime import datetime
 
 # Backend URL from environment
-BASE_URL = "https://translatlas.preview.emergentagent.com/api/v1"
-HEALTH_URL = "https://translatlas.preview.emergentagent.com/api/health"
+BASE_URL = "https://fintech-app-32.preview.emergentagent.com/api/v1"
+HEALTH_URL = "https://fintech-app-32.preview.emergentagent.com/api/health"
 
 # Demo credentials
 CUSTOMER_EMAIL = "customer@demo.com"
