@@ -1,14 +1,42 @@
-"""Statement generation service using WeasyPrint."""
+"""Statement generation service using WeasyPrint (lazy imported)."""
 
 from motor.motor_asyncio import AsyncIOMotorDatabase
 from datetime import datetime, timedelta
 from typing import Optional
-from weasyprint import HTML
 from io import BytesIO
 import calendar
+import logging
 
 from services.ledger_service import LedgerEngine
 from utils.common import serialize_doc
+
+logger = logging.getLogger(__name__)
+
+# Lazy import flag for WeasyPrint
+_weasyprint_available = None
+_HTML = None
+
+
+def _get_weasyprint():
+    """Lazily import WeasyPrint only when needed."""
+    global _weasyprint_available, _HTML
+    
+    if _weasyprint_available is None:
+        try:
+            from weasyprint import HTML
+            _HTML = HTML
+            _weasyprint_available = True
+            logger.info("WeasyPrint loaded successfully")
+        except ImportError as e:
+            _weasyprint_available = False
+            _HTML = None
+            logger.warning(f"WeasyPrint not available: {e}. PDF generation will be disabled.")
+        except Exception as e:
+            _weasyprint_available = False
+            _HTML = None
+            logger.warning(f"WeasyPrint failed to load: {e}. PDF generation will be disabled.")
+    
+    return _HTML
 
 
 class StatementService:
@@ -24,6 +52,11 @@ class StatementService:
         month: int
     ) -> bytes:
         """Generate monthly statement PDF for an account."""
+        # Check if WeasyPrint is available
+        HTML = _get_weasyprint()
+        if HTML is None:
+            raise ValueError("PDF generation is not available. WeasyPrint dependency not installed.")
+        
         # Get account
         account = await self.db.bank_accounts.find_one({"_id": account_id})
         if not account or account["user_id"] != user_id:
@@ -164,8 +197,8 @@ class StatementService:
             <style>
                 @page {{ size: A4; margin: 2cm; }}
                 body {{ font-family: 'Inter', 'Arial', sans-serif; font-size: 10pt; color: #1F2937; }}
-                h1 {{ font-family: 'Space Grotesk', sans-serif; color: #0B5D8F; margin: 0 0 20px 0; }}
-                .header {{ margin-bottom: 30px; padding-bottom: 20px; border-bottom: 2px solid #0B5D8F; }}
+                h1 {{ font-family: 'Space Grotesk', sans-serif; color: #dc3545; margin: 0 0 20px 0; }}
+                .header {{ margin-bottom: 30px; padding-bottom: 20px; border-bottom: 2px solid #dc3545; }}
                 .info-grid {{ display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 30px; }}
                 .info-item {{ }}
                 .info-label {{ font-size: 9pt; color: #6B7280; margin-bottom: 4px; }}
@@ -180,7 +213,7 @@ class StatementService:
         </head>
         <body>
             <div class="header">
-                <h1>Project Atlas</h1>
+                <h1>ecommbx</h1>
                 <p style="color: #6B7280; margin: 0;">Account Statement</p>
             </div>
             
