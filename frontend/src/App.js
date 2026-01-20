@@ -356,14 +356,20 @@ function LoginPage() {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [emailNotVerified, setEmailNotVerified] = useState(false);
+  const [resendLoading, setResendLoading] = useState(false);
+  const [resendSuccess, setResendSuccess] = useState(false);
   const { login } = useAuth();
   const navigate = useNavigate();
+  const toast = useToast();
   const { t, language, setLanguage } = useLanguage();
   const { isDark, toggleTheme } = useTheme();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
+    setEmailNotVerified(false);
+    setResendSuccess(false);
     setLoading(true);
     try {
       const user = await login(email, password);
@@ -374,9 +380,29 @@ function LoginPage() {
         navigate('/admin');
       }
     } catch (err) {
-      setError(err.response?.data?.detail || t('loginFailed'));
+      const errorDetail = err.response?.data?.detail;
+      if (errorDetail === 'EMAIL_NOT_VERIFIED') {
+        setEmailNotVerified(true);
+        setError(t('emailNotVerifiedError'));
+      } else {
+        setError(errorDetail || t('loginFailed'));
+      }
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleResendVerification = async () => {
+    setResendLoading(true);
+    setResendSuccess(false);
+    try {
+      await api.post('/auth/resend-verification', { email, language });
+      setResendSuccess(true);
+      toast.success(t('verificationEmailSent'));
+    } catch (err) {
+      toast.error(err.response?.data?.detail || 'Failed to send verification email');
+    } finally {
+      setResendLoading(false);
     }
   };
 
