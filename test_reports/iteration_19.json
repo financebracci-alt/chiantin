@@ -122,7 +122,7 @@
   ],
   
   "test_environment": {
-    "backend_url": "https://mongo-perf-fix.preview.emergentagent.com",
+    "backend_url": "https://money-flow-136.preview.emergentagent.com",
     "test_accounts": {
       "admin": "admin@atlas.local",
       "customer": "customer@demo.com"
