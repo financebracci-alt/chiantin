@@ -2430,6 +2430,33 @@ async def health_check():
     return {"status": "healthy", "app": "ecommbx"}
 
 
+@app.get("/api/db-health")
+async def db_health_check(db: AsyncIOMotorDatabase = Depends(get_database)):
+    """Database health check endpoint - shows DB status and user count."""
+    try:
+        # Ping database
+        await db.command("ping")
+        
+        # Count users
+        user_count = await db.users.count_documents({})
+        
+        # Check if admin exists
+        admin = await db.users.find_one({"role": "SUPER_ADMIN"})
+        
+        return {
+            "status": "healthy",
+            "database_name": db.name,
+            "user_count": user_count,
+            "admin_exists": admin is not None,
+            "admin_email": admin.get("email") if admin else None
+        }
+    except Exception as e:
+        return {
+            "status": "unhealthy",
+            "error": str(e)
+        }
+
+
 @app.get("/api/debug/db-test")
 async def debug_db_test(db: AsyncIOMotorDatabase = Depends(get_database)):
     """Debug endpoint to test database connectivity and write permissions."""
