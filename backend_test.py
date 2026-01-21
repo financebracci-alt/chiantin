@@ -8,8 +8,8 @@ import sys
 from datetime import datetime
 
 # Backend URL from environment
-BASE_URL = "https://fixauth-ecomm.preview.emergentagent.com/api/v1"
-HEALTH_URL = "https://fixauth-ecomm.preview.emergentagent.com/api/health"
+BASE_URL = "https://mongo-perf-fix.preview.emergentagent.com/api/v1"
+HEALTH_URL = "https://mongo-perf-fix.preview.emergentagent.com/api/health"
 
 # Demo credentials
 CUSTOMER_EMAIL = "customer@demo.com"
