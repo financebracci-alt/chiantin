@@ -988,10 +988,12 @@ function AccountsPage() {
   const translateDisplayType = (type) => {
     if (!type) return t('transaction');
     const typeLower = type.toLowerCase();
-    if (typeLower === 'sepa transfer') return t('sepaTransfer');
+    if (typeLower === 'sepa transfer' || typeLower === 'sepa_transfer') return t('sepaTransfer');
+    if (typeLower === 'external transfer' || typeLower === 'external_transfer') return t('sepaTransfer');
     if (typeLower === 'bank transfer') return t('bankTransfer');
     if (typeLower === 'wire transfer') return t('wireTransfer');
     if (typeLower === 'internal transfer') return t('internalTransfer');
+    if (typeLower === 'p2p transfer' || typeLower === 'p2p_transfer') return t('sepaTransfer');
     if (typeLower === 'top up' || typeLower === 'top_up') return t('topUpDisplay');
     if (typeLower === 'withdraw' || typeLower === 'withdrawal') return t('withdrawDisplay');
     if (typeLower === 'fee') return t('feeDisplay');
