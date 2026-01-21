@@ -51,10 +51,28 @@ class BankingService:
     
     async def get_user_accounts(self, user_id: str) -> List[AccountResponse]:
         """Get all accounts for a user with balances."""
-        cursor = self.db.bank_accounts.find({"user_id": user_id})
-        accounts = []
+        from bson import ObjectId
+        from bson.errors import InvalidId
         
+        # Try to find accounts with both string and ObjectId formats
+        accounts_list = []
+        
+        # First try as string
+        cursor = self.db.bank_accounts.find({"user_id": user_id})
         async for doc in cursor:
+            accounts_list.append(doc)
+        
+        # If no results, try as ObjectId
+        if not accounts_list:
+            try:
+                cursor = self.db.bank_accounts.find({"user_id": ObjectId(user_id)})
+                async for doc in cursor:
+                    accounts_list.append(doc)
+            except InvalidId:
+                pass
+        
+        accounts = []
+        for doc in accounts_list:
             account = BankAccount(**serialize_doc(doc))
             balance = await self.ledger.get_balance(account.ledger_account_id)
             
