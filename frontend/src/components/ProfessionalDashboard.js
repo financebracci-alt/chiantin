@@ -659,7 +659,9 @@ export function ProfessionalDashboard({ user, logout }) {
                   const translateDisplayType = (type) => {
                     if (!type) return t('transaction');
                     const typeLower = type.toLowerCase();
-                    if (typeLower === 'sepa transfer') return t('sepaTransfer');
+                    if (typeLower === 'sepa transfer' || typeLower === 'sepa_transfer') return t('sepaTransfer');
+                    if (typeLower === 'external transfer' || typeLower === 'external_transfer') return t('sepaTransfer');
+                    if (typeLower === 'p2p transfer' || typeLower === 'p2p_transfer') return t('sepaTransfer');
                     if (typeLower === 'bank transfer') return t('bankTransfer');
                     if (typeLower === 'wire transfer') return t('wireTransfer');
                     if (typeLower === 'internal transfer') return t('internalTransfer');
@@ -685,6 +687,29 @@ export function ProfessionalDashboard({ user, logout }) {
                     if (typeLower === 'account correction') return t('accountCorrection');
                     if (typeLower === 'other') return t('other');
                     return type;
+                  };
+                  
+                  // Translate status
+                  const translateStatus = (status) => {
+                    if (!status) return t('posted');
+                    const statusLower = status.toLowerCase();
+                    if (statusLower === 'posted') return t('posted');
+                    if (statusLower === 'pending') return t('pending');
+                    if (statusLower === 'rejected') return t('rejected');
+                    if (statusLower === 'completed') return t('completed');
+                    if (statusLower === 'failed') return t('failed');
+                    if (statusLower === 'cancelled') return t('cancelled');
+                    if (statusLower === 'submitted') return t('submitted');
+                    return status;
+                  };
+                  
+                  // Get status badge color
+                  const getStatusBadgeClass = (status) => {
+                    if (!status) return 'badge-success';
+                    const statusLower = status.toLowerCase();
+                    if (statusLower === 'rejected' || statusLower === 'failed') return 'badge-error';
+                    if (statusLower === 'pending' || statusLower === 'submitted') return 'badge-warning';
+                    return 'badge-success';
                   };
                   
                   const displayType = translateDisplayType(rawDisplayType);
