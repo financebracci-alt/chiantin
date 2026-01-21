@@ -411,6 +411,7 @@ const translations = {
     ourTeamReviewing: 'Our team is reviewing your application.',
     approved: 'Approved',
     rejected: 'Rejected',
+    rejectionReason: 'Rejection Reason',
     needsMoreInfo: 'Needs More Information',
     kycPersonalInfo: 'Personal Info',
     kycDocuments: 'Documents',
