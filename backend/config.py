@@ -20,15 +20,15 @@ class Settings(BaseSettings):
     APP_ENV: str = Field(default="production")
     DEBUG: bool = Field(default=False)
     
-    # Security
-    SECRET_KEY: str = Field(default="ecommbx-super-secret-key-production-2026")
+    # Security - No hardcoded defaults for sensitive values
+    SECRET_KEY: str = Field(default="")
     JWT_ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 15
     REFRESH_TOKEN_EXPIRE_DAYS: int = 30
     
-    # Database - Uses Emergent's local MongoDB by default
+    # Database - Read from environment
     MONGO_URL: str = Field(default="mongodb://localhost:27017")
-    DATABASE_NAME: str = Field(default="ecommbx-fresh-1769004484")
+    DATABASE_NAME: str = Field(default="")
     
     # Storage
     S3_PROVIDER: str = "local"
@@ -36,19 +36,19 @@ class Settings(BaseSettings):
     S3_ACCESS_KEY: str | None = None
     S3_SECRET_KEY: str | None = None
     S3_REGION: str = "us-east-1"
-    S3_BUCKET: str = "atlas-banking"
+    S3_BUCKET: str = "ecommbx-storage"
     S3_USE_SSL: bool = False
     STORAGE_BASE_PATH: str = "/app/storage"
     
-    # Seeding - Admin credentials
-    SEED_SUPERADMIN_EMAIL: str = "admin@ecommbx.io"
-    SEED_SUPERADMIN_PASSWORD: str = "Admin@123456"
+    # Seeding - Configurable via environment
+    SEED_SUPERADMIN_EMAIL: str = Field(default="admin@ecommbx.io")
+    SEED_SUPERADMIN_PASSWORD: str = Field(default="Admin@123456")
     
-    # URLs
-    FRONTEND_URL: str = Field(default="https://ecommbx.io")
+    # URLs - Read from environment
+    FRONTEND_URL: str = Field(default="")
     
-    # Email (Resend)
-    RESEND_API_KEY: str = Field(default="re_XAVmgwpr_73e1PpPi56DCGP5msWPupaLZ")
+    # Email (Resend) - No hardcoded API keys
+    RESEND_API_KEY: str = Field(default="")
     SENDER_EMAIL: str = Field(default="noreply@ecommbx.io")
     
     class Config:
