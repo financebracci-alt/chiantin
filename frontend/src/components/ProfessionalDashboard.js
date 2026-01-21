@@ -1052,12 +1052,26 @@ export function ProfessionalDashboard({ user, logout }) {
                         {isCredit ? '+' : '-'}€{formatAmount(amount)}
                       </p>
                       <span className={`inline-block mt-2 px-3 py-1 rounded-full text-xs font-medium ${
-                        txn.status === 'POSTED' ? 'bg-green-100 text-green-700' : 
-                        txn.status === 'PENDING' ? 'bg-yellow-100 text-yellow-700' : 
+                        txn.status === 'POSTED' || txn.status === 'COMPLETED' ? 'bg-green-100 text-green-700' : 
+                        txn.status === 'PENDING' || txn.status === 'SUBMITTED' ? 'bg-yellow-100 text-yellow-700' : 
+                        txn.status === 'REJECTED' ? 'bg-red-100 text-red-700' :
                         'bg-gray-100 text-gray-700'
                       }`}>
-                        {txn.status === 'POSTED' ? t('posted') : (txn.status || t('posted'))}
+                        {txn.status === 'POSTED' ? t('posted') : 
+                         txn.status === 'COMPLETED' ? t('completed') :
+                         txn.status === 'REJECTED' ? t('rejected') :
+                         txn.status === 'PENDING' ? t('pending') :
+                         txn.status === 'SUBMITTED' ? t('submitted') :
+                         (txn.status || t('posted'))}
                       </span>
+                      
+                      {/* Rejection Reason */}
+                      {txn.status === 'REJECTED' && (metadata.rejection_reason || txn.rejection_reason || txn.admin_notes) && (
+                        <div className="mt-3 p-3 bg-red-50 rounded-lg border border-red-200">
+                          <p className="text-sm font-medium text-red-800">{t('rejectionReason')}:</p>
+                          <p className="text-sm text-red-700 mt-1">{metadata.rejection_reason || txn.rejection_reason || txn.admin_notes}</p>
+                        </div>
+                      )}
                     </div>
 
                     {/* Details */}
