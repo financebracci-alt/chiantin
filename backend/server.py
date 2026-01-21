@@ -1993,7 +1993,8 @@ async def create_p2p_transfer(
         from_user_id=current_user["id"],
         to_iban=data.to_iban,
         amount=data.amount,
-        reason=data.reason
+        reason=data.reason,
+        recipient_name=data.recipient_name
     )
     
     return result
