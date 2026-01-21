@@ -981,7 +981,13 @@ function AccountsPage() {
   };
 
   const formatDate = (dateStr) => {
-    return new Date(dateStr).toLocaleDateString();
+    if (!dateStr) return '';
+    return new Date(dateStr).toLocaleDateString('en-GB', {
+      day: '2-digit',
+      month: 'short', 
+      year: 'numeric',
+      timeZone: 'Europe/Rome'
+    });
   };
 
   // Translation helper for transaction types
