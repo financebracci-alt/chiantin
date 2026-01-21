@@ -1,9 +1,10 @@
 """Configuration management for ecommbx Banking Platform."""
 
 import os
+import sys
 from functools import lru_cache
 from pathlib import Path
-from pydantic import Field
+from pydantic import Field, field_validator
 from pydantic_settings import BaseSettings
 
 
@@ -26,9 +27,9 @@ class Settings(BaseSettings):
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 15
     REFRESH_TOKEN_EXPIRE_DAYS: int = 30
     
-    # Database
+    # Database - NO DEFAULTS that could cause silent fallback
     MONGO_URL: str = Field(default="mongodb://localhost:27017")
-    DATABASE_NAME: str = Field(default="emergent")
+    DATABASE_NAME: str = Field(default="")  # Empty default - will be validated
     
     # Storage
     S3_PROVIDER: str = "local"  # local, minio, aws
@@ -50,6 +51,20 @@ class Settings(BaseSettings):
     # Email (Resend)
     RESEND_API_KEY: str = Field(default="")
     SENDER_EMAIL: str = Field(default="noreply@ecommbx.io")
+    
+    @field_validator('DATABASE_NAME')
+    @classmethod
+    def validate_database_name(cls, v):
+        """CRITICAL: Fail startup if DATABASE_NAME is not set."""
+        if not v or v.strip() == "":
+            print("=" * 60)
+            print("FATAL ERROR: DATABASE_NAME environment variable is NOT SET!")
+            print("=" * 60)
+            print("The backend CANNOT start without a valid DATABASE_NAME.")
+            print("Please set DATABASE_NAME in your environment variables.")
+            print("=" * 60)
+            sys.exit(1)
+        return v
     
     class Config:
         # Only use .env file if it exists (production uses K8s secrets as env vars)
