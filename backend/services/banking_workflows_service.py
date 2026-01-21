@@ -298,7 +298,7 @@ class BankingWorkflowsService:
     ):
         """Admin rejects transfer - returns money to user's account."""
         from services.ledger_service import LedgerEngine
-        from core.ledger import EntryDirection
+        from core.ledger import EntryDirection, AccountType
         from datetime import timezone
         
         trans_doc = await self.db.transfers.find_one({"_id": transfer_id})
@@ -331,11 +331,34 @@ class BankingWorkflowsService:
         if bank_account and amount > 0:
             ledger_engine = LedgerEngine(self.db)
             
-            # Create refund transaction
+            # Get or create the SEPA outgoing account (this was credited during the original transfer)
+            # We need to debit it to balance the refund credit to user
+            sepa_account = await self.db.ledger_accounts.find_one({"type": "SEPA_OUTGOING"})
+            if not sepa_account:
+                # Fallback to SANDBOX_FUNDING if SEPA_OUTGOING doesn't exist
+                sepa_account = await self.db.ledger_accounts.find_one({"account_type": "SANDBOX_FUNDING"})
+            
+            if not sepa_account:
+                # Create a SANDBOX_FUNDING account as last resort
+                sepa_account = {
+                    "_id": f"sandbox_funding_{uuid.uuid4()}",
+                    "account_type": "SANDBOX_FUNDING",
+                    "type": "SANDBOX_FUNDING",
+                    "currency": "EUR",
+                    "created_at": datetime.now(timezone.utc)
+                }
+                await self.db.ledger_accounts.insert_one(sepa_account)
+            
+            sepa_account_id = sepa_account["_id"]
+            
+            # Create refund transaction with balanced entries
+            # CREDIT user's account (money returned)
+            # DEBIT SEPA/funding account (money comes from there)
             await ledger_engine.post_transaction(
                 transaction_type="TRANSFER_REFUND",
                 entries=[
-                    (bank_account["ledger_account_id"], amount, EntryDirection.CREDIT)
+                    (bank_account["ledger_account_id"], amount, EntryDirection.CREDIT),
+                    (sepa_account_id, amount, EntryDirection.DEBIT)
                 ],
                 external_id=f"refund_{transfer_id}_{uuid.uuid4()}",
                 reason=f"Refund: Transfer rejected - {reason}",
@@ -346,7 +369,7 @@ class BankingWorkflowsService:
                     "display_type": "Transfer Refund",
                     "sender_name": "ECOMMBX",
                     "description": f"Refund for rejected transfer to {trans_doc.get('beneficiary_name', 'Unknown')}",
-                    "status": "REJECTED"
+                    "status": "POSTED"
                 }
             )
         
