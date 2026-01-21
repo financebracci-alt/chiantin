@@ -1,9 +1,9 @@
-"""Transfer service for P2P transfers."""
+"""Transfer service for P2P and SEPA transfers."""
 
 from motor.motor_asyncio import AsyncIOMotorDatabase
 from fastapi import HTTPException
 import uuid
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 from bson import ObjectId
 
 from services.ledger_service import LedgerEngine
@@ -40,23 +40,43 @@ class TransferService:
         
         return None
     
+    async def _get_user_details(self, user_id):
+        """Get user details, handling ObjectId/string formats."""
+        user = await self.db.users.find_one({"_id": user_id})
+        if not user:
+            try:
+                user = await self.db.users.find_one({"_id": ObjectId(user_id)})
+            except:
+                pass
+        if not user:
+            user = await self.db.users.find_one({"_id": str(user_id)})
+        return user
+    
     async def p2p_transfer(
         self,
         from_user_id: str,
         to_iban: str,
         amount: int,
-        reason: str = "P2P Transfer",
-        recipient_name: str = None  # Optional recipient name for external transfers
+        reason: str = "SEPA Transfer",
+        recipient_name: str = None
     ):
-        """Transfer money to any IBAN - internal or external."""
+        """Transfer money to any IBAN - internal or SEPA."""
         
         # Normalize IBAN (remove spaces)
         normalized_iban = to_iban.replace(" ", "").upper()
         
-        # Get sender's account - try multiple ID formats
+        # Get sender's account
         from_account = await self._find_bank_account_by_user(from_user_id)
         if not from_account:
             raise HTTPException(status_code=404, detail="Your account not found")
+        
+        # Get sender user details
+        from_user = await self._get_user_details(from_user_id)
+        sender_name = "Unknown"
+        if from_user:
+            first = from_user.get('first_name', '')
+            last = from_user.get('last_name', '')
+            sender_name = f"{first} {last}".strip() or from_user.get('email', 'Unknown')
         
         # Check if sender is trying to send to themselves
         if from_account.get("iban") == normalized_iban:
@@ -70,32 +90,33 @@ class TransferService:
         # Try to find recipient's bank account by IBAN (internal transfer)
         to_account = await self.db.bank_accounts.find_one({"iban": normalized_iban})
         
+        # Current time with correct timezone (UTC+1 for Europe)
+        now = datetime.now(timezone.utc)
+        
         if to_account:
             # INTERNAL TRANSFER - recipient exists in our system
             to_user_id = to_account["user_id"]
             
-            # Check not sending to self (compare as strings)
+            # Check not sending to self
             if str(to_user_id) == str(from_user_id):
                 raise HTTPException(status_code=400, detail="Cannot transfer to yourself")
             
-            # Get recipient user details - try both formats
-            to_user = await self.db.users.find_one({"_id": to_user_id})
-            if not to_user:
-                try:
-                    to_user = await self.db.users.find_one({"_id": ObjectId(to_user_id)})
-                except:
-                    pass
-            if not to_user:
-                to_user = await self.db.users.find_one({"_id": str(to_user_id)})
+            # Get recipient user details
+            to_user = await self._get_user_details(to_user_id)
+            final_recipient_name = "Unknown"
+            if to_user:
+                first = to_user.get('first_name', '')
+                last = to_user.get('last_name', '')
+                final_recipient_name = f"{first} {last}".strip() or to_user.get('email', 'Unknown')
             
-            # Execute internal transfer (debit sender, credit recipient)
+            # Execute internal transfer immediately (debit sender, credit recipient)
             txn = await self.ledger.post_transaction(
-                transaction_type="P2P_TRANSFER",
+                transaction_type="SEPA_TRANSFER",
                 entries=[
                     (from_account["ledger_account_id"], amount, EntryDirection.DEBIT),
                     (to_account["ledger_account_id"], amount, EntryDirection.CREDIT)
                 ],
-                external_id=f"p2p_{uuid.uuid4()}",
+                external_id=f"sepa_{uuid.uuid4()}",
                 reason=reason,
                 performed_by=str(from_user_id),
                 metadata={
@@ -106,76 +127,100 @@ class TransferService:
                 }
             )
             
-            # Build recipient name from user data
-            final_recipient_name = "Unknown"
-            if to_user:
-                first = to_user.get('first_name', '')
-                last = to_user.get('last_name', '')
-                final_recipient_name = f"{first} {last}".strip() or to_user.get('email', 'Unknown')
+            # Store in transfers collection for admin visibility
+            transfer_id = str(uuid.uuid4())
+            transfer_record = {
+                "_id": transfer_id,
+                "user_id": str(from_user_id),
+                "transaction_id": txn.id,
+                "type": "SEPA_TRANSFER",
+                "beneficiary_name": final_recipient_name,
+                "beneficiary_iban": normalized_iban,
+                "amount": amount,
+                "details": reason,
+                "reference_number": f"SEPA-{transfer_id[:8].upper()}",
+                "status": "COMPLETED",  # Internal transfers complete immediately
+                "transfer_type": "INTERNAL",
+                "sender_name": sender_name,
+                "sender_iban": from_account.get("iban"),
+                "created_at": now,
+                "updated_at": now,
+                "completed_at": now
+            }
+            await self.db.transfers.insert_one(transfer_record)
             
             return {
                 "transaction_id": txn.id,
+                "transfer_id": transfer_id,
                 "amount": amount,
                 "recipient": final_recipient_name,
                 "recipient_iban": normalized_iban,
-                "status": "POSTED",
-                "transfer_type": "INTERNAL"
+                "status": "COMPLETED",
+                "transfer_type": "SEPA_TRANSFER"
             }
         
         else:
-            # EXTERNAL TRANSFER - recipient IBAN not in our system
-            # Just deduct from sender's balance and log the transfer
+            # SEPA TRANSFER - recipient IBAN not in our system
+            # Deduct from sender's balance, but mark as SUBMITTED for admin review
             
-            # Create external outgoing ledger account if it doesn't exist
-            external_account = await self.db.ledger_accounts.find_one({"type": "EXTERNAL_OUTGOING"})
-            if not external_account:
-                external_account = {
-                    "_id": f"external_outgoing_{uuid.uuid4()}",
-                    "type": "EXTERNAL_OUTGOING",
-                    "name": "External Outgoing Transfers",
+            # Create SEPA outgoing ledger account if it doesn't exist
+            sepa_account = await self.db.ledger_accounts.find_one({"type": "SEPA_OUTGOING"})
+            if not sepa_account:
+                sepa_account = {
+                    "_id": f"sepa_outgoing_{uuid.uuid4()}",
+                    "type": "SEPA_OUTGOING",
+                    "name": "SEPA Outgoing Transfers",
                     "currency": "EUR",
-                    "created_at": datetime.now(timezone.utc)
+                    "created_at": now
                 }
-                await self.db.ledger_accounts.insert_one(external_account)
+                await self.db.ledger_accounts.insert_one(sepa_account)
             
-            # Execute external transfer (debit sender, credit external account)
+            # Execute SEPA transfer (debit sender, credit SEPA account)
             txn = await self.ledger.post_transaction(
-                transaction_type="EXTERNAL_TRANSFER",
+                transaction_type="SEPA_TRANSFER",
                 entries=[
                     (from_account["ledger_account_id"], amount, EntryDirection.DEBIT),
-                    (external_account["_id"], amount, EntryDirection.CREDIT)
+                    (sepa_account["_id"], amount, EntryDirection.CREDIT)
                 ],
-                external_id=f"ext_{uuid.uuid4()}",
+                external_id=f"sepa_{uuid.uuid4()}",
                 reason=reason,
                 performed_by=str(from_user_id),
                 metadata={
                     "from_user": str(from_user_id),
                     "to_iban": normalized_iban,
-                    "recipient_name": recipient_name or "External Account",
-                    "transfer_type": "EXTERNAL"
+                    "recipient_name": recipient_name or "SEPA Recipient",
+                    "transfer_type": "SEPA"
                 }
             )
             
-            # Also store in a separate external_transfers collection for tracking
-            external_transfer_record = {
-                "_id": str(uuid.uuid4()),
+            # Store in transfers collection for admin panel
+            transfer_id = str(uuid.uuid4())
+            transfer_record = {
+                "_id": transfer_id,
+                "user_id": str(from_user_id),
                 "transaction_id": txn.id,
-                "from_user_id": str(from_user_id),
-                "from_iban": from_account.get("iban"),
-                "to_iban": normalized_iban,
-                "recipient_name": recipient_name or "External Account",
+                "type": "SEPA_TRANSFER",
+                "beneficiary_name": recipient_name or "SEPA Recipient",
+                "beneficiary_iban": normalized_iban,
                 "amount": amount,
-                "reason": reason,
-                "status": "COMPLETED",
-                "created_at": datetime.now(timezone.utc)
+                "details": reason,
+                "reference_number": f"SEPA-{transfer_id[:8].upper()}",
+                "status": "SUBMITTED",  # Pending admin review
+                "transfer_type": "SEPA",
+                "sender_name": sender_name,
+                "sender_iban": from_account.get("iban"),
+                "created_at": now,
+                "updated_at": now
             }
-            await self.db.external_transfers.insert_one(external_transfer_record)
+            await self.db.transfers.insert_one(transfer_record)
             
             return {
                 "transaction_id": txn.id,
+                "transfer_id": transfer_id,
                 "amount": amount,
-                "recipient": recipient_name or "External Account",
+                "recipient": recipient_name or "SEPA Recipient",
                 "recipient_iban": normalized_iban,
-                "status": "POSTED",
-                "transfer_type": "EXTERNAL"
+                "status": "COMPLETED",  # User sees it as completed (money deducted)
+                "transfer_type": "SEPA_TRANSFER",
+                "admin_status": "SUBMITTED"  # But admin will see it as submitted
             }
