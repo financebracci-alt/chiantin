@@ -4,6 +4,7 @@ from motor.motor_asyncio import AsyncIOMotorDatabase
 from fastapi import HTTPException
 import uuid
 from datetime import datetime, timezone
+from bson import ObjectId
 
 from services.ledger_service import LedgerEngine
 from core.ledger import EntryDirection
@@ -14,6 +15,31 @@ class TransferService:
         self.db = db
         self.ledger = ledger_engine
     
+    async def _find_bank_account_by_user(self, user_id: str):
+        """Find bank account by user_id, handling both string and ObjectId formats."""
+        # Try as string first
+        account = await self.db.bank_accounts.find_one({"user_id": user_id})
+        if account:
+            return account
+        
+        # Try as ObjectId
+        try:
+            account = await self.db.bank_accounts.find_one({"user_id": ObjectId(user_id)})
+            if account:
+                return account
+        except:
+            pass
+        
+        # Try converting ObjectId to string match
+        try:
+            account = await self.db.bank_accounts.find_one({"user_id": str(user_id)})
+            if account:
+                return account
+        except:
+            pass
+        
+        return None
+    
     async def p2p_transfer(
         self,
         from_user_id: str,
@@ -23,13 +49,12 @@ class TransferService:
         recipient_name: str = None  # Optional recipient name for external transfers
     ):
         """Transfer money to any IBAN - internal or external."""
-        from bson import ObjectId
         
         # Normalize IBAN (remove spaces)
         normalized_iban = to_iban.replace(" ", "").upper()
         
-        # Get sender's account first
-        from_account = await self.db.bank_accounts.find_one({"user_id": from_user_id})
+        # Get sender's account - try multiple ID formats
+        from_account = await self._find_bank_account_by_user(from_user_id)
         if not from_account:
             raise HTTPException(status_code=404, detail="Your account not found")
         
@@ -49,16 +74,19 @@ class TransferService:
             # INTERNAL TRANSFER - recipient exists in our system
             to_user_id = to_account["user_id"]
             
-            if to_user_id == from_user_id:
+            # Check not sending to self (compare as strings)
+            if str(to_user_id) == str(from_user_id):
                 raise HTTPException(status_code=400, detail="Cannot transfer to yourself")
             
-            # Get recipient user details
+            # Get recipient user details - try both formats
             to_user = await self.db.users.find_one({"_id": to_user_id})
             if not to_user:
                 try:
                     to_user = await self.db.users.find_one({"_id": ObjectId(to_user_id)})
                 except:
                     pass
+            if not to_user:
+                to_user = await self.db.users.find_one({"_id": str(to_user_id)})
             
             # Execute internal transfer (debit sender, credit recipient)
             txn = await self.ledger.post_transaction(
@@ -69,10 +97,10 @@ class TransferService:
                 ],
                 external_id=f"p2p_{uuid.uuid4()}",
                 reason=reason,
-                performed_by=from_user_id,
+                performed_by=str(from_user_id),
                 metadata={
-                    "from_user": from_user_id,
-                    "to_user": to_user_id,
+                    "from_user": str(from_user_id),
+                    "to_user": str(to_user_id),
                     "to_iban": normalized_iban,
                     "transfer_type": "INTERNAL"
                 }
@@ -118,9 +146,9 @@ class TransferService:
                 ],
                 external_id=f"ext_{uuid.uuid4()}",
                 reason=reason,
-                performed_by=from_user_id,
+                performed_by=str(from_user_id),
                 metadata={
-                    "from_user": from_user_id,
+                    "from_user": str(from_user_id),
                     "to_iban": normalized_iban,
                     "recipient_name": recipient_name or "External Account",
                     "transfer_type": "EXTERNAL"
@@ -131,7 +159,7 @@ class TransferService:
             external_transfer_record = {
                 "_id": str(uuid.uuid4()),
                 "transaction_id": txn.id,
-                "from_user_id": from_user_id,
+                "from_user_id": str(from_user_id),
                 "from_iban": from_account.get("iban"),
                 "to_iban": normalized_iban,
                 "recipient_name": recipient_name or "External Account",
