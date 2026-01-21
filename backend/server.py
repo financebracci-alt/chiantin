@@ -2463,3 +2463,42 @@ async def debug_db_test(db: AsyncIOMotorDatabase = Depends(get_database)):
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run("server:app", host="0.0.0.0", port=8001, reload=True)
+
+
+@app.get("/api/debug/try-databases")
+async def try_multiple_databases():
+    """Try writing to different database names to find one with permissions."""
+    import os
+    from motor.motor_asyncio import AsyncIOMotorClient
+    
+    mongo_url = os.environ.get('MONGO_URL', 'mongodb://localhost:27017')
+    
+    # List of database names to try
+    db_names_to_try = [
+        "test",
+        "mongo-perf-fix", 
+        "atlas_bankii",
+        "default",
+        "mydb",
+        "app"
+    ]
+    
+    results = {}
+    client = AsyncIOMotorClient(mongo_url)
+    
+    for db_name in db_names_to_try:
+        try:
+            db = client[db_name]
+            test_id = f"test_{uuid.uuid4()}"
+            await db.permission_test.insert_one({"_id": test_id, "test": True})
+            await db.permission_test.delete_one({"_id": test_id})
+            results[db_name] = "✅ WRITE OK"
+        except Exception as e:
+            error_msg = str(e)
+            if "not authorized" in error_msg.lower():
+                results[db_name] = "❌ No permission"
+            else:
+                results[db_name] = f"❌ Error: {error_msg[:50]}"
+    
+    client.close()
+    return {"mongo_url_prefix": mongo_url[:40], "results": results}
