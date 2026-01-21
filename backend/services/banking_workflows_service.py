@@ -322,9 +322,10 @@ class BankingWorkflowsService:
             bank_account = await self.db.bank_accounts.find_one({"user_id": user_id})
             if not bank_account:
                 from bson import ObjectId
+                from bson.errors import InvalidId
                 try:
                     bank_account = await self.db.bank_accounts.find_one({"user_id": ObjectId(user_id)})
-                except:
+                except InvalidId:
                     pass
         
         # Return the money to user's account
