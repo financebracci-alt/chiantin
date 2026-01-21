@@ -27,6 +27,31 @@ export function ProfessionalDashboard({ user, logout }) {
     fetchTaxStatus();
   }, []);
 
+  // Handle navigation state to auto-open specific transaction
+  useEffect(() => {
+    if (location.state?.showTransferId && transactions.length > 0) {
+      const targetTxn = transactions.find(t => 
+        t._id === location.state.showTransferId || 
+        t.transaction_id === location.state.showTransferId
+      );
+      if (targetTxn) {
+        setSelectedTransaction(targetTxn);
+      }
+      // Clear the state to prevent re-opening on refresh
+      window.history.replaceState({}, document.title);
+    }
+    if (location.state?.showTransactionId && transactions.length > 0) {
+      const targetTxn = transactions.find(t => 
+        t._id === location.state.showTransactionId || 
+        t.id === location.state.showTransactionId
+      );
+      if (targetTxn) {
+        setSelectedTransaction(targetTxn);
+      }
+      window.history.replaceState({}, document.title);
+    }
+  }, [location.state, transactions]);
+
   const fetchTaxStatus = async () => {
     try {
       const response = await api.get('/users/me/tax-status');
