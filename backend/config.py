@@ -28,7 +28,7 @@ class Settings(BaseSettings):
     
     # Database - Uses Emergent's local MongoDB by default
     MONGO_URL: str = Field(default="mongodb://localhost:27017")
-    DATABASE_NAME: str = Field(default="ecommbx-prod-1769004386")
+    DATABASE_NAME: str = Field(default="ecommbx-fresh-1769004484")
     
     # Storage
     S3_PROVIDER: str = "local"
