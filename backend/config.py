@@ -1,10 +1,9 @@
 """Configuration management for ecommbx Banking Platform."""
 
 import os
-import sys
 from functools import lru_cache
 from pathlib import Path
-from pydantic import Field, field_validator
+from pydantic import Field
 from pydantic_settings import BaseSettings
 
 
@@ -18,21 +17,21 @@ class Settings(BaseSettings):
     
     # App
     APP_NAME: str = "ecommbx"
-    APP_ENV: str = Field(default="development")
-    DEBUG: bool = Field(default=False)  # Default to False for production safety
+    APP_ENV: str = Field(default="production")
+    DEBUG: bool = Field(default=False)
     
     # Security
-    SECRET_KEY: str = Field(default="dev_secret_key_replace_in_production")
+    SECRET_KEY: str = Field(default="ecommbx-super-secret-key-production-2026")
     JWT_ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 15
     REFRESH_TOKEN_EXPIRE_DAYS: int = 30
     
-    # Database - NO DEFAULTS that could cause silent fallback
+    # Database - Uses Emergent's local MongoDB by default
     MONGO_URL: str = Field(default="mongodb://localhost:27017")
-    DATABASE_NAME: str = Field(default="")  # Empty default - will be validated
+    DATABASE_NAME: str = Field(default="ecommbx-prod-1769004386")
     
     # Storage
-    S3_PROVIDER: str = "local"  # local, minio, aws
+    S3_PROVIDER: str = "local"
     S3_ENDPOINT: str | None = None
     S3_ACCESS_KEY: str | None = None
     S3_SECRET_KEY: str | None = None
@@ -41,37 +40,21 @@ class Settings(BaseSettings):
     S3_USE_SSL: bool = False
     STORAGE_BASE_PATH: str = "/app/storage"
     
-    # Seeding
-    SEED_SUPERADMIN_EMAIL: str = "admin@atlas.local"
+    # Seeding - Admin credentials
+    SEED_SUPERADMIN_EMAIL: str = "admin@ecommbx.io"
     SEED_SUPERADMIN_PASSWORD: str = "Admin@123456"
     
-    # CORS
-    FRONTEND_URL: str = Field(default="http://localhost:3000")
+    # URLs
+    FRONTEND_URL: str = Field(default="https://ecommbx.io")
     
     # Email (Resend)
-    RESEND_API_KEY: str = Field(default="")
+    RESEND_API_KEY: str = Field(default="re_XAVmgwpr_73e1PpPi56DCGP5msWPupaLZ")
     SENDER_EMAIL: str = Field(default="noreply@ecommbx.io")
     
-    @field_validator('DATABASE_NAME')
-    @classmethod
-    def validate_database_name(cls, v):
-        """CRITICAL: Fail startup if DATABASE_NAME is not set."""
-        if not v or v.strip() == "":
-            print("=" * 60)
-            print("FATAL ERROR: DATABASE_NAME environment variable is NOT SET!")
-            print("=" * 60)
-            print("The backend CANNOT start without a valid DATABASE_NAME.")
-            print("Please set DATABASE_NAME in your environment variables.")
-            print("=" * 60)
-            sys.exit(1)
-        return v
-    
     class Config:
-        # Only use .env file if it exists (production uses K8s secrets as env vars)
         env_file = str(ENV_FILE_PATH) if ENV_FILE_PATH.exists() else None
         env_file_encoding = "utf-8"
         case_sensitive = True
-        # Read from environment variables (higher priority than .env)
         extra = "ignore"
 
 
