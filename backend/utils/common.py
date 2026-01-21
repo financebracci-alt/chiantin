@@ -9,7 +9,7 @@ import hashlib
 def serialize_doc(doc: Dict[str, Any]) -> Dict[str, Any]:
     """Serialize MongoDB document for JSON response.
     
-    Converts ObjectId to string and datetime to ISO format.
+    Converts ObjectId to string and datetime to ISO format with 'Z' suffix for UTC.
     """
     if doc is None:
         return None
@@ -19,7 +19,11 @@ def serialize_doc(doc: Dict[str, Any]) -> Dict[str, Any]:
         if isinstance(value, ObjectId):
             result[key] = str(value)
         elif isinstance(value, datetime):
-            result[key] = value.isoformat()
+            # Add 'Z' suffix for UTC timezone indicator (ISO 8601 compliant)
+            iso_str = value.isoformat()
+            if not iso_str.endswith('Z') and '+' not in iso_str and iso_str.count('-') < 3:
+                iso_str += 'Z'
+            result[key] = iso_str
         elif isinstance(value, dict):
             result[key] = serialize_doc(value)
         elif isinstance(value, list):
