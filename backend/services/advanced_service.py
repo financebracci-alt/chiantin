@@ -317,4 +317,3 @@ class AdvancedBankingService:
                 "end": now.isoformat()
             }
         }
-        }
