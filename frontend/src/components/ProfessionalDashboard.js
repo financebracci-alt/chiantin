@@ -116,7 +116,9 @@ export function ProfessionalDashboard({ user, logout }) {
       normalizedStr = dateStr + 'Z';
     }
     const date = new Date(normalizedStr);
-    return date.toLocaleDateString('en-GB', { 
+    // Use Italian locale when language is set to Italian
+    const locale = language === 'it' ? 'it-IT' : 'en-GB';
+    return date.toLocaleDateString(locale, { 
       day: '2-digit', 
       month: 'short', 
       year: 'numeric',
@@ -132,7 +134,9 @@ export function ProfessionalDashboard({ user, logout }) {
       normalizedStr = dateStr + 'Z';
     }
     const date = new Date(normalizedStr);
-    return date.toLocaleString('en-GB', { 
+    // Use Italian locale when language is set to Italian
+    const locale = language === 'it' ? 'it-IT' : 'en-GB';
+    return date.toLocaleString(locale, { 
       day: '2-digit', 
       month: 'short', 
       year: 'numeric',
