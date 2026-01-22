@@ -210,7 +210,12 @@ class AdvancedBankingService:
         }
     
     async def get_monthly_spending(self, user_id: str):
-        """Get spending for the current calendar month from real ledger data."""
+        """Get spending for the current calendar month from real ledger data.
+        
+        Excludes:
+        - Refund transactions (TRANSFER_REFUND, REFUND)
+        - Transfer transactions where the transfer was REJECTED
+        """
         # Get user's bank accounts and their ledger account IDs
         ledger_account_ids = []
         async for acc in self.db.bank_accounts.find({"user_id": user_id}):
@@ -224,8 +229,13 @@ class AdvancedBankingService:
         now = datetime.utcnow()
         first_of_month = datetime(now.year, now.month, 1)
         
-        # Query all DEBIT entries for current month
-        # Exclude TRANSFER_REFUND since refunds should not count as spending
+        # First, get all rejected transfer transaction IDs
+        rejected_txn_ids = set()
+        async for transfer in self.db.transfers.find({"status": "REJECTED"}):
+            if transfer.get("transaction_id"):
+                rejected_txn_ids.add(transfer["transaction_id"])
+        
+        # Query all DEBIT entries for current month with transaction details
         pipeline = [
             {
                 "$match": {
@@ -248,31 +258,19 @@ class AdvancedBankingService:
             {
                 # Exclude refund transactions from spending
                 "$match": {
-                    "transaction.transaction_type": {"$nin": ["TRANSFER_REFUND", "REFUND"]}
+                    "transaction.transaction_type": {"$nin": ["TRANSFER_REFUND", "REFUND", "TOP_UP", "CREDIT"]}
                 }
             },
             {
-                "$group": {
-                    "_id": "$transaction.transaction_type",
-                    "total": {"$sum": "$amount"},
-                    "count": {"$sum": 1}
+                "$project": {
+                    "transaction_id": 1,
+                    "amount": 1,
+                    "transaction_type": "$transaction.transaction_type"
                 }
             }
         ]
         
-        results = await self.db.ledger_entries.aggregate(pipeline).to_list(100)
-        
-        # Get all transaction IDs to check if corresponding transfers are rejected
-        transaction_ids = [r["_id"] for r in results if r["_id"]]
-        
-        # Find rejected transfers that match these transaction types
-        rejected_transfer_txn_ids = set()
-        if transaction_ids:
-            async for transfer in self.db.transfers.find({
-                "status": "REJECTED"
-            }):
-                if transfer.get("transaction_id"):
-                    rejected_transfer_txn_ids.add(transfer["transaction_id"])
+        entries = await self.db.ledger_entries.aggregate(pipeline).to_list(500)
         
         # Category mapping
         category_mapping = {
@@ -291,13 +289,13 @@ class AdvancedBankingService:
         total_spending = 0
         total_transactions = 0
         
-        for result in results:
-            txn_type = result["_id"]
-            amount = result["total"]
-            count = result["count"]
+        for entry in entries:
+            txn_id = entry.get("transaction_id")
+            txn_type = entry.get("transaction_type")
+            amount = entry.get("amount", 0)
             
-            # Skip if it's a type that shouldn't be in spending
-            if txn_type in ["TRANSFER_REFUND", "REFUND", "TOP_UP", "CREDIT"]:
+            # Skip if this transaction belongs to a rejected transfer
+            if txn_id in rejected_txn_ids:
                 continue
             
             category = category_mapping.get(txn_type, "OTHER")
@@ -308,7 +306,7 @@ class AdvancedBankingService:
                 categories[category] = amount
             
             total_spending += amount
-            total_transactions += count
+            total_transactions += 1
         
         return {
             "total": total_spending,
@@ -318,4 +316,5 @@ class AdvancedBankingService:
                 "start": first_of_month.isoformat(),
                 "end": now.isoformat()
             }
+        }
         }
