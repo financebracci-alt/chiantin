@@ -83,7 +83,14 @@ export function ProfessionalDashboard({ user, logout }) {
 
       if (accountsRes.data.length > 0) {
         const txnRes = await api.get(`/accounts/${accountsRes.data[0].id}/transactions`);
-        setTransactions(txnRes.data.slice(0, 5));
+        // Store more transactions if we need to find a specific one from notification
+        // Otherwise just show first 5 for performance
+        const hasNotificationState = location.state?.showTransferId || location.state?.showTransactionId;
+        if (hasNotificationState) {
+          setTransactions(txnRes.data); // Store all to ensure we find the target
+        } else {
+          setTransactions(txnRes.data.slice(0, 5));
+        }
       }
     } catch (err) {
       console.error('Failed to fetch dashboard data:', err);
