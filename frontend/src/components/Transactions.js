@@ -390,6 +390,17 @@ function TransactionDetailsModal({ transaction, onClose }) {
                   <dd className={`mt-1 ${isDark ? 'text-gray-200' : 'text-gray-900'}`}>{transaction.reason}</dd>
                 </div>
               )}
+              {/* Show rejection reason for REJECTED transactions */}
+              {transaction.status === 'REJECTED' && (transaction.rejection_reason || transaction.metadata?.rejection_reason) && (
+                <div className="col-span-2">
+                  <dt className={`${isDark ? 'text-gray-400' : 'text-gray-600'}`}>{t('rejectionReason')}</dt>
+                  <dd className="mt-1">
+                    <span className="px-3 py-2 bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400 rounded-lg inline-block">
+                      {transaction.rejection_reason || transaction.metadata?.rejection_reason}
+                    </span>
+                  </dd>
+                </div>
+              )}
             </dl>
           </div>
 
