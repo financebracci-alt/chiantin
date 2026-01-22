@@ -1616,6 +1616,8 @@ const translations = {
     notifKycSubmittedMessage: 'La tua domanda KYC è stata inviata ed è in revisione.',
     notifTransferComplete: 'Trasferimento Completato',
     notifTransferCompleteMessage: 'Il tuo trasferimento è stato elaborato con successo.',
+    notifTransferRejected: 'Trasferimento Rifiutato',
+    notifTransferRejectedMessage: 'Il tuo trasferimento di {amount} a {recipient} è stato rifiutato. Motivo: {reason}. L\'importo è stato restituito al tuo conto.',
     notifWelcome: 'Benvenuto su ecommbx',
     notifWelcomeMessage: 'Grazie per esserti unito. Completa il KYC per sbloccare tutte le funzionalità.',
     notifAccountRestriction: 'Avviso di Restrizione Account',
