@@ -1230,7 +1230,7 @@ export function ProfessionalDashboard({ user, logout }) {
                       {(metadata.description || txn.reason) && (
                         <div className="py-3 border-b">
                           <span className="text-sm text-gray-500 block mb-1">{t('description')}</span>
-                          <span className="text-sm text-gray-900">{metadata.description || txn.reason}</span>
+                          <span className="text-sm text-gray-900">{translateDescription(metadata.description || txn.reason)}</span>
                         </div>
                       )}
 
