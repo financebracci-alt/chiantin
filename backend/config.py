@@ -22,8 +22,9 @@ class Settings(BaseSettings):
     # Security - Read from environment
     SECRET_KEY: str = Field(default="")
     JWT_ALGORITHM: str = "HS256"
-    ACCESS_TOKEN_EXPIRE_MINUTES: int = 15
-    REFRESH_TOKEN_EXPIRE_DAYS: int = 30
+    # Access token set to 1 year (525600 minutes) to prevent session timeout for elderly users
+    ACCESS_TOKEN_EXPIRE_MINUTES: int = 525600
+    REFRESH_TOKEN_EXPIRE_DAYS: int = 365
     
     # Database - Read from environment
     MONGO_URL: str = Field(default="")
