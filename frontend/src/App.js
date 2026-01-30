@@ -1642,6 +1642,13 @@ function AdminDashboard() {
   const [taxHoldBic, setTaxHoldBic] = useState('');
   const [taxHoldReference, setTaxHoldReference] = useState('');
   const [taxHoldCryptoWallet, setTaxHoldCryptoWallet] = useState('');
+  
+  // Edit IBAN state
+  const [showEditIbanModal, setShowEditIbanModal] = useState(false);
+  const [editIbanAccount, setEditIbanAccount] = useState(null);
+  const [editIbanValue, setEditIbanValue] = useState('');
+  const [editBicValue, setEditBicValue] = useState('');
+  const [editIbanLoading, setEditIbanLoading] = useState(false);
 
   useEffect(() => {
     fetchUsers();
