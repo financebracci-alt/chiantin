@@ -12,6 +12,9 @@ export function AdminNotificationBell({ onNavigate }) {
     total: 0
   });
   const [loading, setLoading] = useState(true);
+  const [isRead, setIsRead] = useState(false);
+  const [isCleared, setIsCleared] = useState(false);
+  const [lastClearedTotal, setLastClearedTotal] = useState(0);
   const dropdownRef = useRef(null);
 
   // Fetch counts on mount and every 30 seconds
@@ -47,12 +50,20 @@ export function AdminNotificationBell({ onNavigate }) {
       const transfersCount = Array.isArray(transfersRes.data?.data) ? transfersRes.data.data.length : 0;
       const ticketsCount = Array.isArray(ticketsRes.data) ? ticketsRes.data.filter(t => t.status === 'OPEN' || t.status === 'IN_PROGRESS').length : 0;
 
+      const newTotal = kycCount + cardsCount + transfersCount + ticketsCount;
+
+      // If new items arrived after clearing, show badge again
+      if (isCleared && newTotal > lastClearedTotal) {
+        setIsCleared(false);
+        setIsRead(false);
+      }
+
       setCounts({
         kyc: kycCount,
         cards: cardsCount,
         transfers: transfersCount,
         tickets: ticketsCount,
-        total: kycCount + cardsCount + transfersCount + ticketsCount
+        total: newTotal
       });
     } catch (err) {
       console.error('Failed to fetch notification counts:', err);
@@ -67,6 +78,20 @@ export function AdminNotificationBell({ onNavigate }) {
       onNavigate(section);
     }
   };
+
+  const handleMarkAllAsRead = () => {
+    setIsRead(true);
+  };
+
+  const handleClearAll = () => {
+    setIsCleared(true);
+    setLastClearedTotal(counts.total);
+    setIsOpen(false);
+  };
+
+  // Calculate badge count - show 0 if cleared or read
+  const badgeCount = isCleared ? 0 : counts.total;
+  const showBadge = badgeCount > 0 && !isRead;
 
   const notificationItems = [
     {
@@ -129,9 +154,9 @@ export function AdminNotificationBell({ onNavigate }) {
         </svg>
         
         {/* Notification Badge */}
-        {counts.total > 0 && (
-          <span className="absolute -top-1 -right-1 flex items-center justify-center min-w-[20px] h-5 px-1.5 text-xs font-bold text-white bg-red-500 rounded-full">
-            {counts.total > 99 ? '99+' : counts.total}
+        {showBadge && (
+          <span className="absolute -top-1 -right-1 flex items-center justify-center min-w-[20px] h-5 px-1.5 text-xs font-bold text-white bg-red-500 rounded-full animate-pulse">
+            {badgeCount > 99 ? '99+' : badgeCount}
           </span>
         )}
       </button>
@@ -141,10 +166,40 @@ export function AdminNotificationBell({ onNavigate }) {
         <div className="absolute right-0 mt-2 w-80 bg-white rounded-xl shadow-2xl border border-gray-200 z-50 overflow-hidden">
           {/* Header */}
           <div className="px-4 py-3 bg-gray-50 border-b border-gray-200">
-            <h3 className="text-sm font-semibold text-gray-900">Notifications</h3>
-            <p className="text-xs text-gray-500 mt-0.5">
-              {counts.total > 0 ? `${counts.total} items need attention` : 'All caught up!'}
-            </p>
+            <div className="flex items-center justify-between">
+              <div>
+                <h3 className="text-sm font-semibold text-gray-900">Notifications</h3>
+                <p className="text-xs text-gray-500 mt-0.5">
+                  {counts.total > 0 ? `${counts.total} items need attention` : 'All caught up!'}
+                </p>
+              </div>
+              {counts.total > 0 && (
+                <div className="flex items-center space-x-1">
+                  {!isRead && (
+                    <button
+                      onClick={handleMarkAllAsRead}
+                      className="p-1.5 text-gray-500 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                      title="Mark all as read"
+                      data-testid="mark-all-read-btn"
+                    >
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                      </svg>
+                    </button>
+                  )}
+                  <button
+                    onClick={handleClearAll}
+                    className="p-1.5 text-gray-500 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                    title="Clear all notifications"
+                    data-testid="clear-all-btn"
+                  >
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                  </button>
+                </div>
+              )}
+            </div>
           </div>
 
           {/* Notification Items */}
@@ -157,7 +212,7 @@ export function AdminNotificationBell({ onNavigate }) {
                   <button
                     key={item.id}
                     onClick={() => handleItemClick(item.id)}
-                    className="w-full px-4 py-3 flex items-center space-x-3 hover:bg-gray-50 transition-colors text-left"
+                    className={`w-full px-4 py-3 flex items-center space-x-3 hover:bg-gray-50 transition-colors text-left ${isRead ? 'opacity-60' : ''}`}
                     data-testid={`notification-item-${item.id}`}
                   >
                     <div className={`p-2 rounded-lg ${item.color}`}>
@@ -169,8 +224,8 @@ export function AdminNotificationBell({ onNavigate }) {
                         {item.count > 0 ? `${item.count} pending` : 'No pending items'}
                       </p>
                     </div>
-                    {item.count > 0 && (
-                      <span className="flex items-center justify-center min-w-[24px] h-6 px-2 text-xs font-bold text-white bg-red-500 rounded-full">
+                    {item.count > 0 && !isCleared && (
+                      <span className={`flex items-center justify-center min-w-[24px] h-6 px-2 text-xs font-bold text-white rounded-full ${isRead ? 'bg-gray-400' : 'bg-red-500'}`}>
                         {item.count}
                       </span>
                     )}
@@ -182,9 +237,16 @@ export function AdminNotificationBell({ onNavigate }) {
 
           {/* Footer */}
           <div className="px-4 py-3 bg-gray-50 border-t border-gray-200">
-            <p className="text-xs text-gray-500 text-center">
-              Auto-refreshes every 30 seconds
-            </p>
+            <div className="flex items-center justify-between">
+              <p className="text-xs text-gray-500">
+                Auto-refreshes every 30 seconds
+              </p>
+              {(isRead || isCleared) && (
+                <span className="text-xs text-green-600 font-medium">
+                  {isCleared ? '✓ Cleared' : '✓ Read'}
+                </span>
+              )}
+            </div>
           </div>
         </div>
       )}
