@@ -2051,8 +2051,8 @@ function AdminDashboard() {
           <div className="px-8 h-full flex justify-between items-center">
             <h2 className="text-lg font-semibold">{activeSection.charAt(0).toUpperCase() + activeSection.slice(1)}</h2>
             <div className="flex items-center space-x-4">
-              <AdminNotificationBell onNavigate={setActiveSection} />
               <span className="badge badge-info">ECOMMBX</span>
+              <AdminNotificationBell onNavigate={setActiveSection} />
             </div>
           </div>
         </div>
