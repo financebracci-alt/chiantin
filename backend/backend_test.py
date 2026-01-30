@@ -301,6 +301,84 @@ class EcommbxAPITester:
             print(f"   ✓ User has {account_count} accounts")
         return success
 
+    def test_admin_notification_bell_kyc(self):
+        """Test admin notification bell - KYC pending count"""
+        if not self.admin_token:
+            print("⚠️  Skipping - No admin token")
+            return False
+        
+        success, response = self.run_test(
+            "Admin Notification Bell - KYC Pending",
+            "GET",
+            "/api/v1/admin/kyc/pending",
+            200,
+            headers={'Authorization': f'Bearer {self.admin_token}'},
+            description="Fetch pending KYC applications for notification bell"
+        )
+        if success:
+            kyc_count = len(response) if isinstance(response, list) else 0
+            print(f"   ✓ {kyc_count} pending KYC applications")
+        return success
+
+    def test_admin_notification_bell_cards(self):
+        """Test admin notification bell - Card requests count"""
+        if not self.admin_token:
+            print("⚠️  Skipping - No admin token")
+            return False
+        
+        success, response = self.run_test(
+            "Admin Notification Bell - Card Requests",
+            "GET",
+            "/api/v1/admin/card-requests",
+            200,
+            headers={'Authorization': f'Bearer {self.admin_token}'},
+            description="Fetch card requests for notification bell"
+        )
+        if success:
+            cards_data = response.get('data', []) if isinstance(response, dict) else []
+            pending_cards = [c for c in cards_data if c.get('status') == 'PENDING']
+            print(f"   ✓ {len(pending_cards)} pending card requests")
+        return success
+
+    def test_admin_notification_bell_transfers(self):
+        """Test admin notification bell - Pending transfers count"""
+        if not self.admin_token:
+            print("⚠️  Skipping - No admin token")
+            return False
+        
+        success, response = self.run_test(
+            "Admin Notification Bell - Pending Transfers",
+            "GET",
+            "/api/v1/admin/transfers?status=SUBMITTED",
+            200,
+            headers={'Authorization': f'Bearer {self.admin_token}'},
+            description="Fetch pending transfers for notification bell"
+        )
+        if success:
+            transfers_data = response.get('data', []) if isinstance(response, dict) else []
+            print(f"   ✓ {len(transfers_data)} pending transfers")
+        return success
+
+    def test_admin_notification_bell_tickets(self):
+        """Test admin notification bell - Open tickets count"""
+        if not self.admin_token:
+            print("⚠️  Skipping - No admin token")
+            return False
+        
+        success, response = self.run_test(
+            "Admin Notification Bell - Open Tickets",
+            "GET",
+            "/api/v1/admin/tickets?status=OPEN",
+            200,
+            headers={'Authorization': f'Bearer {self.admin_token}'},
+            description="Fetch open tickets for notification bell"
+        )
+        if success:
+            tickets = response if isinstance(response, list) else []
+            open_tickets = [t for t in tickets if t.get('status') in ['OPEN', 'IN_PROGRESS']]
+            print(f"   ✓ {len(open_tickets)} open/in-progress tickets")
+        return success
+
     def print_summary(self):
         """Print test summary"""
         print("\n" + "="*80)
