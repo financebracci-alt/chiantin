@@ -20,25 +20,11 @@ export function AdminAccountsControl() {
 
   const fetchAccounts = async () => {
     try {
-      const response = await api.get('/admin/users');
-      const users = response.data;
-      
-      const allAccounts = [];
-      for (const user of users) {
-        const userDetails = await api.get(`/admin/users/${user.id}`);
-        if (userDetails.data.accounts) {
-          userDetails.data.accounts.forEach(acc => {
-            allAccounts.push({
-              ...acc,
-              userId: user.id,
-              userName: `${userDetails.data.user.first_name} ${userDetails.data.user.last_name}`,
-              userEmail: userDetails.data.user.email
-            });
-          });
-        }
-      }
-      setAccounts(allAccounts);
+      // Use the optimized endpoint that returns all accounts with user info in one request
+      const response = await api.get('/admin/accounts-with-users');
+      setAccounts(response.data);
     } catch (err) {
+      console.error('Failed to load accounts:', err);
       toast.error('Failed to load accounts');
     } finally {
       setLoading(false);
