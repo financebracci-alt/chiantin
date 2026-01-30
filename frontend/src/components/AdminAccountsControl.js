@@ -9,8 +9,10 @@ export function AdminAccountsControl() {
   const [loading, setLoading] = useState(true);
   const [selectedAccount, setSelectedAccount] = useState(null);
   const [showModal, setShowModal] = useState(false);
+  const [showIbanModal, setShowIbanModal] = useState(false);
   const [operation, setOperation] = useState('topup');
   const [formData, setFormData] = useState({ amount: '', reason: '' });
+  const [ibanFormData, setIbanFormData] = useState({ iban: '', bic: '' });
 
   useEffect(() => {
     fetchAccounts();
@@ -28,6 +30,7 @@ export function AdminAccountsControl() {
           userDetails.data.accounts.forEach(acc => {
             allAccounts.push({
               ...acc,
+              userId: user.id,
               userName: `${userDetails.data.user.first_name} ${userDetails.data.user.last_name}`,
               userEmail: userDetails.data.user.email
             });
@@ -61,6 +64,32 @@ export function AdminAccountsControl() {
     }
   };
 
+  const handleEditIban = (acc) => {
+    setSelectedAccount(acc);
+    setIbanFormData({ iban: acc.iban || '', bic: acc.bic || '' });
+    setShowIbanModal(true);
+  };
+
+  const handleIbanSubmit = async () => {
+    if (!ibanFormData.iban || !ibanFormData.bic) {
+      toast.error('IBAN and BIC are required');
+      return;
+    }
+
+    try {
+      await api.patch(`/admin/users/${selectedAccount.userId}/account-iban`, {
+        iban: ibanFormData.iban,
+        bic: ibanFormData.bic
+      });
+      toast.success('IBAN and BIC updated successfully!');
+      setShowIbanModal(false);
+      setIbanFormData({ iban: '', bic: '' });
+      fetchAccounts();
+    } catch (err) {
+      toast.error(err.response?.data?.detail || 'Failed to update IBAN');
+    }
+  };
+
   return (
     <div>
       <h2 className="text-2xl font-semibold mb-6">Account Control</h2>
@@ -74,7 +103,7 @@ export function AdminAccountsControl() {
                 <th>User</th>
                 <th>Account</th>
                 <th>Balance</th>
-                <th>IBAN</th>
+                <th>IBAN / BIC</th>
                 <th>Actions</th>
               </tr>
             </thead>
@@ -87,10 +116,14 @@ export function AdminAccountsControl() {
                   </td>
                   <td>{acc.account_number}</td>
                   <td className="font-semibold">€{(acc.balance / 100).toFixed(2)}</td>
-                  <td className="font-mono text-xs">{acc.iban}</td>
+                  <td>
+                    <div className="font-mono text-xs">{acc.iban || 'Not set'}</div>
+                    <div className="font-mono text-xs text-gray-500">{acc.bic || ''}</div>
+                  </td>
                   <td>
                     <button onClick={() => { setSelectedAccount(acc); setOperation('topup'); setShowModal(true); }} className="btn-text text-xs mr-2">Top Up</button>
-                    <button onClick={() => { setSelectedAccount(acc); setOperation('withdraw'); setShowModal(true); }} className="btn-text text-xs">Withdraw</button>
+                    <button onClick={() => { setSelectedAccount(acc); setOperation('withdraw'); setShowModal(true); }} className="btn-text text-xs mr-2">Withdraw</button>
+                    <button onClick={() => handleEditIban(acc)} className="btn-text text-xs text-blue-600">Edit IBAN</button>
                   </td>
                 </tr>
               ))}
