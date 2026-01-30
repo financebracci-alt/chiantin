@@ -1486,10 +1486,11 @@ async def update_user_account_iban(
         action="ACCOUNT_IBAN_UPDATED",
         entity_type="bank_account",
         entity_id=str(account["_id"]),
+        description=f"IBAN updated from {old_iban} to {iban_clean}",
         performed_by=current_user["id"],
-        old_value={"iban": old_iban, "bic": old_bic},
-        new_value={"iban": iban_clean, "bic": bic_clean},
-        ip_address=None
+        performed_by_role=current_user["role"],
+        performed_by_email=current_user["email"],
+        metadata={"old_iban": old_iban, "old_bic": old_bic, "new_iban": iban_clean, "new_bic": bic_clean}
     )
     
     return {"ok": True, "message": "IBAN and BIC updated successfully", "iban": iban_clean, "bic": bic_clean}
