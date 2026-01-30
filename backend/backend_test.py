@@ -431,6 +431,13 @@ def main():
     print("-"*80)
     tester.test_user_get_accounts()
     
+    print("\n🔔 ADMIN NOTIFICATION BELL TESTS")
+    print("-"*80)
+    tester.test_admin_notification_bell_kyc()
+    tester.test_admin_notification_bell_cards()
+    tester.test_admin_notification_bell_transfers()
+    tester.test_admin_notification_bell_tickets()
+    
     # Print summary
     return tester.print_summary()
 
