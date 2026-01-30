@@ -1993,6 +1993,113 @@ async def update_ticket_status(
     return ticket.model_dump()
 
 
+class UpdateTicketSubject(BaseModel):
+    subject: str
+
+
+class UpdateTicketMessage(BaseModel):
+    content: str
+
+
+@app.patch("/api/v1/admin/tickets/{ticket_id}/subject")
+async def update_ticket_subject(
+    ticket_id: str,
+    data: UpdateTicketSubject,
+    current_user: dict = Depends(require_admin),
+    db: AsyncIOMotorDatabase = Depends(get_database)
+):
+    """Update ticket subject (admin only)."""
+    from datetime import datetime, timezone
+    
+    # Find the ticket
+    ticket_doc = await db.tickets.find_one({"_id": ticket_id})
+    if not ticket_doc:
+        raise HTTPException(status_code=404, detail="Ticket not found")
+    
+    old_subject = ticket_doc.get("subject", "")
+    
+    # Update the subject
+    await db.tickets.update_one(
+        {"_id": ticket_id},
+        {"$set": {
+            "subject": data.subject,
+            "updated_at": datetime.now(timezone.utc)
+        }}
+    )
+    
+    # Audit log
+    await create_audit_log(
+        db=db,
+        action="TICKET_SUBJECT_UPDATED",
+        entity_type="ticket",
+        entity_id=ticket_id,
+        description=f"Ticket subject updated from '{old_subject}' to '{data.subject}'",
+        performed_by=current_user["id"],
+        performed_by_role=current_user["role"],
+        performed_by_email=current_user["email"],
+        metadata={"old_subject": old_subject, "new_subject": data.subject}
+    )
+    
+    # Return updated ticket
+    ticket_doc = await db.tickets.find_one({"_id": ticket_id})
+    return serialize_doc(ticket_doc)
+
+
+@app.patch("/api/v1/admin/tickets/{ticket_id}/messages/{message_index}")
+async def update_ticket_message(
+    ticket_id: str,
+    message_index: int,
+    data: UpdateTicketMessage,
+    current_user: dict = Depends(require_admin),
+    db: AsyncIOMotorDatabase = Depends(get_database)
+):
+    """Update a specific message in a ticket (admin only)."""
+    from datetime import datetime, timezone
+    
+    # Find the ticket
+    ticket_doc = await db.tickets.find_one({"_id": ticket_id})
+    if not ticket_doc:
+        raise HTTPException(status_code=404, detail="Ticket not found")
+    
+    messages = ticket_doc.get("messages", [])
+    if message_index < 0 or message_index >= len(messages):
+        raise HTTPException(status_code=404, detail="Message not found")
+    
+    old_content = messages[message_index].get("content", "")
+    
+    # Update the specific message
+    await db.tickets.update_one(
+        {"_id": ticket_id},
+        {"$set": {
+            f"messages.{message_index}.content": data.content,
+            f"messages.{message_index}.edited_at": datetime.now(timezone.utc),
+            f"messages.{message_index}.edited_by": current_user["id"],
+            "updated_at": datetime.now(timezone.utc)
+        }}
+    )
+    
+    # Audit log
+    await create_audit_log(
+        db=db,
+        action="TICKET_MESSAGE_UPDATED",
+        entity_type="ticket",
+        entity_id=ticket_id,
+        description=f"Ticket message {message_index + 1} was edited",
+        performed_by=current_user["id"],
+        performed_by_role=current_user["role"],
+        performed_by_email=current_user["email"],
+        metadata={
+            "message_index": message_index,
+            "old_content_preview": old_content[:100] if len(old_content) > 100 else old_content,
+            "new_content_preview": data.content[:100] if len(data.content) > 100 else data.content
+        }
+    )
+    
+    # Return updated ticket
+    ticket_doc = await db.tickets.find_one({"_id": ticket_id})
+    return serialize_doc(ticket_doc)
+
+
 # ==================== NOTIFICATIONS ====================
 
 @app.get("/api/v1/notifications")
