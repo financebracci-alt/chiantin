@@ -2228,6 +2228,73 @@ function AdminDashboard() {
           </div>
         </div>
       )}
+
+      {/* Edit IBAN Modal */}
+      {showEditIbanModal && editIbanAccount && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4" onClick={() => setShowEditIbanModal(false)}>
+          <div className="bg-white rounded-xl shadow-2xl w-full max-w-md mx-4 p-6" onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="text-xl font-bold text-gray-900">Edit IBAN / BIC</h3>
+              <button 
+                onClick={() => setShowEditIbanModal(false)}
+                className="text-gray-400 hover:text-gray-600 transition"
+              >
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+
+            <div className="mb-4">
+              <p className="text-sm text-gray-600">User: {selectedUser?.user?.first_name} {selectedUser?.user?.last_name}</p>
+              <p className="text-sm text-gray-600">Email: {selectedUser?.user?.email}</p>
+              <p className="text-sm text-gray-500 mt-1">Account: {editIbanAccount.account_number || editIbanAccount.id}</p>
+            </div>
+
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">IBAN</label>
+                <input
+                  type="text"
+                  value={editIbanValue}
+                  onChange={(e) => setEditIbanValue(e.target.value.toUpperCase())}
+                  placeholder="IT60X0542811101000000123456"
+                  className="input-field font-mono"
+                  data-testid="edit-iban-input"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">BIC / SWIFT</label>
+                <input
+                  type="text"
+                  value={editBicValue}
+                  onChange={(e) => setEditBicValue(e.target.value.toUpperCase())}
+                  placeholder="ATLASLT21"
+                  className="input-field font-mono"
+                  data-testid="edit-bic-input"
+                />
+              </div>
+            </div>
+
+            <div className="mt-6 flex space-x-3">
+              <button
+                onClick={() => setShowEditIbanModal(false)}
+                className="flex-1 px-4 py-2.5 border border-gray-300 text-gray-700 font-medium rounded-lg hover:bg-gray-50 transition"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleUpdateIban}
+                disabled={editIbanLoading || !editIbanValue || !editBicValue}
+                className="flex-1 px-4 py-2.5 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 disabled:opacity-50 transition"
+                data-testid="save-iban-btn"
+              >
+                {editIbanLoading ? 'Saving...' : 'Save Changes'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
