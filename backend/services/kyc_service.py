@@ -150,17 +150,6 @@ class KYCService:
             iban_clean = review.assigned_iban.replace(" ", "").upper()
             bic_clean = review.assigned_bic.replace(" ", "").upper()
             
-            # IMPORTANT: Check if IBAN is already assigned to another account
-            existing_iban_account = await self.db.bank_accounts.find_one({"iban": iban_clean})
-            if existing_iban_account:
-                # Check if it's the same user's account (that's okay)
-                existing_user_id = str(existing_iban_account.get("user_id", ""))
-                if existing_user_id != user_id and existing_user_id != str(user_id):
-                    raise HTTPException(
-                        status_code=400, 
-                        detail=f"This IBAN ({iban_clean}) is already assigned to another account. Please use a different IBAN."
-                    )
-            
             # Check if user has any accounts (try both string and ObjectId)
             account = await self.db.bank_accounts.find_one({"user_id": user_id})
             if not account:
