@@ -265,8 +265,21 @@ function CreateTicketForm({ onClose, onSuccess }) {
 function TicketDetails({ ticket, onUpdate, isAdmin = false }) {
   const [newMessage, setNewMessage] = useState('');
   const [sending, setSending] = useState(false);
+  const [editingSubject, setEditingSubject] = useState(false);
+  const [editedSubject, setEditedSubject] = useState(ticket.subject);
+  const [editingMessageIndex, setEditingMessageIndex] = useState(null);
+  const [editedMessageContent, setEditedMessageContent] = useState('');
+  const [savingEdit, setSavingEdit] = useState(false);
   const { t } = useLanguage();
   const { isDark } = useTheme();
+
+  // Reset edit states when ticket changes
+  useEffect(() => {
+    setEditingSubject(false);
+    setEditedSubject(ticket.subject);
+    setEditingMessageIndex(null);
+    setEditedMessageContent('');
+  }, [ticket.id, ticket.subject]);
 
   const handleSendMessage = async () => {
     if (!newMessage.trim()) return;
@@ -293,13 +306,97 @@ function TicketDetails({ ticket, onUpdate, isAdmin = false }) {
     }
   };
 
+  const handleSaveSubject = async () => {
+    if (!editedSubject.trim()) return;
+    setSavingEdit(true);
+    try {
+      await api.patch(`/admin/tickets/${ticket.id}/subject`, { subject: editedSubject.trim() });
+      setEditingSubject(false);
+      onUpdate();
+    } catch (err) {
+      alert('Failed to update subject');
+    } finally {
+      setSavingEdit(false);
+    }
+  };
+
+  const handleEditMessage = (index, content) => {
+    setEditingMessageIndex(index);
+    setEditedMessageContent(content);
+  };
+
+  const handleSaveMessage = async () => {
+    if (!editedMessageContent.trim()) return;
+    setSavingEdit(true);
+    try {
+      await api.patch(`/admin/tickets/${ticket.id}/messages/${editingMessageIndex}`, { 
+        content: editedMessageContent.trim() 
+      });
+      setEditingMessageIndex(null);
+      setEditedMessageContent('');
+      onUpdate();
+    } catch (err) {
+      alert('Failed to update message');
+    } finally {
+      setSavingEdit(false);
+    }
+  };
+
+  const handleCancelMessageEdit = () => {
+    setEditingMessageIndex(null);
+    setEditedMessageContent('');
+  };
+
   return (
     <div className={`card-enhanced space-y-4 ${isDark ? 'bg-gray-800 border-gray-700' : ''}`}>
       {/* Header */}
       <div className={`p-6 border-b ${isDark ? 'bg-gray-700/50 border-gray-600' : 'bg-blue-50/30'}`}>
         <div className="flex justify-between items-start">
-          <div>
-            <h3 className={`text-lg font-semibold ${isDark ? 'text-white' : 'text-gray-900'}`}>{ticket.subject}</h3>
+          <div className="flex-1 mr-4">
+            {editingSubject && isAdmin ? (
+              <div className="space-y-3">
+                <input
+                  type="text"
+                  value={editedSubject}
+                  onChange={(e) => setEditedSubject(e.target.value)}
+                  className={`input-enhanced w-full text-lg font-semibold ${isDark ? 'bg-gray-700 border-gray-600 text-white' : ''}`}
+                  autoFocus
+                  data-testid="edit-subject-input"
+                />
+                <div className="flex items-center space-x-2">
+                  <button
+                    onClick={handleSaveSubject}
+                    disabled={savingEdit || !editedSubject.trim()}
+                    className="px-3 py-1.5 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700 disabled:opacity-50 transition"
+                    data-testid="save-subject-btn"
+                  >
+                    {savingEdit ? 'Saving...' : 'Save'}
+                  </button>
+                  <button
+                    onClick={() => { setEditingSubject(false); setEditedSubject(ticket.subject); }}
+                    className={`px-3 py-1.5 text-sm rounded-lg transition ${isDark ? 'bg-gray-600 text-gray-200 hover:bg-gray-500' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'}`}
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <div className="flex items-start gap-2">
+                <h3 className={`text-lg font-semibold ${isDark ? 'text-white' : 'text-gray-900'}`}>{ticket.subject}</h3>
+                {isAdmin && (
+                  <button
+                    onClick={() => setEditingSubject(true)}
+                    className={`p-1.5 rounded-lg transition opacity-60 hover:opacity-100 ${isDark ? 'hover:bg-gray-600 text-gray-400' : 'hover:bg-gray-200 text-gray-500'}`}
+                    title="Edit subject"
+                    data-testid="edit-subject-btn"
+                  >
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                    </svg>
+                  </button>
+                )}
+              </div>
+            )}
             <p className={`text-sm mt-1 ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
               {t('created')} {new Date(ticket.created_at).toLocaleString()}
             </p>
@@ -360,12 +457,61 @@ function TicketDetails({ ticket, onUpdate, isAdmin = false }) {
                     Support
                   </span>
                 )}
+                {msg.edited_at && (
+                  <span className={`ml-2 text-xs italic ${isDark ? 'text-gray-500' : 'text-gray-400'}`}>
+                    (edited)
+                  </span>
+                )}
               </span>
-              <span className={`text-xs ${isDark ? 'text-gray-500' : 'text-gray-500'}`}>
-                {new Date(msg.created_at).toLocaleString()}
-              </span>
+              <div className="flex items-center gap-2">
+                <span className={`text-xs ${isDark ? 'text-gray-500' : 'text-gray-500'}`}>
+                  {new Date(msg.created_at).toLocaleString()}
+                </span>
+                {isAdmin && editingMessageIndex !== idx && (
+                  <button
+                    onClick={() => handleEditMessage(idx, msg.content)}
+                    className={`p-1 rounded transition opacity-60 hover:opacity-100 ${isDark ? 'hover:bg-gray-600 text-gray-400' : 'hover:bg-gray-200 text-gray-500'}`}
+                    title="Edit message"
+                    data-testid={`edit-message-btn-${idx}`}
+                  >
+                    <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                    </svg>
+                  </button>
+                )}
+              </div>
             </div>
-            <p className={`text-sm ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>{msg.content}</p>
+            
+            {editingMessageIndex === idx ? (
+              <div className="space-y-3">
+                <textarea
+                  value={editedMessageContent}
+                  onChange={(e) => setEditedMessageContent(e.target.value)}
+                  rows={3}
+                  className={`input-enhanced w-full text-sm ${isDark ? 'bg-gray-600 border-gray-500 text-white' : ''}`}
+                  autoFocus
+                  data-testid={`edit-message-textarea-${idx}`}
+                />
+                <div className="flex items-center space-x-2">
+                  <button
+                    onClick={handleSaveMessage}
+                    disabled={savingEdit || !editedMessageContent.trim()}
+                    className="px-3 py-1.5 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700 disabled:opacity-50 transition"
+                    data-testid={`save-message-btn-${idx}`}
+                  >
+                    {savingEdit ? 'Saving...' : 'Save'}
+                  </button>
+                  <button
+                    onClick={handleCancelMessageEdit}
+                    className={`px-3 py-1.5 text-sm rounded-lg transition ${isDark ? 'bg-gray-600 text-gray-200 hover:bg-gray-500' : 'bg-gray-200 text-gray-700 hover:bg-gray-300'}`}
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <p className={`text-sm ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>{msg.content}</p>
+            )}
           </div>
         ))}
       </div>
