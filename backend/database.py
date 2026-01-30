@@ -137,7 +137,8 @@ async def create_indexes():
         
         # Bank Accounts
         ("bank_accounts", "user_id", {}),
-        ("bank_accounts", "iban", {"unique": True, "sparse": True}),
+        # IBAN index removed - duplicate IBANs are now allowed
+        # ("bank_accounts", "iban", {"unique": True, "sparse": True}),
         
         # Ledger
         ("ledger_accounts", "user_id", {}),
