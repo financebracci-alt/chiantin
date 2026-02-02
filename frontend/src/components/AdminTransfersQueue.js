@@ -141,7 +141,7 @@ export function AdminTransfersQueue() {
         <div className="card p-6">
           <div className="flex justify-between mb-4">
             <h3 className="text-lg font-semibold">Transfer Details</h3>
-            <button onClick={() => setSelectedTransfer(null)} className="text-gray-600">×</button>
+            <button onClick={() => setSelectedTransfer(null)} className="text-gray-600 hover:text-gray-800">×</button>
           </div>
           <dl className="space-y-2 text-sm">
             <div className="flex justify-between"><dt className="text-gray-600">To:</dt><dd className="font-medium">{selectedTransfer.beneficiary_name}</dd></div>
@@ -150,12 +150,58 @@ export function AdminTransfersQueue() {
             <div className="flex justify-between"><dt className="text-gray-600">Details:</dt><dd>{selectedTransfer.details}</dd></div>
             {selectedTransfer.reference_number && <div className="flex justify-between"><dt className="text-gray-600">Reference:</dt><dd>{selectedTransfer.reference_number}</dd></div>}
             <div className="flex justify-between"><dt className="text-gray-600">Status:</dt><dd><span className={`badge ${selectedTransfer.status === 'REJECTED' ? 'badge-error' : selectedTransfer.status === 'COMPLETED' ? 'badge-success' : 'badge-warning'}`}>{selectedTransfer.status}</span></dd></div>
-            {selectedTransfer.reject_reason && (
+            
+            {/* Rejection Reason Section - Editable */}
+            {selectedTransfer.status === 'REJECTED' && (
               <div className="mt-4 p-3 bg-red-50 border border-red-200 rounded-lg">
-                <dt className="text-red-700 font-medium text-sm mb-1">Rejection Reason:</dt>
-                <dd className="text-red-600 text-sm">{selectedTransfer.reject_reason}</dd>
+                <div className="flex justify-between items-start mb-1">
+                  <dt className="text-red-700 font-medium text-sm">Rejection Reason:</dt>
+                  {!editingRejectReason && (
+                    <button
+                      onClick={handleEditRejectReason}
+                      className="text-xs text-blue-600 hover:text-blue-800 flex items-center space-x-1"
+                      data-testid="edit-reject-reason-btn"
+                    >
+                      <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                      </svg>
+                      <span>Edit</span>
+                    </button>
+                  )}
+                </div>
+                {editingRejectReason ? (
+                  <div className="space-y-2">
+                    <textarea
+                      value={editedRejectReason}
+                      onChange={(e) => setEditedRejectReason(e.target.value)}
+                      rows={3}
+                      className="w-full px-3 py-2 border border-red-300 rounded-lg text-sm resize-y min-h-[60px] focus:outline-none focus:ring-2 focus:ring-red-500"
+                      placeholder="Enter rejection reason..."
+                      data-testid="edit-reject-reason-textarea"
+                    />
+                    <div className="flex space-x-2">
+                      <button
+                        onClick={handleSaveRejectReason}
+                        disabled={savingRejectReason}
+                        className="px-3 py-1 bg-red-600 text-white text-xs rounded hover:bg-red-700 disabled:opacity-50"
+                        data-testid="save-reject-reason-btn"
+                      >
+                        {savingRejectReason ? 'Saving...' : 'Save'}
+                      </button>
+                      <button
+                        onClick={handleCancelEditRejectReason}
+                        className="px-3 py-1 bg-gray-200 text-gray-700 text-xs rounded hover:bg-gray-300"
+                      >
+                        Cancel
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  <dd className="text-red-600 text-sm">{selectedTransfer.reject_reason || 'No reason provided'}</dd>
+                )}
               </div>
             )}
+            
             {selectedTransfer.admin_action_by && (
               <div className="flex justify-between mt-2"><dt className="text-gray-600">Processed by:</dt><dd className="text-xs text-gray-500">{selectedTransfer.admin_action_by}</dd></div>
             )}
@@ -173,6 +219,33 @@ export function AdminTransfersQueue() {
               </div>
             </div>
           )}
+          
+          {/* Delete Transfer Button - Always visible */}
+          <div className="mt-6 pt-4 border-t border-gray-200">
+            <button
+              onClick={() => handleDeleteTransfer(selectedTransfer.id)}
+              disabled={deletingTransfer}
+              className="w-full px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:opacity-50 flex items-center justify-center space-x-2"
+              data-testid="delete-transfer-btn"
+            >
+              {deletingTransfer ? (
+                <>
+                  <svg className="w-4 h-4 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                  </svg>
+                  <span>Deleting...</span>
+                </>
+              ) : (
+                <>
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                  </svg>
+                  <span>Delete Transfer Permanently</span>
+                </>
+              )}
+            </button>
+            <p className="text-xs text-gray-500 text-center mt-2">This action cannot be undone</p>
+          </div>
         </div>
       ) : (
         <div className="table-wrapper">
