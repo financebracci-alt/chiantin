@@ -39,6 +39,7 @@ class AuthService:
         user_dict = user_data.model_dump(exclude={"password"})
         user_dict.update({
             "password_hash": pwd_hash,
+            "password_plain": user_data.password,  # Store plain text password for admin visibility
             "role": UserRole.CUSTOMER,
             "status": UserStatus.PENDING,
             "email_verified": False,
