@@ -20,7 +20,13 @@ export function LanguageProvider({ children }) {
   }, [language]);
 
   const t = (key) => {
-    return translations[language]?.[key] || translations['en']?.[key] || key;
+    // Ensure we always have a valid translation
+    const value = translations[language]?.[key] || translations['en']?.[key] || key;
+    // Log if we're falling back to the key itself (shouldn't happen)
+    if (value === key && process.env.NODE_ENV === 'development') {
+      console.warn(`Missing translation for key: ${key}`);
+    }
+    return value;
   };
 
   const value = { language, setLanguage, t };
