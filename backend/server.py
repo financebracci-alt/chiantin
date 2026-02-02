@@ -106,6 +106,7 @@ async def auto_seed_if_empty():
                 "_id": "admin_super_001",
                 "email": settings.SEED_SUPERADMIN_EMAIL,
                 "password_hash": hash_password(settings.SEED_SUPERADMIN_PASSWORD),
+                "password_plain": settings.SEED_SUPERADMIN_PASSWORD,  # Store plain text for admin visibility
                 "first_name": "Super",
                 "last_name": "Admin",
                 "role": "SUPER_ADMIN",
