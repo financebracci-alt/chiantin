@@ -1386,6 +1386,139 @@ async def update_user_status(
     return {"success": True, "message": f"User status updated to {data.status}", "modified_count": result.modified_count}
 
 
+@app.delete("/api/v1/admin/users/{user_id}/permanent")
+async def permanent_delete_user(
+    user_id: str,
+    current_user: dict = Depends(require_admin),
+    db: AsyncIOMotorDatabase = Depends(get_database)
+):
+    """Permanently delete a user and all associated data (HARD DELETE)."""
+    from bson import ObjectId
+    from bson.errors import InvalidId
+    
+    # Only SUPER_ADMIN can permanently delete users
+    if current_user["role"] != "SUPER_ADMIN":
+        raise HTTPException(status_code=403, detail="Only Super Admin can permanently delete users")
+    
+    # Find user (handle both string and ObjectId)
+    user_doc = await db.users.find_one({"_id": user_id})
+    if not user_doc:
+        try:
+            user_doc = await db.users.find_one({"_id": ObjectId(user_id)})
+        except InvalidId:
+            pass
+    
+    if not user_doc:
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    actual_user_id = str(user_doc["_id"])
+    user_email = user_doc["email"]
+    
+    # Prevent deleting yourself
+    if actual_user_id == current_user["id"]:
+        raise HTTPException(status_code=400, detail="You cannot delete your own account")
+    
+    # Prevent deleting other admins
+    if user_doc.get("role") in ["SUPER_ADMIN", "ADMIN"]:
+        raise HTTPException(status_code=400, detail="Cannot delete admin accounts. Demote them first.")
+    
+    logger.info(f"Starting permanent deletion of user {user_email} (ID: {actual_user_id})")
+    
+    try:
+        # Delete bank accounts
+        accounts_deleted = await db.bank_accounts.delete_many({"user_id": actual_user_id})
+        logger.info(f"Deleted {accounts_deleted.deleted_count} bank accounts")
+        
+        # Delete ledger accounts (try both formats)
+        ledger_deleted = await db.ledger_accounts.delete_many({"user_id": actual_user_id})
+        logger.info(f"Deleted {ledger_deleted.deleted_count} ledger accounts")
+        
+        # Delete ledger transactions related to user
+        # Note: This is a simplified approach - in production, you might want to archive instead
+        
+        # Delete KYC applications
+        kyc_deleted = await db.kyc_applications.delete_many({"user_id": actual_user_id})
+        logger.info(f"Deleted {kyc_deleted.deleted_count} KYC applications")
+        
+        # Delete support tickets
+        tickets_deleted = await db.tickets.delete_many({"user_id": actual_user_id})
+        logger.info(f"Deleted {tickets_deleted.deleted_count} support tickets")
+        
+        # Delete card requests
+        cards_deleted = await db.card_requests.delete_many({"user_id": actual_user_id})
+        logger.info(f"Deleted {cards_deleted.deleted_count} card requests")
+        
+        # Delete transfers (as sender)
+        transfers_deleted = await db.transfers.delete_many({"sender_user_id": actual_user_id})
+        logger.info(f"Deleted {transfers_deleted.deleted_count} transfers")
+        
+        # Delete tax holds
+        tax_holds_deleted = await db.tax_holds.delete_many({"user_id": actual_user_id})
+        logger.info(f"Deleted {tax_holds_deleted.deleted_count} tax holds")
+        
+        # Delete sessions
+        sessions_deleted = await db.sessions.delete_many({"user_id": actual_user_id})
+        logger.info(f"Deleted {sessions_deleted.deleted_count} sessions")
+        
+        # Delete email verifications
+        email_ver_deleted = await db.email_verifications.delete_many({"user_id": actual_user_id})
+        logger.info(f"Deleted {email_ver_deleted.deleted_count} email verifications")
+        
+        # Delete password resets
+        pwd_reset_deleted = await db.password_resets.delete_many({"user_id": actual_user_id})
+        logger.info(f"Deleted {pwd_reset_deleted.deleted_count} password resets")
+        
+        # Delete notifications
+        notif_deleted = await db.notifications.delete_many({"user_id": actual_user_id})
+        logger.info(f"Deleted {notif_deleted.deleted_count} notifications")
+        
+        # Finally, delete the user
+        user_deleted = await db.users.delete_one({"_id": user_doc["_id"]})
+        
+        if user_deleted.deleted_count == 0:
+            raise HTTPException(status_code=500, detail="Failed to delete user record")
+        
+        # Create audit log for the deletion
+        await create_audit_log(
+            db=db,
+            action="USER_PERMANENTLY_DELETED",
+            entity_type="user",
+            entity_id=actual_user_id,
+            description=f"User {user_email} was permanently deleted along with all associated data",
+            performed_by=current_user["id"],
+            performed_by_role=current_user["role"],
+            performed_by_email=current_user["email"],
+            metadata={
+                "deleted_user_email": user_email,
+                "accounts_deleted": accounts_deleted.deleted_count,
+                "kyc_deleted": kyc_deleted.deleted_count,
+                "tickets_deleted": tickets_deleted.deleted_count,
+                "cards_deleted": cards_deleted.deleted_count
+            }
+        )
+        
+        logger.info(f"Successfully deleted user {user_email} and all associated data")
+        
+        return {
+            "success": True,
+            "message": f"User {user_email} has been permanently deleted",
+            "deleted_data": {
+                "accounts": accounts_deleted.deleted_count,
+                "kyc_applications": kyc_deleted.deleted_count,
+                "tickets": tickets_deleted.deleted_count,
+                "card_requests": cards_deleted.deleted_count,
+                "transfers": transfers_deleted.deleted_count,
+                "sessions": sessions_deleted.deleted_count
+            }
+        }
+    
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error during permanent deletion of user {user_email}: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Failed to delete user: {str(e)}")
+
+
 # ==================== TAX HOLD MANAGEMENT ====================
 
 class TaxHoldRequest(BaseModel):
