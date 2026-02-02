@@ -28,10 +28,20 @@ api.interceptors.request.use(
 api.interceptors.response.use(
   (response) => response,
   (error) => {
+    // Only redirect to login on 401 if NOT already on a public auth page
+    // This prevents the login form from refreshing when credentials are wrong
     if (error.response?.status === 401) {
-      localStorage.removeItem('access_token');
-      localStorage.removeItem('user');
-      window.location.href = '/login';
+      const currentPath = window.location.pathname;
+      const publicAuthPaths = ['/login', '/signup', '/forgot-password', '/reset-password', '/verify-email'];
+      const isPublicAuthPage = publicAuthPaths.some(path => currentPath.startsWith(path));
+      
+      // Only clear tokens and redirect if we're NOT on a public auth page
+      // (i.e., the user was logged in and their session expired)
+      if (!isPublicAuthPage) {
+        localStorage.removeItem('access_token');
+        localStorage.removeItem('user');
+        window.location.href = '/login';
+      }
     }
     return Promise.reject(error);
   }
