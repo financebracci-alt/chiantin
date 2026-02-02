@@ -203,7 +203,7 @@ export function AdminTransfersQueue() {
             )}
             
             {selectedTransfer.admin_action_by && (
-              <div className="flex justify-between mt-2"><dt className="text-gray-600">Processed by:</dt><dd className="text-xs text-gray-500">{selectedTransfer.admin_action_by}</dd></div>
+              <div className="flex justify-between mt-2"><dt className="text-gray-600">Processed by:</dt><dd className="text-xs text-gray-500">ECOMMBX Staff</dd></div>
             )}
             {selectedTransfer.admin_action_at && (
               <div className="flex justify-between"><dt className="text-gray-600">Processed at:</dt><dd className="text-xs text-gray-500">{new Date(selectedTransfer.admin_action_at).toLocaleString()}</dd></div>
