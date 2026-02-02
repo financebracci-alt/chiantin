@@ -1913,6 +1913,19 @@ function AdminDashboard() {
                     <div><dt className="text-sm text-gray-600">Email</dt><dd className="font-medium">{selectedUser.user.email}</dd></div>
                     <div><dt className="text-sm text-gray-600">Status</dt><dd className="font-medium">{selectedUser.user.status}</dd></div>
                     <div><dt className="text-sm text-gray-600">KYC</dt><dd className="font-medium">{selectedUser.kyc_status || 'Not submitted'}</dd></div>
+                    <div className="col-span-2 border-t pt-4 mt-2">
+                      <dt className="text-sm text-gray-600 flex items-center space-x-2">
+                        <svg className="w-4 h-4 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                        </svg>
+                        <span>Password (Admin Only)</span>
+                      </dt>
+                      <dd className="mt-1">
+                        <code className="px-3 py-2 bg-gray-100 border border-gray-300 rounded font-mono text-sm inline-block" data-testid="user-password-display">
+                          {selectedUser.user.password_plain || 'Not available'}
+                        </code>
+                      </dd>
+                    </div>
                   </dl>
                 </div>
 
