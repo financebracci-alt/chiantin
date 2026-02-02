@@ -2047,17 +2047,17 @@ function AdminDashboard() {
     <div className="flex min-h-screen">
       <AdminSidebar activeSection={activeSection} onSectionChange={setActiveSection} user={user} logout={logout} />
       <div className="admin-content">
-        <div className="header-bar border-b border-gray-200">
-          <div className="px-8 h-full flex items-center">
+        <div className="border-b border-gray-200 bg-white">
+          <div className="px-8 py-4 flex justify-between items-center w-full">
             {/* Left side - Section Title and ECOMMBX badge with space */}
             <div className="flex items-center">
               <h2 className="text-lg font-semibold">{activeSection.charAt(0).toUpperCase() + activeSection.slice(1)}</h2>
               <span className="badge badge-info ml-4">ECOMMBX</span>
             </div>
-            {/* Spacer to push bell to far right */}
-            <div className="flex-1"></div>
             {/* Far right - Notification Bell */}
-            <AdminNotificationBell onNavigate={setActiveSection} />
+            <div className="flex items-center">
+              <AdminNotificationBell onNavigate={setActiveSection} />
+            </div>
           </div>
         </div>
         <div className="p-8">
