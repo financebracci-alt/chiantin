@@ -1767,6 +1767,32 @@ function AdminDashboard() {
 
   const formatAmount = (cents) => `€${(cents / 100).toFixed(2)}`;
 
+  // Save User Notes Function
+  const handleSaveNotes = async () => {
+    if (!selectedUser) return;
+    
+    setSavingNotes(true);
+    try {
+      await api.patch(`/admin/users/${selectedUser.user.id}/notes`, {
+        notes: userNotes
+      });
+      toast.success('Notes saved successfully');
+      setEditingNotes(false);
+      // Update the local user data
+      setSelectedUser(prev => ({
+        ...prev,
+        user: { ...prev.user, admin_notes: userNotes }
+      }));
+      // Refresh user list to update notes indicator
+      fetchUsers();
+    } catch (err) {
+      console.error('Failed to save notes:', err);
+      toast.error('Failed to save notes: ' + (err.response?.data?.detail || err.message));
+    } finally {
+      setSavingNotes(false);
+    }
+  };
+
   // Delete User Function (Hard Delete)
   const handleDeleteUser = async () => {
     if (!selectedUser) return;
