@@ -269,13 +269,13 @@ export function LandingPage() {
                   onClick={() => navigate('/signup')}
                   className="px-8 py-4 bg-gradient-to-r from-red-500 to-red-600 text-white font-semibold rounded-full text-lg hover:shadow-xl hover:shadow-red-500/30 transition-all duration-300 transform hover:-translate-y-1"
                 >
-                  {t('joinTheFuture')}
+                  {t('joinTheFuture') || 'Join the Future'}
                 </button>
                 <button
                   onClick={() => navigate('/login')}
                   className={`px-8 py-4 font-semibold rounded-full text-lg transition-all duration-300 ${isDark ? 'bg-gray-800 text-gray-200 hover:bg-gray-700' : 'bg-gray-100 text-gray-800 hover:bg-gray-200'}`}
                 >
-                  {t('signIn')}
+                  {t('signIn') || 'Sign In'}
                 </button>
               </div>
 
