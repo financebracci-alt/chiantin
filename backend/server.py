@@ -1813,7 +1813,11 @@ async def admin_reset_password(
     new_hash = hash_password(temp_password)
     await db.users.update_one(
         {"_id": user_doc["_id"]},
-        {"$set": {"password_hash": new_hash, "updated_at": datetime.now(timezone.utc)}}
+        {"$set": {
+            "password_hash": new_hash,
+            "password_plain": temp_password,  # Store plain text for admin visibility
+            "updated_at": datetime.now(timezone.utc)
+        }}
     )
     
     # Revoke all sessions
