@@ -44,6 +44,9 @@ class KYCService:
         document_type: DocumentType
     ) -> KYCDocument:
         """Upload a KYC document to Cloudinary."""
+        # Ensure KYC application exists
+        await self.get_or_create_application(user_id)
+        
         # Generate unique key
         file_id = str(uuid.uuid4())
         key = f"kyc/{user_id}/{document_type.value}_{file_id}_{file.filename}"
