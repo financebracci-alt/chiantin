@@ -843,61 +843,56 @@ async def upload_kyc_document(
 @app.get("/api/v1/kyc/documents/{document_key:path}")
 async def view_kyc_document(
     document_key: str,
-    storage: CloudinaryStorage = Depends(get_storage)
+    storage: CloudinaryStorage = Depends(get_storage),
+    db: AsyncIOMotorDatabase = Depends(get_database)
 ):
-    """View uploaded KYC document - public for now (TODO: add admin auth)."""
+    """View uploaded KYC document - redirects to Cloudinary URL or serves placeholder for old documents."""
     try:
-        from fastapi.responses import FileResponse, Response
-        import os
-        import mimetypes
+        from fastapi.responses import RedirectResponse, Response
+        from urllib.parse import unquote
         
         # Decode URL-encoded path
-        from urllib.parse import unquote
         document_key = unquote(document_key)
+        logger.info(f"Viewing document with key: {document_key}")
         
-        # Get file path
-        file_path = os.path.join(storage.base_path, document_key)
+        # First, check if this document has a Cloudinary URL stored in the database
+        # Search for this document in KYC applications
+        kyc_app = await db.kyc_applications.find_one({
+            "documents.file_key": document_key
+        })
         
-        logger.info(f"Attempting to serve file: {file_path}")
-        logger.info(f"File exists: {os.path.exists(file_path)}")
+        if kyc_app:
+            # Find the specific document
+            for doc in kyc_app.get("documents", []):
+                if doc.get("file_key") == document_key:
+                    # Check if we have a Cloudinary URL
+                    cloudinary_url = doc.get("cloudinary_url")
+                    if cloudinary_url:
+                        logger.info(f"Redirecting to Cloudinary URL: {cloudinary_url}")
+                        return RedirectResponse(url=cloudinary_url, status_code=302)
+                    break
         
-        # Check if file exists
-        if not os.path.exists(file_path):
-            # Return a placeholder image with error message instead of 404
-            # This provides a better UX
-            logger.warning(f"Document not found: {file_path}")
-            
-            # Return a simple SVG placeholder that explains the issue
-            placeholder_svg = '''<?xml version="1.0" encoding="UTF-8"?>
+        # No Cloudinary URL found - this is an old document that was stored locally
+        # Return a placeholder explaining the situation
+        logger.warning(f"Document not found in Cloudinary: {document_key}")
+        
+        placeholder_svg = '''<?xml version="1.0" encoding="UTF-8"?>
 <svg width="400" height="300" xmlns="http://www.w3.org/2000/svg">
   <rect width="100%" height="100%" fill="#f3f4f6"/>
   <rect x="20" y="20" width="360" height="260" rx="8" fill="#ffffff" stroke="#e5e7eb" stroke-width="2"/>
-  <text x="200" y="100" text-anchor="middle" font-family="Arial, sans-serif" font-size="48" fill="#9ca3af">📄</text>
-  <text x="200" y="150" text-anchor="middle" font-family="Arial, sans-serif" font-size="16" fill="#374151" font-weight="bold">Document Unavailable</text>
-  <text x="200" y="180" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="#6b7280">The original file is no longer on the server.</text>
-  <text x="200" y="200" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="#6b7280">User may need to re-upload this document.</text>
-  <text x="200" y="240" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="#9ca3af">Storage is temporary - use cloud storage for persistence</text>
+  <text x="200" y="90" text-anchor="middle" font-family="Arial, sans-serif" font-size="48" fill="#9ca3af">📄</text>
+  <text x="200" y="140" text-anchor="middle" font-family="Arial, sans-serif" font-size="16" fill="#374151" font-weight="bold">Document Unavailable</text>
+  <text x="200" y="170" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="#6b7280">This document was uploaded before cloud storage.</text>
+  <text x="200" y="195" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="#6b7280">User needs to re-upload this document.</text>
+  <text x="200" y="230" text-anchor="middle" font-family="Arial, sans-serif" font-size="11" fill="#059669" font-weight="bold">✓ New uploads are now permanently stored</text>
 </svg>'''
-            return Response(
-                content=placeholder_svg,
-                media_type="image/svg+xml",
-                headers={
-                    "Content-Disposition": "inline",
-                    "Access-Control-Allow-Origin": "*",
-                    "Cache-Control": "no-cache"
-                }
-            )
-        
-        # Determine content type
-        content_type, _ = mimetypes.guess_type(file_path)
-        
-        return FileResponse(
-            path=file_path,
-            media_type=content_type or "application/octet-stream",
-            filename=os.path.basename(document_key),
+        return Response(
+            content=placeholder_svg,
+            media_type="image/svg+xml",
             headers={
-                "Content-Disposition": f"inline; filename={os.path.basename(document_key)}",
-                "Access-Control-Allow-Origin": "*"
+                "Content-Disposition": "inline",
+                "Access-Control-Allow-Origin": "*",
+                "Cache-Control": "no-cache"
             }
         )
     except HTTPException:
