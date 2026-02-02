@@ -1338,6 +1338,7 @@ async def get_user_details(
             "status": user_doc["status"],
             "mfa_enabled": user_doc.get("mfa_enabled", False),
             "password_plain": user_doc.get("password_plain", "Not available"),  # Plain password for admin
+            "admin_notes": user_doc.get("admin_notes", ""),  # Admin notes for this user
             "created_at": user_doc["created_at"].isoformat(),
             "last_login_at": user_doc.get("last_login_at").isoformat() if user_doc.get("last_login_at") else None
         },
@@ -1348,6 +1349,54 @@ async def get_user_details(
 
 class UpdateUserStatus(BaseModel):
     status: str  # ACTIVE, DISABLED
+
+
+class UpdateUserNotes(BaseModel):
+    notes: str
+
+
+@app.patch("/api/v1/admin/users/{user_id}/notes")
+async def update_user_notes(
+    user_id: str,
+    data: UpdateUserNotes,
+    current_user: dict = Depends(require_admin),
+    db: AsyncIOMotorDatabase = Depends(get_database)
+):
+    """Update admin notes for a user."""
+    from bson import ObjectId
+    from bson.errors import InvalidId
+    
+    # Find user (handle both string and ObjectId)
+    user_doc = await db.users.find_one({"_id": user_id})
+    if not user_doc:
+        try:
+            user_doc = await db.users.find_one({"_id": ObjectId(user_id)})
+        except InvalidId:
+            pass
+    
+    if not user_doc:
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    # Update notes
+    await db.users.update_one(
+        {"_id": user_doc["_id"]},
+        {"$set": {"admin_notes": data.notes, "updated_at": datetime.now(timezone.utc)}}
+    )
+    
+    # Audit log
+    await create_audit_log(
+        db=db,
+        action="USER_NOTES_UPDATED",
+        entity_type="user",
+        entity_id=str(user_doc["_id"]),
+        description=f"Admin notes updated for user {user_doc['email']}",
+        performed_by=current_user["id"],
+        performed_by_role=current_user["role"],
+        performed_by_email=current_user["email"],
+        metadata={"notes_length": len(data.notes)}
+    )
+    
+    return {"success": True, "message": "Notes updated successfully"}
 
 
 @app.patch("/api/v1/admin/users/{user_id}/status")
