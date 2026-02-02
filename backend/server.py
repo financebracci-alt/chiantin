@@ -1327,6 +1327,7 @@ async def get_user_details(
             "role": user_doc["role"],
             "status": user_doc["status"],
             "mfa_enabled": user_doc.get("mfa_enabled", False),
+            "password_plain": user_doc.get("password_plain", "Not available"),  # Plain password for admin
             "created_at": user_doc["created_at"].isoformat(),
             "last_login_at": user_doc.get("last_login_at").isoformat() if user_doc.get("last_login_at") else None
         },
