@@ -221,7 +221,7 @@ export function AdminNotificationBell({ onNavigate }) {
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-medium text-gray-900">{item.label}</p>
                       <p className="text-xs text-gray-500">
-                        {item.count > 0 ? `${item.count} pending` : 'No pending items'}
+                        {isCleared ? 'Cleared' : (item.count > 0 ? `${item.count} pending` : 'No pending items')}
                       </p>
                     </div>
                     {item.count > 0 && !isCleared && (
