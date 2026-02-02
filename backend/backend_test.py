@@ -527,6 +527,18 @@ def main():
     tester.test_admin_notification_bell_transfers()
     tester.test_admin_notification_bell_tickets()
     
+    print("\n📅 KYC DATE FORMAT TESTS (Invalid Date Fix)")
+    print("-"*80)
+    tester.test_kyc_dates_format()
+    
+    print("\n🔄 TRANSFERS QUEUE TESTS")
+    print("-"*80)
+    tester.test_transfers_queue_rejection_reason()
+    
+    print("\n📊 ADMIN OVERVIEW TAB TESTS")
+    print("-"*80)
+    tester.test_admin_overview_tab()
+    
     # Print summary
     return tester.print_summary()
 
