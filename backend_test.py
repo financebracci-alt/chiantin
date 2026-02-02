@@ -570,6 +570,12 @@ def main():
         tester.test_user_registration_with_plain_password()
         tester.test_admin_user_details_password_field()
         print()
+
+        print("📝 Testing New Features - Tax Hold & Admin Notes...")
+        tester.test_admin_users_list_with_tax_hold_and_notes()
+        tester.test_admin_user_notes_update()
+        tester.test_admin_tax_hold_management()
+        print()
     else:
         print("⚠️  Skipping admin tests due to login failure")
         print()
