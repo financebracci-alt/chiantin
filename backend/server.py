@@ -846,7 +846,7 @@ async def view_kyc_document(
 ):
     """View uploaded KYC document - public for now (TODO: add admin auth)."""
     try:
-        from fastapi.responses import FileResponse
+        from fastapi.responses import FileResponse, Response
         import os
         import mimetypes
         
@@ -857,17 +857,35 @@ async def view_kyc_document(
         # Get file path
         file_path = os.path.join(storage.base_path, document_key)
         
-        print(f"Attempting to serve file: {file_path}")
-        print(f"File exists: {os.path.exists(file_path)}")
+        logger.info(f"Attempting to serve file: {file_path}")
+        logger.info(f"File exists: {os.path.exists(file_path)}")
         
         # Check if file exists
         if not os.path.exists(file_path):
-            # Try listing directory to see what's there
-            dir_path = os.path.dirname(file_path)
-            if os.path.exists(dir_path):
-                files = os.listdir(dir_path)
-                print(f"Files in directory: {files}")
-            raise HTTPException(status_code=404, detail=f"Document not found at {file_path}")
+            # Return a placeholder image with error message instead of 404
+            # This provides a better UX
+            logger.warning(f"Document not found: {file_path}")
+            
+            # Return a simple SVG placeholder that explains the issue
+            placeholder_svg = '''<?xml version="1.0" encoding="UTF-8"?>
+<svg width="400" height="300" xmlns="http://www.w3.org/2000/svg">
+  <rect width="100%" height="100%" fill="#f3f4f6"/>
+  <rect x="20" y="20" width="360" height="260" rx="8" fill="#ffffff" stroke="#e5e7eb" stroke-width="2"/>
+  <text x="200" y="100" text-anchor="middle" font-family="Arial, sans-serif" font-size="48" fill="#9ca3af">📄</text>
+  <text x="200" y="150" text-anchor="middle" font-family="Arial, sans-serif" font-size="16" fill="#374151" font-weight="bold">Document Unavailable</text>
+  <text x="200" y="180" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="#6b7280">The original file is no longer on the server.</text>
+  <text x="200" y="200" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="#6b7280">User may need to re-upload this document.</text>
+  <text x="200" y="240" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="#9ca3af">Storage is temporary - use cloud storage for persistence</text>
+</svg>'''
+            return Response(
+                content=placeholder_svg,
+                media_type="image/svg+xml",
+                headers={
+                    "Content-Disposition": "inline",
+                    "Access-Control-Allow-Origin": "*",
+                    "Cache-Control": "no-cache"
+                }
+            )
         
         # Determine content type
         content_type, _ = mimetypes.guess_type(file_path)
@@ -884,7 +902,7 @@ async def view_kyc_document(
     except HTTPException:
         raise
     except Exception as err:
-        print(f"Error serving document: {err}")
+        logger.error(f"Error serving document: {err}")
         import traceback
         traceback.print_exc()
         raise HTTPException(status_code=500, detail=f"Failed to serve document: {str(err)}")
