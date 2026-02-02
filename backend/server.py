@@ -904,6 +904,78 @@ async def view_kyc_document(
         raise HTTPException(status_code=500, detail=f"Failed to serve document: {str(err)}")
 
 
+@app.get("/api/v1/kyc/documents/{document_key:path}/download")
+async def download_kyc_document(
+    document_key: str,
+    storage: CloudinaryStorage = Depends(get_storage),
+    db: AsyncIOMotorDatabase = Depends(get_database)
+):
+    """Download KYC document - fetches from Cloudinary and serves with proper download headers."""
+    try:
+        from fastapi.responses import Response
+        from urllib.parse import unquote
+        import httpx
+        
+        # Decode URL-encoded path
+        document_key = unquote(document_key)
+        logger.info(f"Downloading document with key: {document_key}")
+        
+        # Find the document in KYC applications
+        kyc_app = await db.kyc_applications.find_one({
+            "documents.file_key": document_key
+        })
+        
+        if not kyc_app:
+            raise HTTPException(status_code=404, detail="Document not found")
+        
+        # Find the specific document
+        doc_info = None
+        for doc in kyc_app.get("documents", []):
+            if doc.get("file_key") == document_key:
+                doc_info = doc
+                break
+        
+        if not doc_info:
+            raise HTTPException(status_code=404, detail="Document not found")
+        
+        # Get the Cloudinary URL
+        cloudinary_url = doc_info.get("cloudinary_url")
+        if not cloudinary_url:
+            raise HTTPException(status_code=404, detail="Document not available for download. Please ask user to re-upload.")
+        
+        # Fetch the document from Cloudinary
+        async with httpx.AsyncClient() as client:
+            response = await client.get(cloudinary_url, timeout=30.0)
+            
+            if response.status_code != 200:
+                raise HTTPException(status_code=502, detail="Failed to fetch document from storage")
+            
+            content = response.content
+            content_type = response.headers.get("content-type", "application/octet-stream")
+        
+        # Get filename
+        file_name = doc_info.get("file_name", f"document_{document_key}")
+        
+        # Return with download headers
+        return Response(
+            content=content,
+            media_type=content_type,
+            headers={
+                "Content-Disposition": f'attachment; filename="{file_name}"',
+                "Access-Control-Allow-Origin": "*",
+                "Cache-Control": "no-cache"
+            }
+        )
+        
+    except HTTPException:
+        raise
+    except Exception as err:
+        logger.error(f"Error downloading document: {err}")
+        import traceback
+        traceback.print_exc()
+        raise HTTPException(status_code=500, detail=f"Failed to download document: {str(err)}")
+
+
 @app.post("/api/v1/kyc/submit")
 async def submit_kyc(
     data: KYCSubmitRequest,
