@@ -1670,7 +1670,7 @@ function AdminDashboard() {
 
   useEffect(() => {
     applyFilters();
-  }, [users, searchQuery, statusFilter, roleFilter]);
+  }, [users, searchQuery, statusFilter, roleFilter, taxHoldFilter, notesFilter]);
 
   const applyFilters = () => {
     let filtered = [...users];
@@ -1694,6 +1694,20 @@ function AdminDashboard() {
     // Role filter
     if (roleFilter !== 'all') {
       filtered = filtered.filter(u => u.role === roleFilter);
+    }
+    
+    // Tax Hold filter
+    if (taxHoldFilter === 'with_tax_hold') {
+      filtered = filtered.filter(u => u.has_tax_hold === true);
+    } else if (taxHoldFilter === 'no_tax_hold') {
+      filtered = filtered.filter(u => u.has_tax_hold !== true);
+    }
+    
+    // Notes filter
+    if (notesFilter === 'with_notes') {
+      filtered = filtered.filter(u => u.admin_notes && u.admin_notes.trim() !== '');
+    } else if (notesFilter === 'no_notes') {
+      filtered = filtered.filter(u => !u.admin_notes || u.admin_notes.trim() === '');
     }
 
     setFilteredUsers(filtered);
