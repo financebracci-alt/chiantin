@@ -1581,6 +1581,7 @@ function AdminUsersTable({ users, loading, onSelectUser, selectedUser }) {
             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Email</th>
             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Role</th>
             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
+            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Flags</th>
             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Created</th>
           </tr>
         </thead>
@@ -1606,6 +1607,20 @@ function AdminUsersTable({ users, loading, onSelectUser, selectedUser }) {
                 <span className={`badge ${user.status === 'ACTIVE' ? 'badge-success' : 'badge-gray'}`}>
                   {user.status}
                 </span>
+              </td>
+              <td className="px-6 py-4 whitespace-nowrap">
+                <div className="flex items-center space-x-2">
+                  {user.has_tax_hold && (
+                    <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-red-100 text-red-800" title="User has active tax hold">
+                      🔴 TAX
+                    </span>
+                  )}
+                  {user.admin_notes && user.admin_notes.trim() !== '' && (
+                    <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-800" title="User has admin notes">
+                      📝
+                    </span>
+                  )}
+                </div>
               </td>
               <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
                 {new Date(user.created_at).toLocaleDateString()}
