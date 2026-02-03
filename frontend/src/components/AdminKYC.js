@@ -43,6 +43,34 @@ export function AdminKYCReview() {
     }
   };
 
+  // Handle manual queue submission
+  const handleManualQueue = async () => {
+    if (!queueEmail.trim()) {
+      toast.error('Please enter a user email');
+      return;
+    }
+    
+    setQueueLoading(true);
+    try {
+      const response = await api.post('/admin/kyc/queue-user', {
+        user_email: queueEmail.trim(),
+        reason: queueReason.trim() || null
+      });
+      
+      toast.success(response.data.message || 'User KYC queued successfully');
+      setShowQueueModal(false);
+      setQueueEmail('');
+      setQueueReason('');
+      // Refresh the applications list
+      fetchApplications();
+    } catch (err) {
+      const errorMsg = err.response?.data?.detail || 'Failed to queue user KYC';
+      toast.error(errorMsg);
+    } finally {
+      setQueueLoading(false);
+    }
+  };
+
   // Function to download document properly
   const handleDownloadDocument = async (doc) => {
     if (downloadingDocument) return;
