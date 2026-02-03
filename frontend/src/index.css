@@ -74,11 +74,16 @@
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
     font-size: 14px;
     line-height: 1.5;
-    /* Support iOS PWA safe area - push content below status bar */
-    padding-top: env(safe-area-inset-top, 0px);
-    padding-left: env(safe-area-inset-left, 0px);
-    padding-right: env(safe-area-inset-right, 0px);
-    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+  
+  /* iOS PWA Safe Area Support - for standalone mode headers */
+  @supports (padding-top: env(safe-area-inset-top)) {
+    /* Only apply in standalone PWA mode */
+    @media all and (display-mode: standalone) {
+      body {
+        padding-top: env(safe-area-inset-top, 0px);
+      }
+    }
   }
   
   .dark body {
