@@ -987,6 +987,8 @@ const translations = {
     amountDue: 'Importo Dovuto',
     settleBalanceNow: 'Salda il Saldo Ora',
     contactSupport: 'Contatta Supporto',
+    needHelp: 'Hai Bisogno di Aiuto?',
+    needHelpDesc: 'Il nostro team di supporto è qui per assisterti',
     settleOutstandingBalance: 'Salda il Saldo in Sospeso',
     selectPaymentMethod: 'Seleziona il metodo di pagamento preferito',
     pleaseSettleAmount: 'Si prega di saldare l\'importo richiesto per ripristinare l\'accesso completo. Per assistenza, contatta il supporto.',
