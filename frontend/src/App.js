@@ -1053,8 +1053,8 @@ function AccountsPage() {
   };
 
   return (
-    <div className={`min-h-screen ${isDark ? 'bg-gray-900' : 'bg-gray-50'}`} style={{ paddingTop: 'env(safe-area-inset-top, 0px)' }}>
-      {/* Header - with safe area inset for PWA mode on iOS */}
+    <div className={`min-h-screen ${isDark ? 'bg-gray-900' : 'bg-gray-50'}`}>
+      {/* Header */}
       <header className={`h-16 px-4 flex items-center justify-between border-b ${isDark ? 'bg-gray-900 border-gray-800' : 'bg-white border-gray-200'}`}>
         <div className="flex items-center gap-3">
           <button onClick={() => navigate('/dashboard')} className={`${isDark ? 'text-gray-400 hover:text-gray-200' : 'text-gray-500 hover:text-gray-700'}`}>
