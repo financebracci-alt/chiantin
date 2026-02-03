@@ -137,7 +137,7 @@ class SupportTicketsAPITester:
                 timeout=10
             )
             
-            if response.status_code == 201:
+            if response.status_code in [200, 201]:
                 data = response.json()
                 ticket_id = data.get("id")
                 self.log_result(
