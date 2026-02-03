@@ -1068,9 +1068,9 @@ function AccountsPage() {
           <button
             onClick={() => setLanguage(language === 'en' ? 'it' : 'en')}
             className={`flex items-center space-x-1 px-2 py-1.5 rounded-md text-sm font-medium transition ${isDark ? 'hover:bg-gray-700 text-gray-300' : 'hover:bg-gray-100 text-gray-700'}`}
+            data-testid="lang-toggle"
           >
-            <span className="text-base">{language === 'en' ? '🇬🇧' : '🇮🇹'}</span>
-            <span className="hidden sm:inline">{language === 'en' ? 'EN' : 'IT'}</span>
+            <span className="font-bold">{language === 'en' ? 'EN' : 'IT'}</span>
           </button>
           <button
             onClick={toggleTheme}
