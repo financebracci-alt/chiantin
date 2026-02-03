@@ -165,7 +165,7 @@ function SignupPage() {
             onClick={() => setLanguage(language === 'en' ? 'it' : 'en')}
             className={`px-3 py-1.5 rounded-lg font-bold text-sm transition ${isDark ? 'bg-gray-800 hover:bg-gray-700 text-gray-300' : 'bg-gray-100 hover:bg-gray-200 text-gray-700'}`}
           >
-            {language === 'en' ? '🇬🇧 EN' : '🇮🇹 IT'}
+            {language === 'en' ? 'EN' : 'IT'}
           </button>
           <button
             onClick={toggleTheme}
@@ -213,7 +213,7 @@ function SignupPage() {
           className={`px-3 py-1.5 rounded-lg font-bold text-sm transition ${isDark ? 'bg-gray-800 hover:bg-gray-700 text-gray-300' : 'bg-gray-100 hover:bg-gray-200 text-gray-700'}`}
           title={language === 'en' ? 'Switch to Italian' : 'Passa all\'Inglese'}
         >
-          {language === 'en' ? '🇬🇧 EN' : '🇮🇹 IT'}
+          {language === 'en' ? 'EN' : 'IT'}
         </button>
         
         {/* Theme Toggle */}
@@ -442,7 +442,7 @@ function LoginPage() {
           className={`px-3 py-1.5 rounded-lg font-bold text-sm transition ${isDark ? 'bg-gray-800 hover:bg-gray-700 text-gray-300' : 'bg-gray-100 hover:bg-gray-200 text-gray-700'}`}
           title={language === 'en' ? 'Switch to Italian' : 'Passa all\'Inglese'}
         >
-          {language === 'en' ? '🇬🇧 EN' : '🇮🇹 IT'}
+          {language === 'en' ? 'EN' : 'IT'}
         </button>
         
         {/* Theme Toggle */}
@@ -609,7 +609,7 @@ function ForgotPasswordPage() {
           onClick={() => setLanguage(language === 'en' ? 'it' : 'en')}
           className={`px-3 py-1.5 rounded-lg font-bold text-sm transition ${isDark ? 'bg-gray-800 hover:bg-gray-700 text-gray-300' : 'bg-gray-100 hover:bg-gray-200 text-gray-700'}`}
         >
-          {language === 'en' ? '🇬🇧 EN' : '🇮🇹 IT'}
+          {language === 'en' ? 'EN' : 'IT'}
         </button>
         <button
           onClick={toggleTheme}
@@ -776,7 +776,7 @@ function ResetPasswordPage() {
           onClick={() => setLanguage(language === 'en' ? 'it' : 'en')}
           className={`px-3 py-1.5 rounded-lg font-bold text-sm transition ${isDark ? 'bg-gray-800 hover:bg-gray-700 text-gray-300' : 'bg-gray-100 hover:bg-gray-200 text-gray-700'}`}
         >
-          {language === 'en' ? '🇬🇧 EN' : '🇮🇹 IT'}
+          {language === 'en' ? 'EN' : 'IT'}
         </button>
         <button
           onClick={toggleTheme}
@@ -915,7 +915,7 @@ function VerifyEmailPage() {
           onClick={() => setLanguage(language === 'en' ? 'it' : 'en')}
           className={`px-3 py-1.5 rounded-lg font-bold text-sm transition ${isDark ? 'bg-gray-800 hover:bg-gray-700 text-gray-300' : 'bg-gray-100 hover:bg-gray-200 text-gray-700'}`}
         >
-          {language === 'en' ? '🇬🇧 EN' : '🇮🇹 IT'}
+          {language === 'en' ? 'EN' : 'IT'}
         </button>
         <button
           onClick={toggleTheme}
@@ -1485,7 +1485,7 @@ function CustomerDashboard() {
             className={`px-2 py-1 rounded font-bold text-xs sm:text-sm transition ${isDark ? 'bg-gray-800 hover:bg-gray-700 text-gray-300' : 'bg-gray-100 hover:bg-gray-200 text-gray-700'}`}
             title={language === 'en' ? 'Switch to Italian' : 'Passa all\'Inglese'}
           >
-            {language === 'en' ? '🇬🇧 EN' : '🇮🇹 IT'}
+            {language === 'en' ? 'EN' : 'IT'}
           </button>
           
           {/* Theme Toggle */}
