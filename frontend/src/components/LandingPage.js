@@ -154,31 +154,40 @@ export function LandingPage() {
               </button>
             </div>
 
-            {/* Mobile Menu Button */}
-            <div className="flex items-center space-x-2 md:hidden">
+            {/* Mobile Menu Button - Improved spacing and touch targets for small screens */}
+            <div className="flex items-center space-x-3 md:hidden">
+              {/* Language Toggle - min 44px touch target */}
               <button
                 onClick={() => setLanguage(language === 'en' ? 'it' : 'en')}
-                className={`px-2 py-1 rounded font-bold text-xs ${isDark ? 'bg-gray-800 text-gray-300' : 'bg-gray-100 text-gray-700'}`}
+                className={`min-w-[44px] min-h-[44px] flex items-center justify-center px-3 py-2 rounded-lg font-bold text-sm ${isDark ? 'bg-gray-800 text-gray-300 active:bg-gray-700' : 'bg-gray-100 text-gray-700 active:bg-gray-200'}`}
+                data-testid="mobile-lang-toggle"
+                aria-label={language === 'en' ? 'Switch to Italian' : 'Switch to English'}
               >
                 {language === 'en' ? 'EN' : 'IT'}
               </button>
+              {/* Theme Toggle - min 44px touch target */}
               <button
                 onClick={toggleTheme}
-                className={`p-1.5 rounded ${isDark ? 'text-yellow-400' : 'text-gray-600'}`}
+                className={`min-w-[44px] min-h-[44px] flex items-center justify-center p-2 rounded-lg ${isDark ? 'text-yellow-400 active:bg-gray-800' : 'text-gray-600 active:bg-gray-100'}`}
+                data-testid="mobile-theme-toggle"
+                aria-label={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
               >
                 {isDark ? (
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
                   </svg>
                 ) : (
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
                   </svg>
                 )}
               </button>
+              {/* Hamburger Menu - min 44px touch target */}
               <button
                 onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-                className={`p-2 ${isDark ? 'text-gray-300' : 'text-gray-600'}`}
+                className={`min-w-[44px] min-h-[44px] flex items-center justify-center p-2 rounded-lg ${isDark ? 'text-gray-300 active:bg-gray-800' : 'text-gray-600 active:bg-gray-100'}`}
+                data-testid="mobile-menu-toggle"
+                aria-label={mobileMenuOpen ? 'Close menu' : 'Open menu'}
               >
                 {mobileMenuOpen ? (
                   <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
