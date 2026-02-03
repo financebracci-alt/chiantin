@@ -94,6 +94,22 @@ class KYCService:
                 detail="Application cannot be modified in current status"
             )
         
+        # CRITICAL VALIDATION: Ensure required documents are uploaded
+        # Get the latest application data to check documents
+        app_doc = await self.db.kyc_applications.find_one({"user_id": user_id})
+        documents = app_doc.get("documents", []) if app_doc else []
+        
+        # Check for required document types
+        doc_types = {doc.get("document_type") for doc in documents}
+        required_docs = {"PASSPORT", "PROOF_OF_ADDRESS"}  # Minimum required
+        missing_docs = required_docs - doc_types
+        
+        if missing_docs:
+            raise HTTPException(
+                status_code=400,
+                detail=f"Missing required documents: {', '.join(missing_docs)}. Please upload all required documents before submitting."
+            )
+        
         # Update application
         update_data = data.model_dump()
         update_data.update({
