@@ -947,9 +947,15 @@ async def submit_kyc(
     storage: CloudinaryStorage = Depends(get_storage)
 ):
     """Submit KYC application for review."""
-    kyc_service = KYCService(db, storage)
-    app = await kyc_service.submit_application(current_user["id"], data)
-    return app.model_dump()
+    logger.info(f"KYC submission started for user {current_user['id']} ({current_user['email']})")
+    try:
+        kyc_service = KYCService(db, storage)
+        app = await kyc_service.submit_application(current_user["id"], data)
+        logger.info(f"KYC submission successful for user {current_user['id']} - Status: {app.status}")
+        return app.model_dump()
+    except Exception as e:
+        logger.error(f"KYC submission failed for user {current_user['id']}: {str(e)}")
+        raise
 
 
 @app.get("/api/v1/admin/kyc/pending")
