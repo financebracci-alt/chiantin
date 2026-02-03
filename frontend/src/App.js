@@ -1223,8 +1223,7 @@ function TransactionsPage() {
                 className={`flex items-center space-x-1 px-3 py-1.5 rounded-md text-sm font-medium transition ${isDark ? 'hover:bg-gray-700 text-gray-300' : 'hover:bg-gray-100 text-gray-700'}`}
                 title={language === 'en' ? 'Switch to Italian' : 'Passa a Inglese'}
               >
-                <span className="text-base">{language === 'en' ? '🇬🇧' : '🇮🇹'}</span>
-                <span className="hidden sm:inline">{language === 'en' ? 'EN' : 'IT'}</span>
+                <span className="font-bold">{language === 'en' ? 'EN' : 'IT'}</span>
               </button>
               {/* Theme Toggle */}
               <button
@@ -1390,8 +1389,7 @@ function SecurityPage() {
                 className={`flex items-center space-x-1 px-3 py-1.5 rounded-md text-sm font-medium transition ${isDark ? 'hover:bg-gray-700 text-gray-300' : 'hover:bg-gray-100 text-gray-700'}`}
                 title={language === 'en' ? 'Switch to Italian' : 'Passa a Inglese'}
               >
-                <span className="text-base">{language === 'en' ? '🇬🇧' : '🇮🇹'}</span>
-                <span className="hidden sm:inline">{language === 'en' ? 'EN' : 'IT'}</span>
+                <span className="font-bold">{language === 'en' ? 'EN' : 'IT'}</span>
               </button>
               {/* Theme Toggle */}
               <button
@@ -2645,8 +2643,7 @@ function ProfilePage() {
                 className={`flex items-center space-x-1 px-3 py-1.5 rounded-md text-sm font-medium transition ${isDark ? 'hover:bg-gray-700 text-gray-300' : 'hover:bg-gray-100 text-gray-700'}`}
                 title={language === 'en' ? 'Switch to Italian' : 'Passa a Inglese'}
               >
-                <span className="text-base">{language === 'en' ? '🇬🇧' : '🇮🇹'}</span>
-                <span className="hidden sm:inline">{language === 'en' ? 'EN' : 'IT'}</span>
+                <span className="font-bold">{language === 'en' ? 'EN' : 'IT'}</span>
               </button>
               {/* Theme Toggle */}
               <button
