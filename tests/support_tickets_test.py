@@ -132,8 +132,7 @@ class SupportTicketsAPITester:
                 headers={"Authorization": f"Bearer {self.user_token}"},
                 json={
                     "subject": f"Test Ticket - {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}",
-                    "message": "This is a test support ticket to verify the support system is working correctly.",
-                    "category": "GENERAL"
+                    "description": "This is a test support ticket to verify the support system is working correctly."
                 },
                 timeout=10
             )
