@@ -1,488 +1,85 @@
-<analysis>**original_problem_statement**: The user requested a series of features and bug fixes for a professional banking application. The main tasks included: adding an Edit IBAN button to the admin user details view, fixing performance issues in the admin panel, renaming Super Admin to ECOMMBX and Staff to Support, implementing a full Edit Ticket feature for admins, adding a real-time notification bell for admins, and fixing various UI bugs related to date formatting, modal behavior, and data display. The user emphasized the need for a professional look and feel, careful implementation without breaking existing code, and thorough testing after every change.
+<analysis>**original_problem_statement**: The user initiated the session with a request to continue development by adding a feature for admins to delete support tickets and to implement a password visibility toggle on the login/signup pages.
 
-**PRODUCT REQUIREMENTS**:
-- Admins must be able to edit a user's IBAN from the user details page.
-- The admin panel, especially the Accounts tab, must load quickly.
-- The UI must be professional; Super_admin should be displayed as ECOMMBX and Staff as Support.
-- Admins must be able to edit the subject and messages of support tickets.
-- The admin panel must have a notification bell in the top-right corner that provides live counts of pending KYC requests, card requests, transfers, and support tickets.
-- The notification bell should allow marking items as read and clearing the notification badge.
-- Rejected transfers must show the reason for rejection in the UI.
-- All date formats must be correct and not show Invalid Date.
-- KYC document images should be viewable and downloadable.
+Throughout the session, the user reported a series of bugs and requested additional features, including:
+- A bug where the KYC submission date showed Invalid Date.
+- A bug where the Download button for KYC documents only viewed the image instead of downloading it.
+- A critical issue where a user's transfer disappeared (later found to be deleted by a testing agent in a previous session).
+- A mobile-specific UI bug where the login button incorrectly displayed Registrazione (Registration).
+- A bug where the email field was cleared after a failed login attempt.
+- A bug where resetting a password didn't update the plain-text password visible to admins.
+- A feature request to auto-capitalize user names upon registration to a professional standard (e.g., jOhN -> John).
+- A request to fix the capitalization for all existing users in the database.
+- A final request for a comprehensive, full-application test to ensure 100% readiness for production deployment, which led to debugging a post-deployment login failure.
 
 **User's preferred language**: English
 
 **what currently exists?**
-The application is a functional banking platform with a FastAPI backend and a React frontend. It includes user authentication, admin panels for managing users, accounts, transfers, KYC, and support tickets. In this session, numerous features were added and bugs fixed:
-- The Edit IBAN feature is fully implemented.
-- The admin panel performance issues have been resolved by optimizing API calls.
-- A comprehensive Edit Ticket feature is now available for admins.
-- A live notification bell with polling, categorized counts, and mark as read/clear functionality has been implemented.
-- UI labels and roles have been updated to ECOMMBX and Support as requested.
-- Several bugs related to date formatting (Invalid Date), modal behavior, and data display (rejection reasons) have been fixed.
+The application is a professional banking platform with a FastAPI backend and a React frontend. The following features were implemented or fixed in this session:
+- **Support Tickets**: Admins can now delete individual messages within a support ticket, and they can delete entire tickets. Both actions have confirmation modals.
+- **Authentication**: The login and signup pages now feature a password visibility toggle (eye icon). A bug was fixed where the email field would clear after a failed login; the email is now retained. The plain-text password shown to admins is now correctly updated upon password reset and is also synced on every successful login as a failsafe.
+- **User Management**: User names are now automatically capitalized to Title Case upon registration. A one-time script was run to fix the capitalization of all existing users in the database.
+- **KYC Documents**: A bug causing Invalid Date to be displayed for submission dates has been fixed. The document download functionality has been corrected to trigger a file download instead of just opening the image.
+- **UI/UX**: A resilient fix was implemented for a mobile-specific translation issue on the login page by adding fallback text to critical buttons.
+- **Testing**: The application underwent extensive manual and automated testing, with the agent verifying all core functionalities before declaring it ready for deployment.
 
 **Last working item**:
-- **Last item agent was working**: The user reported that the Clear All (X) button in the notification bell dropdown does not work as expected. It removes the red count badge from the bell icon but does not clear the individual item counts (e.g., 5 pending) inside the dropdown itself. The agent has identified this as the next item to fix.
-- **Status**: IN PROGRESS
-- **Agent Testing Done**: N
-- **Which testing method agent to use?**: Frontend testing agent
+- **Last item agent was working**: The agent was troubleshooting a Login failed error reported by the user on the production deployment (). After confirming the backend API was working correctly, the agent diagnosed the issue as a misconfigured frontend environment variable. The user's  was pointing to the preview environment instead of the production URL.
+- **Status**: USER VERIFICATION PENDING
+- **Agent Testing Done**: Y
+- **Which testing method agent to use?**: Manual testing by curl
 - **User Testing Done**: N
 
 **All Pending/In progress Issue list**:
-- **Issue 1: Clear All notification functionality is incomplete (P0)**
-- **Issue 2: Pre-existing linting errors in  (P2)**
+- **Issue 1: Production Login Failure (P0)**
 
 **Issues Detail**:
-- **Issue 1: Clear All notification functionality is incomplete**
-  - **Attempted fixes**: The current implementation clears the main badge count but does not visually reset the categorized counts inside the dropdown menu, which is confusing for the user.
+- **Issue 1: Production Login Failure**
+  - **Attempted fixes**: The agent diagnosed that the  in the user's production deployment settings was incorrectly pointing to the preview environment. The agent instructed the user to change the value to their production URL () and redeploy.
   - **Next debug checklist**:
-    1.  Locate the  function in .
-    2.  In addition to setting the main  to 0, introduce a new state variable, e.g., , and set it to  when the button is clicked.
-    3.  In the JSX, add a conditional check. If  is , do not render the count badges next to the notification categories (KYC, Transfers, etc.) within the dropdown.
-    4.  Ensure that when new notifications arrive (during the next polling interval),  is reset to  so the counts reappear.
-  - **Why fix this issue and what will be achieved with the fix?**: To make the Clear All feature intuitive. When the user clears notifications, the dropdown should reflect this by hiding the counts, preventing confusion.
-  - **Status**: IN PROGRESS
+    1. Wait for the user to confirm they have updated the environment variable and redeployed the application.
+    2. Ask the user to clear their browser cache and try logging in to the production site again.
+    3. If the issue persists, re-verify the production backend logs for any new errors.
+  - **Why fix this issue and what will be achieved with the fix?**: This is a critical blocker preventing users from logging into the production application. Fixing it will restore core functionality.
+  - **Status**: USER VERIFICATION PENDING
   - **Is recurring issue?**: N
-  - **Should Test frontend/backend/both after fix?**: Frontend
-  - **Blocked on other issue**: None
-
-- **Issue 2: Pre-existing linting errors in **
-  - **Attempted fixes**: None. The agent noted these early in the session but prioritized feature requests and bug fixes.
-  - **Next debug checklist**:
-    1.  Run /app/backend/server.py:3:1: F401 'fastapi.status' imported but unused
-/app/backend/server.py:3:80: E501 line too long (96 > 79 characters)
-/app/backend/server.py:29:80: E501 line too long (159 > 79 characters)
-/app/backend/server.py:31:1: F401 'schemas.banking.TransactionDisplayType' imported but unused
-/app/backend/server.py:31:80: E501 line too long (106 > 79 characters)
-/app/backend/server.py:65:80: E501 line too long (83 > 79 characters)
-/app/backend/server.py:90:1: W293 blank line contains whitespace
-/app/backend/server.py:94:1: W293 blank line contains whitespace
-/app/backend/server.py:97:1: W293 blank line contains whitespace
-/app/backend/server.py:103:1: W293 blank line contains whitespace
-/app/backend/server.py:108:80: E501 line too long (82 > 79 characters)
-/app/backend/server.py:119:80: E501 line too long (88 > 79 characters)
-/app/backend/server.py:120:80: E501 line too long (81 > 79 characters)
-/app/backend/server.py:123:80: E501 line too long (81 > 79 characters)
-/app/backend/server.py:132:80: E501 line too long (84 > 79 characters)
-/app/backend/server.py:140:80: E501 line too long (95 > 79 characters)
-/app/backend/server.py:143:1: W293 blank line contains whitespace
-/app/backend/server.py:145:1: W293 blank line contains whitespace
-/app/backend/server.py:148:1: W293 blank line contains whitespace
-/app/backend/server.py:155:1: W293 blank line contains whitespace
-/app/backend/server.py:157:1: W293 blank line contains whitespace
-/app/backend/server.py:201:1: W293 blank line contains whitespace
-/app/backend/server.py:205:1: W293 blank line contains whitespace
-/app/backend/server.py:209:1: W293 blank line contains whitespace
-/app/backend/server.py:216:1: W293 blank line contains whitespace
-/app/backend/server.py:219:1: W293 blank line contains whitespace
-/app/backend/server.py:234:80: E501 line too long (97 > 79 characters)
-/app/backend/server.py:259:80: E501 line too long (110 > 79 characters)
-/app/backend/server.py:260:1: W293 blank line contains whitespace
-/app/backend/server.py:268:80: E501 line too long (102 > 79 characters)
-/app/backend/server.py:269:1: W293 blank line contains whitespace
-/app/backend/server.py:272:1: W293 blank line contains whitespace
-/app/backend/server.py:282:1: W293 blank line contains whitespace
-/app/backend/server.py:285:1: W293 blank line contains whitespace
-/app/backend/server.py:290:1: W293 blank line contains whitespace
-/app/backend/server.py:304:1: W293 blank line contains whitespace
-/app/backend/server.py:314:80: E501 line too long (100 > 79 characters)
-/app/backend/server.py:316:80: E501 line too long (105 > 79 characters)
-/app/backend/server.py:317:1: W293 blank line contains whitespace
-/app/backend/server.py:337:80: E501 line too long (119 > 79 characters)
-/app/backend/server.py:350:1: W293 blank line contains whitespace
-/app/backend/server.py:367:1: W293 blank line contains whitespace
-/app/backend/server.py:381:80: E501 line too long (99 > 79 characters)
-/app/backend/server.py:382:1: W293 blank line contains whitespace
-/app/backend/server.py:397:29: W291 trailing whitespace
-/app/backend/server.py:400:1: W293 blank line contains whitespace
-/app/backend/server.py:405:1: W293 blank line contains whitespace
-/app/backend/server.py:419:1: W293 blank line contains whitespace
-/app/backend/server.py:426:1: W293 blank line contains whitespace
-/app/backend/server.py:439:1: W293 blank line contains whitespace
-/app/backend/server.py:449:1: W293 blank line contains whitespace
-/app/backend/server.py:478:1: W293 blank line contains whitespace
-/app/backend/server.py:481:29: W291 trailing whitespace
-/app/backend/server.py:482:80: E501 line too long (84 > 79 characters)
-/app/backend/server.py:484:1: W293 blank line contains whitespace
-/app/backend/server.py:488:29: W291 trailing whitespace
-/app/backend/server.py:491:1: W293 blank line contains whitespace
-/app/backend/server.py:495:80: E501 line too long (80 > 79 characters)
-/app/backend/server.py:498:1: W293 blank line contains whitespace
-/app/backend/server.py:504:1: W293 blank line contains whitespace
-/app/backend/server.py:511:1: W293 blank line contains whitespace
-/app/backend/server.py:517:1: W293 blank line contains whitespace
-/app/backend/server.py:529:1: W293 blank line contains whitespace
-/app/backend/server.py:531:1: W293 blank line contains whitespace
-/app/backend/server.py:532:80: E501 line too long (91 > 79 characters)
-/app/backend/server.py:543:1: W293 blank line contains whitespace
-/app/backend/server.py:546:80: E501 line too long (118 > 79 characters)
-/app/backend/server.py:547:1: W293 blank line contains whitespace
-/app/backend/server.py:551:29: W291 trailing whitespace
-/app/backend/server.py:554:1: W293 blank line contains whitespace
-/app/backend/server.py:560:1: W293 blank line contains whitespace
-/app/backend/server.py:564:1: W293 blank line contains whitespace
-/app/backend/server.py:575:1: W293 blank line contains whitespace
-/app/backend/server.py:585:80: E501 line too long (87 > 79 characters)
-/app/backend/server.py:587:80: E501 line too long (89 > 79 characters)
-/app/backend/server.py:588:1: W293 blank line contains whitespace
-/app/backend/server.py:589:80: E501 line too long (92 > 79 characters)
-/app/backend/server.py:602:1: W293 blank line contains whitespace
-/app/backend/server.py:654:1: W293 blank line contains whitespace
-/app/backend/server.py:659:80: E501 line too long (85 > 79 characters)
-/app/backend/server.py:662:1: W293 blank line contains whitespace
-/app/backend/server.py:665:1: W293 blank line contains whitespace
-/app/backend/server.py:668:80: E501 line too long (84 > 79 characters)
-/app/backend/server.py:669:1: W293 blank line contains whitespace
-/app/backend/server.py:672:80: E501 line too long (97 > 79 characters)
-/app/backend/server.py:673:1: W293 blank line contains whitespace
-/app/backend/server.py:678:80: E501 line too long (87 > 79 characters)
-/app/backend/server.py:680:1: W293 blank line contains whitespace
-/app/backend/server.py:686:1: W293 blank line contains whitespace
-/app/backend/server.py:687:80: E501 line too long (93 > 79 characters)
-/app/backend/server.py:709:1: W293 blank line contains whitespace
-/app/backend/server.py:711:80: E501 line too long (93 > 79 characters)
-/app/backend/server.py:712:1: W293 blank line contains whitespace
-/app/backend/server.py:715:80: E501 line too long (85 > 79 characters)
-/app/backend/server.py:716:80: E501 line too long (124 > 79 characters)
-/app/backend/server.py:717:1: W293 blank line contains whitespace
-/app/backend/server.py:721:1: W293 blank line contains whitespace
-/app/backend/server.py:723:80: E501 line too long (92 > 79 characters)
-/app/backend/server.py:733:1: W293 blank line contains whitespace
-/app/backend/server.py:736:80: E501 line too long (93 > 79 characters)
-/app/backend/server.py:737:80: E501 line too long (91 > 79 characters)
-/app/backend/server.py:740:1: W293 blank line contains whitespace
-/app/backend/server.py:741:80: E501 line too long (120 > 79 characters)
-/app/backend/server.py:756:1: W293 blank line contains whitespace
-/app/backend/server.py:759:29: W291 trailing whitespace
-/app/backend/server.py:760:80: E501 line too long (89 > 79 characters)
-/app/backend/server.py:762:1: W293 blank line contains whitespace
-/app/backend/server.py:765:80: E501 line too long (93 > 79 characters)
-/app/backend/server.py:766:1: W293 blank line contains whitespace
-/app/backend/server.py:774:80: E501 line too long (86 > 79 characters)
-/app/backend/server.py:777:1: W293 blank line contains whitespace
-/app/backend/server.py:780:1: W293 blank line contains whitespace
-/app/backend/server.py:785:80: E501 line too long (87 > 79 characters)
-/app/backend/server.py:787:1: W293 blank line contains whitespace
-/app/backend/server.py:793:1: W293 blank line contains whitespace
-/app/backend/server.py:799:1: W293 blank line contains whitespace
-/app/backend/server.py:801:1: W293 blank line contains whitespace
-/app/backend/server.py:802:80: E501 line too long (111 > 79 characters)
-/app/backend/server.py:829:80: E501 line too long (84 > 79 characters)
-/app/backend/server.py:843:1: W293 blank line contains whitespace
-/app/backend/server.py:847:1: W293 blank line contains whitespace
-/app/backend/server.py:850:1: W293 blank line contains whitespace
-/app/backend/server.py:853:1: W293 blank line contains whitespace
-/app/backend/server.py:861:80: E501 line too long (93 > 79 characters)
-/app/backend/server.py:862:1: W293 blank line contains whitespace
-/app/backend/server.py:865:1: W293 blank line contains whitespace
-/app/backend/server.py:871:80: E501 line too long (92 > 79 characters)
-/app/backend/server.py:881:80: E501 line too long (92 > 79 characters)
-/app/backend/server.py:919:80: E501 line too long (90 > 79 characters)
-/app/backend/server.py:920:1: W293 blank line contains whitespace
-/app/backend/server.py:927:80: E501 line too long (84 > 79 characters)
-/app/backend/server.py:931:80: E501 line too long (102 > 79 characters)
-/app/backend/server.py:933:1: W293 blank line contains whitespace
-/app/backend/server.py:946:80: E501 line too long (81 > 79 characters)
-/app/backend/server.py:948:1: W293 blank line contains whitespace
-/app/backend/server.py:951:80: E501 line too long (82 > 79 characters)
-/app/backend/server.py:952:1: W293 blank line contains whitespace
-/app/backend/server.py:954:1: W293 blank line contains whitespace
-/app/backend/server.py:961:80: E501 line too long (81 > 79 characters)
-/app/backend/server.py:965:80: E501 line too long (111 > 79 characters)
-/app/backend/server.py:967:1: W293 blank line contains whitespace
-/app/backend/server.py:1002:1: W293 blank line contains whitespace
-/app/backend/server.py:1005:80: E501 line too long (102 > 79 characters)
-/app/backend/server.py:1007:1: W293 blank line contains whitespace
-/app/backend/server.py:1009:80: E501 line too long (89 > 79 characters)
-/app/backend/server.py:1026:1: W293 blank line contains whitespace
-/app/backend/server.py:1027:80: E501 line too long (109 > 79 characters)
-/app/backend/server.py:1029:1: W293 blank line contains whitespace
-/app/backend/server.py:1033:1: W293 blank line contains whitespace
-/app/backend/server.py:1040:1: W293 blank line contains whitespace
-/app/backend/server.py:1046:80: E501 line too long (91 > 79 characters)
-/app/backend/server.py:1082:1: W293 blank line contains whitespace
-/app/backend/server.py:1092:1: W293 blank line contains whitespace
-/app/backend/server.py:1099:80: E501 line too long (110 > 79 characters)
-/app/backend/server.py:1103:80: E501 line too long (98 > 79 characters)
-/app/backend/server.py:1105:1: W293 blank line contains whitespace
-/app/backend/server.py:1119:1: W293 blank line contains whitespace
-/app/backend/server.py:1129:1: W293 blank line contains whitespace
-/app/backend/server.py:1136:80: E501 line too long (116 > 79 characters)
-/app/backend/server.py:1140:80: E501 line too long (98 > 79 characters)
-/app/backend/server.py:1142:1: W293 blank line contains whitespace
-/app/backend/server.py:1156:1: W293 blank line contains whitespace
-/app/backend/server.py:1166:1: W293 blank line contains whitespace
-/app/backend/server.py:1173:80: E501 line too long (114 > 79 characters)
-/app/backend/server.py:1177:80: E501 line too long (98 > 79 characters)
-/app/backend/server.py:1179:1: W293 blank line contains whitespace
-/app/backend/server.py:1210:1: W293 blank line contains whitespace
-/app/backend/server.py:1221:80: E501 line too long (81 > 79 characters)
-/app/backend/server.py:1223:1: W293 blank line contains whitespace
-/app/backend/server.py:1226:1: W293 blank line contains whitespace
-/app/backend/server.py:1232:80: E501 line too long (83 > 79 characters)
-/app/backend/server.py:1233:80: E501 line too long (81 > 79 characters)
-/app/backend/server.py:1239:1: W293 blank line contains whitespace
-/app/backend/server.py:1275:1: W293 blank line contains whitespace
-/app/backend/server.py:1278:1: W293 blank line contains whitespace
-/app/backend/server.py:1285:1: W293 blank line contains whitespace
-/app/backend/server.py:1288:1: W293 blank line contains whitespace
-/app/backend/server.py:1291:1: W293 blank line contains whitespace
-/app/backend/server.py:1296:1: W293 blank line contains whitespace
-/app/backend/server.py:1308:1: W293 blank line contains whitespace
-/app/backend/server.py:1311:1: W293 blank line contains whitespace
-/app/backend/server.py:1322:80: E501 line too long (113 > 79 characters)
-/app/backend/server.py:1343:1: W293 blank line contains whitespace
-/app/backend/server.py:1351:1: W293 blank line contains whitespace
-/app/backend/server.py:1354:1: W293 blank line contains whitespace
-/app/backend/server.py:1356:1: W293 blank line contains whitespace
-/app/backend/server.py:1360:80: E501 line too long (83 > 79 characters)
-/app/backend/server.py:1362:1: W293 blank line contains whitespace
-/app/backend/server.py:1369:80: E501 line too long (98 > 79 characters)
-/app/backend/server.py:1375:1: W293 blank line contains whitespace
-/app/backend/server.py:1376:80: E501 line too long (121 > 79 characters)
-/app/backend/server.py:1383:80: E501 line too long (92 > 79 characters)
-/app/backend/server.py:1384:80: E501 line too long (107 > 79 characters)
-/app/backend/server.py:1386:80: E501 line too long (107 > 79 characters)
-/app/backend/server.py:1387:80: E501 line too long (83 > 79 characters)
-/app/backend/server.py:1388:80: E501 line too long (80 > 79 characters)
-/app/backend/server.py:1389:80: E501 line too long (90 > 79 characters)
-/app/backend/server.py:1390:80: E501 line too long (92 > 79 characters)
-/app/backend/server.py:1408:80: E501 line too long (83 > 79 characters)
-/app/backend/server.py:1409:80: E501 line too long (92 > 79 characters)
-/app/backend/server.py:1412:1: W293 blank line contains whitespace
-/app/backend/server.py:1418:1: W293 blank line contains whitespace
-/app/backend/server.py:1430:1: W293 blank line contains whitespace
-/app/backend/server.py:1450:1: W293 blank line contains whitespace
-/app/backend/server.py:1455:1: W293 blank line contains whitespace
-/app/backend/server.py:1460:1: W293 blank line contains whitespace
-/app/backend/server.py:1465:80: E501 line too long (85 > 79 characters)
-/app/backend/server.py:1468:1: W293 blank line contains whitespace
-/app/backend/server.py:1470:80: E501 line too long (90 > 79 characters)
-/app/backend/server.py:1471:1: W293 blank line contains whitespace
-/app/backend/server.py:1474:1: W293 blank line contains whitespace
-/app/backend/server.py:1484:1: W293 blank line contains whitespace
-/app/backend/server.py:1495:80: E501 line too long (105 > 79 characters)
-/app/backend/server.py:1497:1: W293 blank line contains whitespace
-/app/backend/server.py:1498:80: E501 line too long (109 > 79 characters)
-/app/backend/server.py:1511:1: W293 blank line contains whitespace
-/app/backend/server.py:1519:1: W293 blank line contains whitespace
-/app/backend/server.py:1522:1: W293 blank line contains whitespace
-/app/backend/server.py:1524:1: W293 blank line contains whitespace
-/app/backend/server.py:1527:1: W293 blank line contains whitespace
-/app/backend/server.py:1533:1: W293 blank line contains whitespace
-/app/backend/server.py:1572:1: W293 blank line contains whitespace
-/app/backend/server.py:1578:80: E501 line too long (163 > 79 characters)
-/app/backend/server.py:1581:1: W293 blank line contains whitespace
-/app/backend/server.py:1588:80: E501 line too long (127 > 79 characters)
-/app/backend/server.py:1592:80: E501 line too long (108 > 79 characters)
-/app/backend/server.py:1594:1: W293 blank line contains whitespace
-/app/backend/server.py:1613:1: W293 blank line contains whitespace
-/app/backend/server.py:1621:1: W293 blank line contains whitespace
-/app/backend/server.py:1624:1: W293 blank line contains whitespace
-/app/backend/server.py:1626:1: W293 blank line contains whitespace
-/app/backend/server.py:1638:1: W293 blank line contains whitespace
-/app/backend/server.py:1640:80: E501 line too long (93 > 79 characters)
-/app/backend/server.py:1641:1: W293 blank line contains whitespace
-/app/backend/server.py:1647:80: E501 line too long (107 > 79 characters)
-/app/backend/server.py:1650:1: W293 blank line contains whitespace
-/app/backend/server.py:1663:1: W293 blank line contains whitespace
-/app/backend/server.py:1680:1: W293 blank line contains whitespace
-/app/backend/server.py:1688:1: W293 blank line contains whitespace
-/app/backend/server.py:1691:1: W293 blank line contains whitespace
-/app/backend/server.py:1693:1: W293 blank line contains whitespace
-/app/backend/server.py:1698:1: W293 blank line contains whitespace
-/app/backend/server.py:1704:80: E501 line too long (94 > 79 characters)
-/app/backend/server.py:1712:1: W293 blank line contains whitespace
-/app/backend/server.py:1723:1: W293 blank line contains whitespace
-/app/backend/server.py:1734:80: E501 line too long (181 > 79 characters)
-/app/backend/server.py:1737:1: W293 blank line contains whitespace
-/app/backend/server.py:1755:1: W293 blank line contains whitespace
-/app/backend/server.py:1763:1: W293 blank line contains whitespace
-/app/backend/server.py:1766:1: W293 blank line contains whitespace
-/app/backend/server.py:1768:1: W293 blank line contains whitespace
-/app/backend/server.py:1774:1: W293 blank line contains whitespace
-/app/backend/server.py:1787:1: W293 blank line contains whitespace
-/app/backend/server.py:1795:1: W293 blank line contains whitespace
-/app/backend/server.py:1798:1: W293 blank line contains whitespace
-/app/backend/server.py:1802:1: W293 blank line contains whitespace
-/app/backend/server.py:1807:80: E501 line too long (87 > 79 characters)
-/app/backend/server.py:1809:1: W293 blank line contains whitespace
-/app/backend/server.py:1815:1: W293 blank line contains whitespace
-/app/backend/server.py:1822:1: W293 blank line contains whitespace
-/app/backend/server.py:1835:1: W293 blank line contains whitespace
-/app/backend/server.py:1839:80: E501 line too long (103 > 79 characters)
-/app/backend/server.py:1854:1: W293 blank line contains whitespace
-/app/backend/server.py:1870:1: W293 blank line contains whitespace
-/app/backend/server.py:1885:1: W293 blank line contains whitespace
-/app/backend/server.py:1892:1: W293 blank line contains whitespace
-/app/backend/server.py:1925:1: W293 blank line contains whitespace
-/app/backend/server.py:1926:80: E501 line too long (125 > 79 characters)
-/app/backend/server.py:1928:1: W293 blank line contains whitespace
-/app/backend/server.py:1931:80: E501 line too long (80 > 79 characters)
-/app/backend/server.py:1932:1: W293 blank line contains whitespace
-/app/backend/server.py:1938:1: W293 blank line contains whitespace
-/app/backend/server.py:1952:5: F811 redefinition of unused 'status' from line 3
-/app/backend/server.py:1980:1: W293 blank line contains whitespace
-/app/backend/server.py:1993:1: W293 blank line contains whitespace
-/app/backend/server.py:2014:1: W293 blank line contains whitespace
-/app/backend/server.py:2019:1: W293 blank line contains whitespace
-/app/backend/server.py:2021:1: W293 blank line contains whitespace
-/app/backend/server.py:2030:1: W293 blank line contains whitespace
-/app/backend/server.py:2037:80: E501 line too long (87 > 79 characters)
-/app/backend/server.py:2043:1: W293 blank line contains whitespace
-/app/backend/server.py:2059:1: W293 blank line contains whitespace
-/app/backend/server.py:2064:1: W293 blank line contains whitespace
-/app/backend/server.py:2068:1: W293 blank line contains whitespace
-/app/backend/server.py:2070:1: W293 blank line contains whitespace
-/app/backend/server.py:2081:1: W293 blank line contains whitespace
-/app/backend/server.py:2094:80: E501 line too long (96 > 79 characters)
-/app/backend/server.py:2095:80: E501 line too long (98 > 79 characters)
-/app/backend/server.py:2098:1: W293 blank line contains whitespace
-/app/backend/server.py:2112:5: F401 'datetime.datetime' imported but unused
-/app/backend/server.py:2112:5: F401 'datetime.timezone' imported but unused
-/app/backend/server.py:2112:5: F401 'datetime.timedelta' imported but unused
-/app/backend/server.py:2113:1: W293 blank line contains whitespace
-/app/backend/server.py:2117:80: E501 line too long (84 > 79 characters)
-/app/backend/server.py:2119:1: W293 blank line contains whitespace
-/app/backend/server.py:2122:80: E501 line too long (83 > 79 characters)
-/app/backend/server.py:2123:80: E501 line too long (85 > 79 characters)
-/app/backend/server.py:2124:80: E501 line too long (83 > 79 characters)
-/app/backend/server.py:2125:1: W293 blank line contains whitespace
-/app/backend/server.py:2128:80: E501 line too long (97 > 79 characters)
-/app/backend/server.py:2129:1: W293 blank line contains whitespace
-/app/backend/server.py:2131:80: E501 line too long (81 > 79 characters)
-/app/backend/server.py:2132:1: W293 blank line contains whitespace
-/app/backend/server.py:2185:80: E501 line too long (83 > 79 characters)
-/app/backend/server.py:2217:80: E501 line too long (102 > 79 characters)
-/app/backend/server.py:2219:80: E501 line too long (313 > 79 characters)
-/app/backend/server.py:2222:1: W293 blank line contains whitespace
-/app/backend/server.py:2225:1: W293 blank line contains whitespace
-/app/backend/server.py:2233:1: W293 blank line contains whitespace
-/app/backend/server.py:2248:80: E501 line too long (82 > 79 characters)
-/app/backend/server.py:2260:80: E501 line too long (80 > 79 characters)
-/app/backend/server.py:2273:80: E501 line too long (91 > 79 characters)
-/app/backend/server.py:2288:80: E501 line too long (87 > 79 characters)
-/app/backend/server.py:2300:80: E501 line too long (80 > 79 characters)
-/app/backend/server.py:2313:80: E501 line too long (93 > 79 characters)
-/app/backend/server.py:2328:80: E501 line too long (89 > 79 characters)
-/app/backend/server.py:2361:80: E501 line too long (102 > 79 characters)
-/app/backend/server.py:2363:80: E501 line too long (297 > 79 characters)
-/app/backend/server.py:2366:1: W293 blank line contains whitespace
-/app/backend/server.py:2427:80: E501 line too long (80 > 79 characters)
-/app/backend/server.py:2448:80: E501 line too long (102 > 79 characters)
-/app/backend/server.py:2450:80: E501 line too long (301 > 79 characters)
-/app/backend/server.py:2453:1: W293 blank line contains whitespace
-/app/backend/server.py:2456:80: E501 line too long (88 > 79 characters)
-/app/backend/server.py:2471:1: E303 too many blank lines (3)
-/app/backend/server.py:2487:5: F811 redefinition of unused 'status' from line 3
-/app/backend/server.py:2506:80: E501 line too long (90 > 79 characters)
-/app/backend/server.py:2519:80: E501 line too long (80 > 79 characters)
-/app/backend/server.py:2527:5: F811 redefinition of unused 'status' from line 3
-/app/backend/server.py:2562:80: E501 line too long (81 > 79 characters)
-/app/backend/server.py:2571:80: E501 line too long (85 > 79 characters)
-/app/backend/server.py:2573:1: W293 blank line contains whitespace
-/app/backend/server.py:2578:1: W293 blank line contains whitespace
-/app/backend/server.py:2582:80: E501 line too long (134 > 79 characters)
-/app/backend/server.py:2584:1: W293 blank line contains whitespace
-/app/backend/server.py:2587:1: W293 blank line contains whitespace
-/app/backend/server.py:2594:1: W293 blank line contains whitespace
-/app/backend/server.py:2601:1: W293 blank line contains whitespace
-/app/backend/server.py:2610:80: E501 line too long (105 > 79 characters)
-/app/backend/server.py:2613:1: W293 blank line contains whitespace
-/app/backend/server.py:2627:1: W293 blank line contains whitespace
-/app/backend/server.py:2631:1: W293 blank line contains whitespace
-/app/backend/server.py:2634:80: E501 line too long (110 > 79 characters)
-/app/backend/server.py:2643:1: W293 blank line contains whitespace
-/app/backend/server.py:2646:1: W293 blank line contains whitespace
-/app/backend/server.py:2651:80: E501 line too long (126 > 79 characters)
-/app/backend/server.py:2655:1: W293 blank line contains whitespace
-/app/backend/server.py:2656:80: E501 line too long (114 > 79 characters)
-/app/backend/server.py:2658:1: W293 blank line contains whitespace
-/app/backend/server.py:2659:80: E501 line too long (83 > 79 characters)
-/app/backend/server.py:2672:1: W293 blank line contains whitespace
-/app/backend/server.py:2676:1: W293 blank line contains whitespace
-/app/backend/server.py:2687:1: W293 blank line contains whitespace
-/app/backend/server.py:2690:1: W293 blank line contains whitespace
-/app/backend/server.py:2699:1: W293 blank line contains whitespace
-/app/backend/server.py:2700:80: E501 line too long (116 > 79 characters)
-/app/backend/server.py:2702:1: W293 blank line contains whitespace
-/app/backend/server.py:2703:80: E501 line too long (82 > 79 characters)
-/app/backend/server.py:2725:1: W293 blank line contains whitespace
-/app/backend/server.py:2728:1: W293 blank line contains whitespace
-/app/backend/server.py:2731:1: W293 blank line contains whitespace
-/app/backend/server.py:2752:80: E501 line too long (80 > 79 characters)
-/app/backend/server.py:2759:1: W293 blank line contains whitespace
-/app/backend/server.py:2764:1: W293 blank line contains whitespace
-/app/backend/server.py:2768:80: E501 line too long (116 > 79 characters)
-/app/backend/server.py:2774:1: W293 blank line contains whitespace
-/app/backend/server.py:2781:1: W293 blank line contains whitespace
-/app/backend/server.py:2788:1: W293 blank line contains whitespace
-/app/backend/server.py:2791:1: W293 blank line contains whitespace
-/app/backend/server.py:2797:1: E303 too many blank lines (4)
-/app/backend/server.py:2802:1: W293 blank line contains whitespace
-/app/backend/server.py:2804:1: W293 blank line contains whitespace
-/app/backend/server.py:2809:40: W291 trailing whitespace
-/app/backend/server.py:2819:1: W293 blank line contains whitespace
-/app/backend/server.py:2821:1: W293 blank line contains whitespace
-/app/backend/server.py:2828:1: W293 blank line contains whitespace
-/app/backend/server.py:2836:1: W293 blank line contains whitespace
-/app/backend/server.py:2841:80: E501 line too long (83 > 79 characters)
-/app/backend/server.py:2850:1: W293 blank line contains whitespace
-/app/backend/server.py:2854:1: W293 blank line contains whitespace
-/app/backend/server.py:2871:5: F401 'bson.ObjectId' imported but unused
-/app/backend/server.py:2872:1: W293 blank line contains whitespace
-/app/backend/server.py:2874:1: W293 blank line contains whitespace
-/app/backend/server.py:2879:80: E501 line too long (96 > 79 characters)
-/app/backend/server.py:2880:1: W293 blank line contains whitespace
-/app/backend/server.py:2882:1: W293 blank line contains whitespace
-/app/backend/server.py:2890:80: E501 line too long (103 > 79 characters)
-/app/backend/server.py:2891:1: W293 blank line contains whitespace
-/app/backend/server.py:2894:80: E501 line too long (83 > 79 characters)
-/app/backend/server.py:2895:80: E501 line too long (86 > 79 characters)
-/app/backend/server.py:2896:80: E501 line too long (84 > 79 characters)
-/app/backend/server.py:2899:1: W293 blank line contains whitespace
-/app/backend/server.py:2901:80: E501 line too long (95 > 79 characters)
-/app/backend/server.py:2903:1: W293 blank line contains whitespace
-/app/backend/server.py:2908:32: F541 f-string is missing placeholders
-/app/backend/server.py:2910:32: F541 f-string is missing placeholders
-/app/backend/server.py:2910:80: E501 line too long (82 > 79 characters)
-/app/backend/server.py:2911:1: W293 blank line contains whitespace
-/app/backend/server.py:2916:1: W293 blank line contains whitespace.
-    2.  Fix the reported warnings, such as .
-  - **Why fix this issue and what will be achieved with the fix?**: Improves code quality and maintainability.
-  - **Status**: NOT STARTED
-  - **Is recurring issue?**: Y
-  - **Should Test frontend/backend/both after fix?**: Backend (quick health check).
+  - **Should Test frontend/backend/both after fix?**: Frontend (manual user test)
   - **Blocked on other issue**: None
 
 **In progress Task List**:
-- **Task 1: Fix Clear All Notification Behavior**
-  - **Where to resume**: Modify the  component to hide the individual counts within the dropdown when Clear All is clicked.
-  - **What will be achieved with this?**: The Clear All button will provide a clear and intuitive user experience by hiding all visible counts until new notifications are fetched.
-  - **Status**: IN PROGRESS
-  - **Should Test frontend/backend/both after fix?**: Frontend
-  - **Blocked on something**: None
+- None. The last task resulted in an instruction for the user to perform an action.
 
 **Upcoming and Future Tasks**
-- **Upcoming Tasks**:
-  - **Implement Admin Password Reset (P1)**: The user requested the ability to see and edit client passwords. The agent correctly identified that passwords are hashed and cannot be viewed, then proposed a Reset Password feature. The user was interrupted before confirming the approach. The next agent must re-confirm with the user and then implement this feature in the Admin User Details view.
 - **Future Tasks**:
-  - **Implement Persistent Storage for KYC Documents**: The agent identified that KYC document images are lost on server restart because they are stored in the temporary  directory. To fix this permanently, the storage provider in  needs to be updated to use a persistent volume or a cloud storage service like S3.
+    - **Performance Optimization (P2)**: Address the N+1 query patterns identified by the deployment agent in  (account balance fetching) and  (account validation) to improve performance under high load.
+    - **Implement Soft Deletes (P1)**: To prevent accidental data loss like the deleted transfer, implement a soft-delete mechanism for critical data like transfers, where items are marked as deleted but not permanently removed from the database.
+    - **Enhance Audit Logging (P2)**: Improve audit logs for destructive actions (e.g., deletions) to record the full object that was deleted, not just a small subset of its metadata. This would have helped in recovering the details of the lost transfer.
 
 **Completed work in this session**
-- **Edit IBAN Feature (DONE)**: Added the Edit IBAN button and modal to the Admin User Details view in .
-- **Admin Panel Performance (DONE)**: Created a new endpoint  in  and updated  to fix the N+1 query problem, making the Accounts tab load instantly.
-- **Edit Ticket Feature (DONE)**: Implemented full CRUD for admins to edit ticket subjects and messages, including new backend endpoints in  and a professional UI in .
-- **Notification Bell Feature (DONE)**: Created  with 30-second polling for pending items, a dropdown menu, navigation, and Mark/Clear All functionality.
-- **UI Renaming & Styling (DONE)**: Renamed Super_admin to ECOMMBX and added proper spacing in headers and sidebars (, ). Renamed Staff to Support in .
-- **Critical Login Bug Fix (DONE)**: Fixed a  in  that was causing 500 errors and blocking logins.
-- **Invalid Date Bug Fix (DONE)**: Corrected date parsing logic in  to properly display dates in the KYC queue and document viewer modal.
-- **Transfer Details UI (DONE)**: Added the rejection reason to the transfer details modal in . Also added a Reason column to the main table for rejected transfers.
+- **Admin Ticket Deletion (DONE)**: Implemented a feature for admins to delete support tickets ().
+- **Admin Message Deletion (DONE)**: Implemented a feature for admins to delete individual messages within tickets ().
+- **Password Visibility Toggle (DONE)**: Added an eye icon to show/hide passwords on the login and signup pages in .
+- **KYC Invalid Date Bug (FIXED)**: Corrected date parsing in  to handle ISO 8601 date strings with timezone offsets.
+- **KYC Document Download Bug (FIXED)**: Implemented a backend-assisted download by modifying  to accept a  parameter, which serves the file with a  header. Installed  in the backend.
+- **Login Email Retention (FIXED)**: Modified the Axios interceptor in  to prevent a page refresh on 401 errors during login, preserving the email input.
+- **Password Sync Logic (FIXED)**: Ensured the  field is updated on password reset and also added a failsafe to sync it on every successful login in .
+- **Name Capitalization on Signup (DONE)**: Added logic in  to automatically capitalize user's first and last names during registration.
+- **Existing User Name Correction (DONE)**: Ran a one-time script to find and fix improperly capitalized names for all existing users in the database.
+- **Mobile Translation Bug (FIXED)**: Added fallback text to critical buttons on the login, signup, and landing pages to prevent UI issues from potential translation loading failures.
+- **Full Application Test (DONE)**: Performed a comprehensive manual and automated test of all core features.
 
 **Earlier issues found/mentioned but not fixed**
-- **Issue 1: Linting errors in **: Several ./backend/backend_test.py:11:1: E302 expected 2 blank lines, found 1
-./backend/backend_test.py:12:80: E501 line too long (80 > 79 characters)
+- **Issue 1: N+1 Query Performance**
+  - **Debug checklist**:
+    - Review  and .
+    - Identify loops where database queries are made for each item.
+    - Refactor the code to fetch related data in a single batch query (e.g., using MongoDB's  operator) before the loop.
+  - **Why to solve this issue and what will be achieved with this?**: To prevent performance degradation as the number of users and transactions grows. This will ensure the application remains fast and responsive.
+  - **Should Test frontend/backend/both after fix**: Backend
+  - **Is recurring issue?**: N
+
+**Known issue recurrence from previous fork**
+- **Issue recurrence in previous fork**: The previous summary mentioned that ./backend/backend_test.py:11:1: E302 expected 2 blank lines, found 1
+./backend/backend_test.py:12:80: E501 line too long (86 > 79 characters)
 ./backend/backend_test.py:21:80: E501 line too long (105 > 79 characters)
 ./backend/backend_test.py:34:1: W293 blank line contains whitespace
 ./backend/backend_test.py:39:80: E501 line too long (90 > 79 characters)
@@ -566,9 +163,10 @@ The application is a functional banking platform with a FastAPI backend and a Re
 ./backend/config.py:28:1: W293 blank line contains whitespace
 ./backend/config.py:32:1: W293 blank line contains whitespace
 ./backend/config.py:42:1: W293 blank line contains whitespace
-./backend/config.py:46:1: W293 blank line contains whitespace
-./backend/config.py:49:1: W293 blank line contains whitespace
-./backend/config.py:53:1: W293 blank line contains whitespace
+./backend/config.py:47:1: W293 blank line contains whitespace
+./backend/config.py:51:1: W293 blank line contains whitespace
+./backend/config.py:54:1: W293 blank line contains whitespace
+./backend/config.py:58:1: W293 blank line contains whitespace
 ./backend/core/__init__.py:1:60: W292 no newline at end of file
 ./backend/core/auth/__init__.py:7:76: W292 no newline at end of file
 ./backend/core/auth/jwt_handler.py:17:1: W293 blank line contains whitespace
@@ -736,7 +334,31 @@ The application is a functional banking platform with a FastAPI backend and a Re
 ./backend/database.py:180:1: W293 blank line contains whitespace
 ./backend/database.py:188:1: W293 blank line contains whitespace
 ./backend/database.py:189:80: E501 line too long (82 > 79 characters)
-./backend/providers/__init__.py:6:64: W292 no newline at end of file
+./backend/providers/__init__.py:7:80: E501 line too long (84 > 79 characters)
+./backend/providers/__init__.py:7:85: W292 no newline at end of file
+./backend/providers/cloudinary_storage.py:14:1: W293 blank line contains whitespace
+./backend/providers/cloudinary_storage.py:24:1: W293 blank line contains whitespace
+./backend/providers/cloudinary_storage.py:32:1: W293 blank line contains whitespace
+./backend/providers/cloudinary_storage.py:37:1: W293 blank line contains whitespace
+./backend/providers/cloudinary_storage.py:48:1: W293 blank line contains whitespace
+./backend/providers/cloudinary_storage.py:51:1: W293 blank line contains whitespace
+./backend/providers/cloudinary_storage.py:55:1: W293 blank line contains whitespace
+./backend/providers/cloudinary_storage.py:58:1: W293 blank line contains whitespace
+./backend/providers/cloudinary_storage.py:68:1: W293 blank line contains whitespace
+./backend/providers/cloudinary_storage.py:71:1: W293 blank line contains whitespace
+./backend/providers/cloudinary_storage.py:79:1: W293 blank line contains whitespace
+./backend/providers/cloudinary_storage.py:82:1: W293 blank line contains whitespace
+./backend/providers/cloudinary_storage.py:87:1: W293 blank line contains whitespace
+./backend/providers/cloudinary_storage.py:91:1: W293 blank line contains whitespace
+./backend/providers/cloudinary_storage.py:98:1: W293 blank line contains whitespace
+./backend/providers/cloudinary_storage.py:105:1: W293 blank line contains whitespace
+./backend/providers/cloudinary_storage.py:108:1: W293 blank line contains whitespace
+./backend/providers/cloudinary_storage.py:110:80: E501 line too long (92 > 79 characters)
+./backend/providers/cloudinary_storage.py:111:80: E501 line too long (92 > 79 characters)
+./backend/providers/cloudinary_storage.py:112:1: W293 blank line contains whitespace
+./backend/providers/cloudinary_storage.py:114:1: W293 blank line contains whitespace
+./backend/providers/cloudinary_storage.py:118:1: W293 blank line contains whitespace
+./backend/providers/cloudinary_storage.py:123:1: W293 blank line contains whitespace
 ./backend/providers/local_s3.py:7:1: F401 'os' imported but unused
 ./backend/providers/local_s3.py:19:1: W293 blank line contains whitespace
 ./backend/providers/local_s3.py:22:1: W293 blank line contains whitespace
@@ -891,400 +513,519 @@ The application is a functional banking platform with a FastAPI backend and a Re
 ./backend/server.py:29:80: E501 line too long (159 > 79 characters)
 ./backend/server.py:31:1: F401 'schemas.banking.TransactionDisplayType' imported but unused
 ./backend/server.py:31:80: E501 line too long (106 > 79 characters)
+./backend/server.py:38:1: F401 'providers.LocalS3Storage' imported but unused
 ./backend/server.py:65:80: E501 line too long (83 > 79 characters)
 ./backend/server.py:90:1: W293 blank line contains whitespace
 ./backend/server.py:94:1: W293 blank line contains whitespace
 ./backend/server.py:97:1: W293 blank line contains whitespace
 ./backend/server.py:103:1: W293 blank line contains whitespace
 ./backend/server.py:108:80: E501 line too long (82 > 79 characters)
-./backend/server.py:119:80: E501 line too long (88 > 79 characters)
-./backend/server.py:120:80: E501 line too long (81 > 79 characters)
-./backend/server.py:123:80: E501 line too long (81 > 79 characters)
-./backend/server.py:132:80: E501 line too long (84 > 79 characters)
-./backend/server.py:140:80: E501 line too long (95 > 79 characters)
-./backend/server.py:143:1: W293 blank line contains whitespace
-./backend/server.py:145:1: W293 blank line contains whitespace
-./backend/server.py:148:1: W293 blank line contains whitespace
-./backend/server.py:155:1: W293 blank line contains whitespace
-./backend/server.py:157:1: W293 blank line contains whitespace
-./backend/server.py:201:1: W293 blank line contains whitespace
-./backend/server.py:205:1: W293 blank line contains whitespace
-./backend/server.py:209:1: W293 blank line contains whitespace
-./backend/server.py:216:1: W293 blank line contains whitespace
-./backend/server.py:219:1: W293 blank line contains whitespace
-./backend/server.py:234:80: E501 line too long (97 > 79 characters)
-./backend/server.py:259:80: E501 line too long (110 > 79 characters)
-./backend/server.py:260:1: W293 blank line contains whitespace
-./backend/server.py:268:80: E501 line too long (102 > 79 characters)
-./backend/server.py:269:1: W293 blank line contains whitespace
-./backend/server.py:272:1: W293 blank line contains whitespace
-./backend/server.py:282:1: W293 blank line contains whitespace
-./backend/server.py:285:1: W293 blank line contains whitespace
-./backend/server.py:290:1: W293 blank line contains whitespace
-./backend/server.py:304:1: W293 blank line contains whitespace
-./backend/server.py:314:80: E501 line too long (100 > 79 characters)
-./backend/server.py:316:80: E501 line too long (105 > 79 characters)
-./backend/server.py:317:1: W293 blank line contains whitespace
-./backend/server.py:337:80: E501 line too long (119 > 79 characters)
-./backend/server.py:350:1: W293 blank line contains whitespace
-./backend/server.py:367:1: W293 blank line contains whitespace
-./backend/server.py:381:80: E501 line too long (99 > 79 characters)
-./backend/server.py:382:1: W293 blank line contains whitespace
-./backend/server.py:397:29: W291 trailing whitespace
-./backend/server.py:400:1: W293 blank line contains whitespace
-./backend/server.py:405:1: W293 blank line contains whitespace
-./backend/server.py:419:1: W293 blank line contains whitespace
-./backend/server.py:426:1: W293 blank line contains whitespace
-./backend/server.py:439:1: W293 blank line contains whitespace
-./backend/server.py:449:1: W293 blank line contains whitespace
-./backend/server.py:478:1: W293 blank line contains whitespace
-./backend/server.py:481:29: W291 trailing whitespace
-./backend/server.py:482:80: E501 line too long (84 > 79 characters)
-./backend/server.py:484:1: W293 blank line contains whitespace
-./backend/server.py:488:29: W291 trailing whitespace
-./backend/server.py:491:1: W293 blank line contains whitespace
-./backend/server.py:495:80: E501 line too long (80 > 79 characters)
-./backend/server.py:498:1: W293 blank line contains whitespace
-./backend/server.py:504:1: W293 blank line contains whitespace
-./backend/server.py:511:1: W293 blank line contains whitespace
-./backend/server.py:517:1: W293 blank line contains whitespace
-./backend/server.py:529:1: W293 blank line contains whitespace
+./backend/server.py:109:80: E501 line too long (109 > 79 characters)
+./backend/server.py:120:80: E501 line too long (88 > 79 characters)
+./backend/server.py:121:80: E501 line too long (81 > 79 characters)
+./backend/server.py:124:80: E501 line too long (81 > 79 characters)
+./backend/server.py:133:80: E501 line too long (84 > 79 characters)
+./backend/server.py:141:80: E501 line too long (95 > 79 characters)
+./backend/server.py:144:1: W293 blank line contains whitespace
+./backend/server.py:146:1: W293 blank line contains whitespace
+./backend/server.py:149:1: W293 blank line contains whitespace
+./backend/server.py:156:1: W293 blank line contains whitespace
+./backend/server.py:158:1: W293 blank line contains whitespace
+./backend/server.py:203:1: W293 blank line contains whitespace
+./backend/server.py:207:1: W293 blank line contains whitespace
+./backend/server.py:211:1: W293 blank line contains whitespace
+./backend/server.py:218:1: W293 blank line contains whitespace
+./backend/server.py:221:1: W293 blank line contains whitespace
+./backend/server.py:236:80: E501 line too long (97 > 79 characters)
+./backend/server.py:261:80: E501 line too long (110 > 79 characters)
+./backend/server.py:262:1: W293 blank line contains whitespace
+./backend/server.py:270:80: E501 line too long (102 > 79 characters)
+./backend/server.py:271:1: W293 blank line contains whitespace
+./backend/server.py:274:1: W293 blank line contains whitespace
+./backend/server.py:284:1: W293 blank line contains whitespace
+./backend/server.py:287:1: W293 blank line contains whitespace
+./backend/server.py:292:1: W293 blank line contains whitespace
+./backend/server.py:306:1: W293 blank line contains whitespace
+./backend/server.py:316:80: E501 line too long (100 > 79 characters)
+./backend/server.py:318:80: E501 line too long (105 > 79 characters)
+./backend/server.py:319:1: W293 blank line contains whitespace
+./backend/server.py:339:80: E501 line too long (119 > 79 characters)
+./backend/server.py:352:1: W293 blank line contains whitespace
+./backend/server.py:369:1: W293 blank line contains whitespace
+./backend/server.py:383:80: E501 line too long (99 > 79 characters)
+./backend/server.py:384:1: W293 blank line contains whitespace
+./backend/server.py:399:29: W291 trailing whitespace
+./backend/server.py:402:1: W293 blank line contains whitespace
+./backend/server.py:407:1: W293 blank line contains whitespace
+./backend/server.py:421:1: W293 blank line contains whitespace
+./backend/server.py:428:1: W293 blank line contains whitespace
+./backend/server.py:441:1: W293 blank line contains whitespace
+./backend/server.py:451:1: W293 blank line contains whitespace
+./backend/server.py:480:1: W293 blank line contains whitespace
+./backend/server.py:483:29: W291 trailing whitespace
+./backend/server.py:484:80: E501 line too long (84 > 79 characters)
+./backend/server.py:486:1: W293 blank line contains whitespace
+./backend/server.py:490:29: W291 trailing whitespace
+./backend/server.py:493:1: W293 blank line contains whitespace
+./backend/server.py:497:80: E501 line too long (80 > 79 characters)
+./backend/server.py:500:1: W293 blank line contains whitespace
+./backend/server.py:506:1: W293 blank line contains whitespace
+./backend/server.py:513:1: W293 blank line contains whitespace
+./backend/server.py:519:1: W293 blank line contains whitespace
 ./backend/server.py:531:1: W293 blank line contains whitespace
-./backend/server.py:532:80: E501 line too long (91 > 79 characters)
-./backend/server.py:543:1: W293 blank line contains whitespace
-./backend/server.py:546:80: E501 line too long (118 > 79 characters)
-./backend/server.py:547:1: W293 blank line contains whitespace
-./backend/server.py:551:29: W291 trailing whitespace
-./backend/server.py:554:1: W293 blank line contains whitespace
-./backend/server.py:560:1: W293 blank line contains whitespace
-./backend/server.py:564:1: W293 blank line contains whitespace
-./backend/server.py:575:1: W293 blank line contains whitespace
-./backend/server.py:585:80: E501 line too long (87 > 79 characters)
-./backend/server.py:587:80: E501 line too long (89 > 79 characters)
-./backend/server.py:588:1: W293 blank line contains whitespace
-./backend/server.py:589:80: E501 line too long (92 > 79 characters)
-./backend/server.py:602:1: W293 blank line contains whitespace
-./backend/server.py:654:1: W293 blank line contains whitespace
-./backend/server.py:659:80: E501 line too long (85 > 79 characters)
-./backend/server.py:662:1: W293 blank line contains whitespace
-./backend/server.py:665:1: W293 blank line contains whitespace
-./backend/server.py:668:80: E501 line too long (84 > 79 characters)
-./backend/server.py:669:1: W293 blank line contains whitespace
-./backend/server.py:672:80: E501 line too long (97 > 79 characters)
-./backend/server.py:673:1: W293 blank line contains whitespace
-./backend/server.py:678:80: E501 line too long (87 > 79 characters)
-./backend/server.py:680:1: W293 blank line contains whitespace
+./backend/server.py:533:1: W293 blank line contains whitespace
+./backend/server.py:534:80: E501 line too long (91 > 79 characters)
+./backend/server.py:545:1: W293 blank line contains whitespace
+./backend/server.py:548:80: E501 line too long (118 > 79 characters)
+./backend/server.py:549:1: W293 blank line contains whitespace
+./backend/server.py:553:29: W291 trailing whitespace
+./backend/server.py:556:1: W293 blank line contains whitespace
+./backend/server.py:562:1: W293 blank line contains whitespace
+./backend/server.py:566:1: W293 blank line contains whitespace
+./backend/server.py:577:1: W293 blank line contains whitespace
+./backend/server.py:587:80: E501 line too long (87 > 79 characters)
+./backend/server.py:589:80: E501 line too long (89 > 79 characters)
+./backend/server.py:590:1: W293 blank line contains whitespace
+./backend/server.py:591:80: E501 line too long (92 > 79 characters)
+./backend/server.py:604:1: W293 blank line contains whitespace
+./backend/server.py:656:1: W293 blank line contains whitespace
+./backend/server.py:661:80: E501 line too long (85 > 79 characters)
+./backend/server.py:664:1: W293 blank line contains whitespace
+./backend/server.py:667:1: W293 blank line contains whitespace
+./backend/server.py:670:80: E501 line too long (84 > 79 characters)
+./backend/server.py:671:1: W293 blank line contains whitespace
+./backend/server.py:674:80: E501 line too long (97 > 79 characters)
+./backend/server.py:675:1: W293 blank line contains whitespace
+./backend/server.py:682:80: E501 line too long (89 > 79 characters)
 ./backend/server.py:686:1: W293 blank line contains whitespace
-./backend/server.py:687:80: E501 line too long (93 > 79 characters)
-./backend/server.py:709:1: W293 blank line contains whitespace
-./backend/server.py:711:80: E501 line too long (93 > 79 characters)
-./backend/server.py:712:1: W293 blank line contains whitespace
-./backend/server.py:715:80: E501 line too long (85 > 79 characters)
-./backend/server.py:716:80: E501 line too long (124 > 79 characters)
-./backend/server.py:717:1: W293 blank line contains whitespace
-./backend/server.py:721:1: W293 blank line contains whitespace
-./backend/server.py:723:80: E501 line too long (92 > 79 characters)
-./backend/server.py:733:1: W293 blank line contains whitespace
-./backend/server.py:736:80: E501 line too long (93 > 79 characters)
-./backend/server.py:737:80: E501 line too long (91 > 79 characters)
-./backend/server.py:740:1: W293 blank line contains whitespace
-./backend/server.py:741:80: E501 line too long (120 > 79 characters)
-./backend/server.py:756:1: W293 blank line contains whitespace
-./backend/server.py:759:29: W291 trailing whitespace
-./backend/server.py:760:80: E501 line too long (89 > 79 characters)
+./backend/server.py:692:1: W293 blank line contains whitespace
+./backend/server.py:693:80: E501 line too long (93 > 79 characters)
+./backend/server.py:715:1: W293 blank line contains whitespace
+./backend/server.py:717:80: E501 line too long (93 > 79 characters)
+./backend/server.py:718:1: W293 blank line contains whitespace
+./backend/server.py:721:80: E501 line too long (85 > 79 characters)
+./backend/server.py:722:80: E501 line too long (124 > 79 characters)
+./backend/server.py:723:1: W293 blank line contains whitespace
+./backend/server.py:727:1: W293 blank line contains whitespace
+./backend/server.py:729:80: E501 line too long (92 > 79 characters)
+./backend/server.py:739:1: W293 blank line contains whitespace
+./backend/server.py:742:80: E501 line too long (93 > 79 characters)
+./backend/server.py:743:80: E501 line too long (91 > 79 characters)
+./backend/server.py:746:1: W293 blank line contains whitespace
+./backend/server.py:747:80: E501 line too long (120 > 79 characters)
 ./backend/server.py:762:1: W293 blank line contains whitespace
-./backend/server.py:765:80: E501 line too long (93 > 79 characters)
-./backend/server.py:766:1: W293 blank line contains whitespace
-./backend/server.py:774:80: E501 line too long (86 > 79 characters)
-./backend/server.py:777:1: W293 blank line contains whitespace
-./backend/server.py:780:1: W293 blank line contains whitespace
-./backend/server.py:785:80: E501 line too long (87 > 79 characters)
-./backend/server.py:787:1: W293 blank line contains whitespace
-./backend/server.py:793:1: W293 blank line contains whitespace
-./backend/server.py:799:1: W293 blank line contains whitespace
-./backend/server.py:801:1: W293 blank line contains whitespace
-./backend/server.py:802:80: E501 line too long (111 > 79 characters)
-./backend/server.py:829:80: E501 line too long (84 > 79 characters)
-./backend/server.py:843:1: W293 blank line contains whitespace
-./backend/server.py:847:1: W293 blank line contains whitespace
-./backend/server.py:850:1: W293 blank line contains whitespace
-./backend/server.py:853:1: W293 blank line contains whitespace
-./backend/server.py:861:80: E501 line too long (93 > 79 characters)
-./backend/server.py:862:1: W293 blank line contains whitespace
+./backend/server.py:765:29: W291 trailing whitespace
+./backend/server.py:766:80: E501 line too long (89 > 79 characters)
+./backend/server.py:768:1: W293 blank line contains whitespace
+./backend/server.py:771:80: E501 line too long (93 > 79 characters)
+./backend/server.py:772:1: W293 blank line contains whitespace
+./backend/server.py:780:80: E501 line too long (86 > 79 characters)
+./backend/server.py:783:1: W293 blank line contains whitespace
+./backend/server.py:786:1: W293 blank line contains whitespace
+./backend/server.py:793:80: E501 line too long (89 > 79 characters)
+./backend/server.py:797:1: W293 blank line contains whitespace
+./backend/server.py:799:80: E501 line too long (140 > 79 characters)
+./backend/server.py:800:1: W293 blank line contains whitespace
+./backend/server.py:802:80: E501 line too long (96 > 79 characters)
+./backend/server.py:803:1: W293 blank line contains whitespace
+./backend/server.py:809:1: W293 blank line contains whitespace
+./backend/server.py:815:1: W293 blank line contains whitespace
+./backend/server.py:817:1: W293 blank line contains whitespace
+./backend/server.py:818:80: E501 line too long (111 > 79 characters)
+./backend/server.py:845:80: E501 line too long (84 > 79 characters)
+./backend/server.py:856:80: E501 line too long (97 > 79 characters)
+./backend/server.py:861:1: W293 blank line contains whitespace
+./backend/server.py:864:80: E501 line too long (100 > 79 characters)
 ./backend/server.py:865:1: W293 blank line contains whitespace
-./backend/server.py:871:80: E501 line too long (92 > 79 characters)
-./backend/server.py:881:80: E501 line too long (92 > 79 characters)
-./backend/server.py:919:80: E501 line too long (90 > 79 characters)
-./backend/server.py:920:1: W293 blank line contains whitespace
-./backend/server.py:927:80: E501 line too long (84 > 79 characters)
-./backend/server.py:931:80: E501 line too long (102 > 79 characters)
-./backend/server.py:933:1: W293 blank line contains whitespace
-./backend/server.py:946:80: E501 line too long (81 > 79 characters)
-./backend/server.py:948:1: W293 blank line contains whitespace
-./backend/server.py:951:80: E501 line too long (82 > 79 characters)
-./backend/server.py:952:1: W293 blank line contains whitespace
-./backend/server.py:954:1: W293 blank line contains whitespace
-./backend/server.py:961:80: E501 line too long (81 > 79 characters)
-./backend/server.py:965:80: E501 line too long (111 > 79 characters)
-./backend/server.py:967:1: W293 blank line contains whitespace
-./backend/server.py:1002:1: W293 blank line contains whitespace
-./backend/server.py:1005:80: E501 line too long (102 > 79 characters)
-./backend/server.py:1007:1: W293 blank line contains whitespace
-./backend/server.py:1009:80: E501 line too long (89 > 79 characters)
-./backend/server.py:1026:1: W293 blank line contains whitespace
-./backend/server.py:1027:80: E501 line too long (109 > 79 characters)
-./backend/server.py:1029:1: W293 blank line contains whitespace
-./backend/server.py:1033:1: W293 blank line contains whitespace
-./backend/server.py:1040:1: W293 blank line contains whitespace
-./backend/server.py:1046:80: E501 line too long (91 > 79 characters)
-./backend/server.py:1082:1: W293 blank line contains whitespace
-./backend/server.py:1092:1: W293 blank line contains whitespace
-./backend/server.py:1099:80: E501 line too long (110 > 79 characters)
-./backend/server.py:1103:80: E501 line too long (98 > 79 characters)
-./backend/server.py:1105:1: W293 blank line contains whitespace
-./backend/server.py:1119:1: W293 blank line contains whitespace
-./backend/server.py:1129:1: W293 blank line contains whitespace
-./backend/server.py:1136:80: E501 line too long (116 > 79 characters)
-./backend/server.py:1140:80: E501 line too long (98 > 79 characters)
-./backend/server.py:1142:1: W293 blank line contains whitespace
-./backend/server.py:1156:1: W293 blank line contains whitespace
-./backend/server.py:1166:1: W293 blank line contains whitespace
-./backend/server.py:1173:80: E501 line too long (114 > 79 characters)
-./backend/server.py:1177:80: E501 line too long (98 > 79 characters)
-./backend/server.py:1179:1: W293 blank line contains whitespace
-./backend/server.py:1210:1: W293 blank line contains whitespace
-./backend/server.py:1221:80: E501 line too long (81 > 79 characters)
-./backend/server.py:1223:1: W293 blank line contains whitespace
-./backend/server.py:1226:1: W293 blank line contains whitespace
-./backend/server.py:1232:80: E501 line too long (83 > 79 characters)
-./backend/server.py:1233:80: E501 line too long (81 > 79 characters)
-./backend/server.py:1239:1: W293 blank line contains whitespace
-./backend/server.py:1275:1: W293 blank line contains whitespace
-./backend/server.py:1278:1: W293 blank line contains whitespace
-./backend/server.py:1285:1: W293 blank line contains whitespace
-./backend/server.py:1288:1: W293 blank line contains whitespace
-./backend/server.py:1291:1: W293 blank line contains whitespace
-./backend/server.py:1296:1: W293 blank line contains whitespace
-./backend/server.py:1308:1: W293 blank line contains whitespace
+./backend/server.py:866:80: E501 line too long (83 > 79 characters)
+./backend/server.py:871:1: W293 blank line contains whitespace
+./backend/server.py:880:80: E501 line too long (96 > 79 characters)
+./backend/server.py:881:80: E501 line too long (108 > 79 characters)
+./backend/server.py:883:80: E501 line too long (89 > 79 characters)
+./backend/server.py:884:1: W293 blank line contains whitespace
+./backend/server.py:886:80: E501 line too long (120 > 79 characters)
+./backend/server.py:887:1: W293 blank line contains whitespace
+./backend/server.py:889:80: E501 line too long (111 > 79 characters)
+./backend/server.py:890:1: W293 blank line contains whitespace
+./backend/server.py:892:80: E501 line too long (88 > 79 characters)
+./backend/server.py:893:1: W293 blank line contains whitespace
+./backend/server.py:899:80: E501 line too long (97 > 79 characters)
+./backend/server.py:906:80: E501 line too long (91 > 79 characters)
+./backend/server.py:907:80: E501 line too long (88 > 79 characters)
+./backend/server.py:909:1: W293 blank line contains whitespace
+./backend/server.py:910:80: E501 line too long (83 > 79 characters)
+./backend/server.py:913:1: W293 blank line contains whitespace
+./backend/server.py:917:80: E501 line too long (104 > 79 characters)
+./backend/server.py:918:80: E501 line too long (114 > 79 characters)
+./backend/server.py:919:80: E501 line too long (153 > 79 characters)
+./backend/server.py:920:80: E501 line too long (162 > 79 characters)
+./backend/server.py:921:80: E501 line too long (152 > 79 characters)
+./backend/server.py:922:80: E501 line too long (173 > 79 characters)
+./backend/server.py:939:80: E501 line too long (92 > 79 characters)
+./backend/server.py:977:80: E501 line too long (90 > 79 characters)
+./backend/server.py:978:1: W293 blank line contains whitespace
+./backend/server.py:985:80: E501 line too long (84 > 79 characters)
+./backend/server.py:989:80: E501 line too long (102 > 79 characters)
+./backend/server.py:991:1: W293 blank line contains whitespace
+./backend/server.py:1004:80: E501 line too long (81 > 79 characters)
+./backend/server.py:1006:1: W293 blank line contains whitespace
+./backend/server.py:1009:80: E501 line too long (82 > 79 characters)
+./backend/server.py:1010:1: W293 blank line contains whitespace
+./backend/server.py:1012:1: W293 blank line contains whitespace
+./backend/server.py:1019:80: E501 line too long (81 > 79 characters)
+./backend/server.py:1023:80: E501 line too long (111 > 79 characters)
+./backend/server.py:1025:1: W293 blank line contains whitespace
+./backend/server.py:1060:1: W293 blank line contains whitespace
+./backend/server.py:1063:80: E501 line too long (102 > 79 characters)
+./backend/server.py:1065:1: W293 blank line contains whitespace
+./backend/server.py:1067:80: E501 line too long (89 > 79 characters)
+./backend/server.py:1084:1: W293 blank line contains whitespace
+./backend/server.py:1085:80: E501 line too long (109 > 79 characters)
+./backend/server.py:1087:1: W293 blank line contains whitespace
+./backend/server.py:1091:1: W293 blank line contains whitespace
+./backend/server.py:1098:1: W293 blank line contains whitespace
+./backend/server.py:1104:80: E501 line too long (91 > 79 characters)
+./backend/server.py:1140:1: W293 blank line contains whitespace
+./backend/server.py:1150:1: W293 blank line contains whitespace
+./backend/server.py:1157:80: E501 line too long (110 > 79 characters)
+./backend/server.py:1161:80: E501 line too long (98 > 79 characters)
+./backend/server.py:1163:1: W293 blank line contains whitespace
+./backend/server.py:1177:1: W293 blank line contains whitespace
+./backend/server.py:1187:1: W293 blank line contains whitespace
+./backend/server.py:1194:80: E501 line too long (116 > 79 characters)
+./backend/server.py:1198:80: E501 line too long (98 > 79 characters)
+./backend/server.py:1200:1: W293 blank line contains whitespace
+./backend/server.py:1214:1: W293 blank line contains whitespace
+./backend/server.py:1224:1: W293 blank line contains whitespace
+./backend/server.py:1231:80: E501 line too long (114 > 79 characters)
+./backend/server.py:1235:80: E501 line too long (98 > 79 characters)
+./backend/server.py:1237:1: W293 blank line contains whitespace
+./backend/server.py:1268:1: W293 blank line contains whitespace
+./backend/server.py:1279:80: E501 line too long (81 > 79 characters)
+./backend/server.py:1281:1: W293 blank line contains whitespace
+./backend/server.py:1284:1: W293 blank line contains whitespace
+./backend/server.py:1290:80: E501 line too long (83 > 79 characters)
+./backend/server.py:1291:80: E501 line too long (81 > 79 characters)
+./backend/server.py:1297:1: W293 blank line contains whitespace
 ./backend/server.py:1311:1: W293 blank line contains whitespace
-./backend/server.py:1322:80: E501 line too long (113 > 79 characters)
+./backend/server.py:1317:1: W293 blank line contains whitespace
 ./backend/server.py:1343:1: W293 blank line contains whitespace
-./backend/server.py:1351:1: W293 blank line contains whitespace
-./backend/server.py:1354:1: W293 blank line contains whitespace
+./backend/server.py:1346:1: W293 blank line contains whitespace
+./backend/server.py:1353:1: W293 blank line contains whitespace
 ./backend/server.py:1356:1: W293 blank line contains whitespace
-./backend/server.py:1360:80: E501 line too long (83 > 79 characters)
-./backend/server.py:1362:1: W293 blank line contains whitespace
-./backend/server.py:1369:80: E501 line too long (98 > 79 characters)
-./backend/server.py:1375:1: W293 blank line contains whitespace
-./backend/server.py:1376:80: E501 line too long (121 > 79 characters)
-./backend/server.py:1383:80: E501 line too long (92 > 79 characters)
-./backend/server.py:1384:80: E501 line too long (107 > 79 characters)
-./backend/server.py:1386:80: E501 line too long (107 > 79 characters)
-./backend/server.py:1387:80: E501 line too long (83 > 79 characters)
-./backend/server.py:1388:80: E501 line too long (80 > 79 characters)
-./backend/server.py:1389:80: E501 line too long (90 > 79 characters)
-./backend/server.py:1390:80: E501 line too long (92 > 79 characters)
-./backend/server.py:1408:80: E501 line too long (83 > 79 characters)
-./backend/server.py:1409:80: E501 line too long (92 > 79 characters)
-./backend/server.py:1412:1: W293 blank line contains whitespace
-./backend/server.py:1418:1: W293 blank line contains whitespace
-./backend/server.py:1430:1: W293 blank line contains whitespace
-./backend/server.py:1450:1: W293 blank line contains whitespace
-./backend/server.py:1455:1: W293 blank line contains whitespace
-./backend/server.py:1460:1: W293 blank line contains whitespace
-./backend/server.py:1465:80: E501 line too long (85 > 79 characters)
-./backend/server.py:1468:1: W293 blank line contains whitespace
-./backend/server.py:1470:80: E501 line too long (90 > 79 characters)
-./backend/server.py:1471:1: W293 blank line contains whitespace
+./backend/server.py:1359:1: W293 blank line contains whitespace
+./backend/server.py:1364:1: W293 blank line contains whitespace
+./backend/server.py:1376:1: W293 blank line contains whitespace
+./backend/server.py:1379:1: W293 blank line contains whitespace
+./backend/server.py:1389:80: E501 line too long (106 > 79 characters)
+./backend/server.py:1390:80: E501 line too long (88 > 79 characters)
+./backend/server.py:1392:80: E501 line too long (113 > 79 characters)
+./backend/server.py:1417:1: W293 blank line contains whitespace
+./backend/server.py:1425:1: W293 blank line contains whitespace
+./backend/server.py:1428:1: W293 blank line contains whitespace
+./backend/server.py:1432:80: E501 line too long (87 > 79 characters)
+./backend/server.py:1434:1: W293 blank line contains whitespace
+./backend/server.py:1447:1: W293 blank line contains whitespace
+./backend/server.py:1461:1: W293 blank line contains whitespace
+./backend/server.py:1469:1: W293 blank line contains whitespace
+./backend/server.py:1472:1: W293 blank line contains whitespace
 ./backend/server.py:1474:1: W293 blank line contains whitespace
-./backend/server.py:1484:1: W293 blank line contains whitespace
-./backend/server.py:1495:80: E501 line too long (105 > 79 characters)
-./backend/server.py:1497:1: W293 blank line contains whitespace
-./backend/server.py:1498:80: E501 line too long (109 > 79 characters)
-./backend/server.py:1511:1: W293 blank line contains whitespace
-./backend/server.py:1519:1: W293 blank line contains whitespace
-./backend/server.py:1522:1: W293 blank line contains whitespace
+./backend/server.py:1478:80: E501 line too long (83 > 79 characters)
+./backend/server.py:1480:1: W293 blank line contains whitespace
+./backend/server.py:1487:80: E501 line too long (98 > 79 characters)
+./backend/server.py:1493:1: W293 blank line contains whitespace
+./backend/server.py:1494:80: E501 line too long (121 > 79 characters)
+./backend/server.py:1506:1: W293 blank line contains whitespace
+./backend/server.py:1509:80: E501 line too long (100 > 79 characters)
+./backend/server.py:1510:1: W293 blank line contains whitespace
+./backend/server.py:1518:1: W293 blank line contains whitespace
+./backend/server.py:1521:1: W293 blank line contains whitespace
 ./backend/server.py:1524:1: W293 blank line contains whitespace
-./backend/server.py:1527:1: W293 blank line contains whitespace
-./backend/server.py:1533:1: W293 blank line contains whitespace
-./backend/server.py:1572:1: W293 blank line contains whitespace
-./backend/server.py:1578:80: E501 line too long (163 > 79 characters)
-./backend/server.py:1581:1: W293 blank line contains whitespace
-./backend/server.py:1588:80: E501 line too long (127 > 79 characters)
-./backend/server.py:1592:80: E501 line too long (108 > 79 characters)
-./backend/server.py:1594:1: W293 blank line contains whitespace
-./backend/server.py:1613:1: W293 blank line contains whitespace
-./backend/server.py:1621:1: W293 blank line contains whitespace
-./backend/server.py:1624:1: W293 blank line contains whitespace
-./backend/server.py:1626:1: W293 blank line contains whitespace
-./backend/server.py:1638:1: W293 blank line contains whitespace
-./backend/server.py:1640:80: E501 line too long (93 > 79 characters)
-./backend/server.py:1641:1: W293 blank line contains whitespace
-./backend/server.py:1647:80: E501 line too long (107 > 79 characters)
-./backend/server.py:1650:1: W293 blank line contains whitespace
+./backend/server.py:1527:80: E501 line too long (89 > 79 characters)
+./backend/server.py:1528:1: W293 blank line contains whitespace
+./backend/server.py:1531:80: E501 line too long (103 > 79 characters)
+./backend/server.py:1532:1: W293 blank line contains whitespace
+./backend/server.py:1533:80: E501 line too long (91 > 79 characters)
+./backend/server.py:1534:1: W293 blank line contains whitespace
+./backend/server.py:1537:80: E501 line too long (90 > 79 characters)
+./backend/server.py:1539:1: W293 blank line contains whitespace
+./backend/server.py:1541:80: E501 line too long (90 > 79 characters)
+./backend/server.py:1543:1: W293 blank line contains whitespace
+./backend/server.py:1545:80: E501 line too long (96 > 79 characters)
+./backend/server.py:1546:1: W293 blank line contains whitespace
+./backend/server.py:1548:80: E501 line too long (88 > 79 characters)
+./backend/server.py:1550:1: W293 blank line contains whitespace
+./backend/server.py:1552:80: E501 line too long (83 > 79 characters)
+./backend/server.py:1554:1: W293 blank line contains whitespace
+./backend/server.py:1556:80: E501 line too long (87 > 79 characters)
+./backend/server.py:1558:1: W293 blank line contains whitespace
+./backend/server.py:1560:80: E501 line too long (94 > 79 characters)
+./backend/server.py:1562:1: W293 blank line contains whitespace
+./backend/server.py:1564:80: E501 line too long (87 > 79 characters)
+./backend/server.py:1566:1: W293 blank line contains whitespace
+./backend/server.py:1568:80: E501 line too long (85 > 79 characters)
+./backend/server.py:1570:1: W293 blank line contains whitespace
+./backend/server.py:1572:80: E501 line too long (97 > 79 characters)
+./backend/server.py:1573:80: E501 line too long (85 > 79 characters)
+./backend/server.py:1574:1: W293 blank line contains whitespace
+./backend/server.py:1576:80: E501 line too long (93 > 79 characters)
+./backend/server.py:1577:80: E501 line too long (81 > 79 characters)
+./backend/server.py:1578:1: W293 blank line contains whitespace
+./backend/server.py:1580:80: E501 line too long (87 > 79 characters)
+./backend/server.py:1582:1: W293 blank line contains whitespace
+./backend/server.py:1585:1: W293 blank line contains whitespace
+./backend/server.py:1587:80: E501 line too long (87 > 79 characters)
+./backend/server.py:1588:1: W293 blank line contains whitespace
+./backend/server.py:1595:80: E501 line too long (100 > 79 characters)
+./backend/server.py:1607:1: W293 blank line contains whitespace
+./backend/server.py:1608:80: E501 line too long (86 > 79 characters)
+./backend/server.py:1609:1: W293 blank line contains whitespace
+./backend/server.py:1622:1: W293 blank line contains whitespace
+./backend/server.py:1626:80: E501 line too long (87 > 79 characters)
+./backend/server.py:1627:80: E501 line too long (87 > 79 characters)
+./backend/server.py:1634:80: E501 line too long (92 > 79 characters)
+./backend/server.py:1635:80: E501 line too long (107 > 79 characters)
+./backend/server.py:1637:80: E501 line too long (107 > 79 characters)
+./backend/server.py:1638:80: E501 line too long (83 > 79 characters)
+./backend/server.py:1639:80: E501 line too long (80 > 79 characters)
+./backend/server.py:1640:80: E501 line too long (90 > 79 characters)
+./backend/server.py:1641:80: E501 line too long (92 > 79 characters)
+./backend/server.py:1659:80: E501 line too long (83 > 79 characters)
+./backend/server.py:1660:80: E501 line too long (92 > 79 characters)
 ./backend/server.py:1663:1: W293 blank line contains whitespace
-./backend/server.py:1680:1: W293 blank line contains whitespace
-./backend/server.py:1688:1: W293 blank line contains whitespace
-./backend/server.py:1691:1: W293 blank line contains whitespace
-./backend/server.py:1693:1: W293 blank line contains whitespace
-./backend/server.py:1698:1: W293 blank line contains whitespace
-./backend/server.py:1704:80: E501 line too long (94 > 79 characters)
-./backend/server.py:1712:1: W293 blank line contains whitespace
-./backend/server.py:1723:1: W293 blank line contains whitespace
-./backend/server.py:1734:80: E501 line too long (181 > 79 characters)
-./backend/server.py:1737:1: W293 blank line contains whitespace
-./backend/server.py:1755:1: W293 blank line contains whitespace
-./backend/server.py:1763:1: W293 blank line contains whitespace
-./backend/server.py:1766:1: W293 blank line contains whitespace
-./backend/server.py:1768:1: W293 blank line contains whitespace
-./backend/server.py:1774:1: W293 blank line contains whitespace
-./backend/server.py:1787:1: W293 blank line contains whitespace
-./backend/server.py:1795:1: W293 blank line contains whitespace
-./backend/server.py:1798:1: W293 blank line contains whitespace
-./backend/server.py:1802:1: W293 blank line contains whitespace
-./backend/server.py:1807:80: E501 line too long (87 > 79 characters)
-./backend/server.py:1809:1: W293 blank line contains whitespace
-./backend/server.py:1815:1: W293 blank line contains whitespace
-./backend/server.py:1822:1: W293 blank line contains whitespace
-./backend/server.py:1835:1: W293 blank line contains whitespace
-./backend/server.py:1839:80: E501 line too long (103 > 79 characters)
-./backend/server.py:1854:1: W293 blank line contains whitespace
-./backend/server.py:1870:1: W293 blank line contains whitespace
-./backend/server.py:1885:1: W293 blank line contains whitespace
+./backend/server.py:1669:1: W293 blank line contains whitespace
+./backend/server.py:1681:1: W293 blank line contains whitespace
+./backend/server.py:1701:1: W293 blank line contains whitespace
+./backend/server.py:1706:1: W293 blank line contains whitespace
+./backend/server.py:1711:1: W293 blank line contains whitespace
+./backend/server.py:1716:80: E501 line too long (85 > 79 characters)
+./backend/server.py:1719:1: W293 blank line contains whitespace
+./backend/server.py:1721:80: E501 line too long (90 > 79 characters)
+./backend/server.py:1722:1: W293 blank line contains whitespace
+./backend/server.py:1725:1: W293 blank line contains whitespace
+./backend/server.py:1735:1: W293 blank line contains whitespace
+./backend/server.py:1746:80: E501 line too long (105 > 79 characters)
+./backend/server.py:1748:1: W293 blank line contains whitespace
+./backend/server.py:1749:80: E501 line too long (109 > 79 characters)
+./backend/server.py:1762:1: W293 blank line contains whitespace
+./backend/server.py:1770:1: W293 blank line contains whitespace
+./backend/server.py:1773:1: W293 blank line contains whitespace
+./backend/server.py:1775:1: W293 blank line contains whitespace
+./backend/server.py:1778:1: W293 blank line contains whitespace
+./backend/server.py:1784:1: W293 blank line contains whitespace
+./backend/server.py:1823:1: W293 blank line contains whitespace
+./backend/server.py:1829:80: E501 line too long (163 > 79 characters)
+./backend/server.py:1832:1: W293 blank line contains whitespace
+./backend/server.py:1839:80: E501 line too long (127 > 79 characters)
+./backend/server.py:1843:80: E501 line too long (108 > 79 characters)
+./backend/server.py:1845:1: W293 blank line contains whitespace
+./backend/server.py:1864:1: W293 blank line contains whitespace
+./backend/server.py:1872:1: W293 blank line contains whitespace
+./backend/server.py:1875:1: W293 blank line contains whitespace
+./backend/server.py:1877:1: W293 blank line contains whitespace
+./backend/server.py:1889:1: W293 blank line contains whitespace
+./backend/server.py:1891:80: E501 line too long (93 > 79 characters)
 ./backend/server.py:1892:1: W293 blank line contains whitespace
-./backend/server.py:1925:1: W293 blank line contains whitespace
-./backend/server.py:1926:80: E501 line too long (125 > 79 characters)
-./backend/server.py:1928:1: W293 blank line contains whitespace
-./backend/server.py:1931:80: E501 line too long (80 > 79 characters)
-./backend/server.py:1932:1: W293 blank line contains whitespace
-./backend/server.py:1938:1: W293 blank line contains whitespace
-./backend/server.py:1952:5: F811 redefinition of unused 'status' from line 3
-./backend/server.py:1980:1: W293 blank line contains whitespace
-./backend/server.py:1993:1: W293 blank line contains whitespace
+./backend/server.py:1898:80: E501 line too long (107 > 79 characters)
+./backend/server.py:1901:1: W293 blank line contains whitespace
+./backend/server.py:1914:1: W293 blank line contains whitespace
+./backend/server.py:1931:1: W293 blank line contains whitespace
+./backend/server.py:1939:1: W293 blank line contains whitespace
+./backend/server.py:1942:1: W293 blank line contains whitespace
+./backend/server.py:1944:1: W293 blank line contains whitespace
+./backend/server.py:1949:1: W293 blank line contains whitespace
+./backend/server.py:1955:80: E501 line too long (94 > 79 characters)
+./backend/server.py:1963:1: W293 blank line contains whitespace
+./backend/server.py:1974:1: W293 blank line contains whitespace
+./backend/server.py:1985:80: E501 line too long (181 > 79 characters)
+./backend/server.py:1988:1: W293 blank line contains whitespace
+./backend/server.py:2006:1: W293 blank line contains whitespace
 ./backend/server.py:2014:1: W293 blank line contains whitespace
+./backend/server.py:2017:1: W293 blank line contains whitespace
 ./backend/server.py:2019:1: W293 blank line contains whitespace
-./backend/server.py:2021:1: W293 blank line contains whitespace
-./backend/server.py:2030:1: W293 blank line contains whitespace
-./backend/server.py:2037:80: E501 line too long (87 > 79 characters)
-./backend/server.py:2043:1: W293 blank line contains whitespace
-./backend/server.py:2059:1: W293 blank line contains whitespace
+./backend/server.py:2025:1: W293 blank line contains whitespace
+./backend/server.py:2038:1: W293 blank line contains whitespace
+./backend/server.py:2046:1: W293 blank line contains whitespace
+./backend/server.py:2049:1: W293 blank line contains whitespace
+./backend/server.py:2053:1: W293 blank line contains whitespace
+./backend/server.py:2060:80: E501 line too long (85 > 79 characters)
 ./backend/server.py:2064:1: W293 blank line contains whitespace
-./backend/server.py:2068:1: W293 blank line contains whitespace
 ./backend/server.py:2070:1: W293 blank line contains whitespace
-./backend/server.py:2081:1: W293 blank line contains whitespace
-./backend/server.py:2094:80: E501 line too long (96 > 79 characters)
-./backend/server.py:2095:80: E501 line too long (98 > 79 characters)
-./backend/server.py:2098:1: W293 blank line contains whitespace
-./backend/server.py:2112:5: F401 'datetime.datetime' imported but unused
-./backend/server.py:2112:5: F401 'datetime.timezone' imported but unused
-./backend/server.py:2112:5: F401 'datetime.timedelta' imported but unused
-./backend/server.py:2113:1: W293 blank line contains whitespace
-./backend/server.py:2117:80: E501 line too long (84 > 79 characters)
-./backend/server.py:2119:1: W293 blank line contains whitespace
-./backend/server.py:2122:80: E501 line too long (83 > 79 characters)
-./backend/server.py:2123:80: E501 line too long (85 > 79 characters)
-./backend/server.py:2124:80: E501 line too long (83 > 79 characters)
+./backend/server.py:2077:1: W293 blank line contains whitespace
+./backend/server.py:2090:1: W293 blank line contains whitespace
+./backend/server.py:2094:80: E501 line too long (103 > 79 characters)
+./backend/server.py:2109:1: W293 blank line contains whitespace
 ./backend/server.py:2125:1: W293 blank line contains whitespace
-./backend/server.py:2128:80: E501 line too long (97 > 79 characters)
-./backend/server.py:2129:1: W293 blank line contains whitespace
-./backend/server.py:2131:80: E501 line too long (81 > 79 characters)
-./backend/server.py:2132:1: W293 blank line contains whitespace
-./backend/server.py:2185:80: E501 line too long (83 > 79 characters)
-./backend/server.py:2217:80: E501 line too long (102 > 79 characters)
-./backend/server.py:2219:80: E501 line too long (313 > 79 characters)
-./backend/server.py:2222:1: W293 blank line contains whitespace
-./backend/server.py:2225:1: W293 blank line contains whitespace
-./backend/server.py:2233:1: W293 blank line contains whitespace
-./backend/server.py:2248:80: E501 line too long (82 > 79 characters)
-./backend/server.py:2260:80: E501 line too long (80 > 79 characters)
-./backend/server.py:2273:80: E501 line too long (91 > 79 characters)
-./backend/server.py:2288:80: E501 line too long (87 > 79 characters)
-./backend/server.py:2300:80: E501 line too long (80 > 79 characters)
-./backend/server.py:2313:80: E501 line too long (93 > 79 characters)
-./backend/server.py:2328:80: E501 line too long (89 > 79 characters)
-./backend/server.py:2361:80: E501 line too long (102 > 79 characters)
-./backend/server.py:2363:80: E501 line too long (297 > 79 characters)
-./backend/server.py:2366:1: W293 blank line contains whitespace
-./backend/server.py:2427:80: E501 line too long (80 > 79 characters)
-./backend/server.py:2448:80: E501 line too long (102 > 79 characters)
-./backend/server.py:2450:80: E501 line too long (301 > 79 characters)
-./backend/server.py:2453:1: W293 blank line contains whitespace
-./backend/server.py:2456:80: E501 line too long (88 > 79 characters)
-./backend/server.py:2471:1: E303 too many blank lines (3)
-./backend/server.py:2487:5: F811 redefinition of unused 'status' from line 3
-./backend/server.py:2506:80: E501 line too long (90 > 79 characters)
-./backend/server.py:2519:80: E501 line too long (80 > 79 characters)
-./backend/server.py:2527:5: F811 redefinition of unused 'status' from line 3
-./backend/server.py:2562:80: E501 line too long (81 > 79 characters)
-./backend/server.py:2571:80: E501 line too long (85 > 79 characters)
-./backend/server.py:2573:1: W293 blank line contains whitespace
-./backend/server.py:2578:1: W293 blank line contains whitespace
-./backend/server.py:2582:80: E501 line too long (134 > 79 characters)
-./backend/server.py:2584:1: W293 blank line contains whitespace
-./backend/server.py:2587:1: W293 blank line contains whitespace
-./backend/server.py:2594:1: W293 blank line contains whitespace
-./backend/server.py:2601:1: W293 blank line contains whitespace
-./backend/server.py:2610:80: E501 line too long (105 > 79 characters)
-./backend/server.py:2613:1: W293 blank line contains whitespace
-./backend/server.py:2627:1: W293 blank line contains whitespace
-./backend/server.py:2631:1: W293 blank line contains whitespace
-./backend/server.py:2634:80: E501 line too long (110 > 79 characters)
-./backend/server.py:2643:1: W293 blank line contains whitespace
-./backend/server.py:2646:1: W293 blank line contains whitespace
-./backend/server.py:2651:80: E501 line too long (126 > 79 characters)
-./backend/server.py:2655:1: W293 blank line contains whitespace
-./backend/server.py:2656:80: E501 line too long (114 > 79 characters)
-./backend/server.py:2658:1: W293 blank line contains whitespace
-./backend/server.py:2659:80: E501 line too long (83 > 79 characters)
-./backend/server.py:2672:1: W293 blank line contains whitespace
-./backend/server.py:2676:1: W293 blank line contains whitespace
-./backend/server.py:2687:1: W293 blank line contains whitespace
-./backend/server.py:2690:1: W293 blank line contains whitespace
-./backend/server.py:2699:1: W293 blank line contains whitespace
-./backend/server.py:2700:80: E501 line too long (116 > 79 characters)
-./backend/server.py:2702:1: W293 blank line contains whitespace
-./backend/server.py:2703:80: E501 line too long (82 > 79 characters)
-./backend/server.py:2725:1: W293 blank line contains whitespace
-./backend/server.py:2728:1: W293 blank line contains whitespace
-./backend/server.py:2731:1: W293 blank line contains whitespace
-./backend/server.py:2752:80: E501 line too long (80 > 79 characters)
-./backend/server.py:2759:1: W293 blank line contains whitespace
-./backend/server.py:2764:1: W293 blank line contains whitespace
-./backend/server.py:2768:80: E501 line too long (116 > 79 characters)
-./backend/server.py:2774:1: W293 blank line contains whitespace
-./backend/server.py:2781:1: W293 blank line contains whitespace
-./backend/server.py:2788:1: W293 blank line contains whitespace
-./backend/server.py:2791:1: W293 blank line contains whitespace
-./backend/server.py:2797:1: E303 too many blank lines (4)
-./backend/server.py:2802:1: W293 blank line contains whitespace
-./backend/server.py:2804:1: W293 blank line contains whitespace
-./backend/server.py:2809:40: W291 trailing whitespace
-./backend/server.py:2819:1: W293 blank line contains whitespace
-./backend/server.py:2821:1: W293 blank line contains whitespace
-./backend/server.py:2828:1: W293 blank line contains whitespace
-./backend/server.py:2836:1: W293 blank line contains whitespace
-./backend/server.py:2841:80: E501 line too long (83 > 79 characters)
-./backend/server.py:2850:1: W293 blank line contains whitespace
-./backend/server.py:2854:1: W293 blank line contains whitespace
-./backend/server.py:2871:5: F401 'bson.ObjectId' imported but unused
-./backend/server.py:2872:1: W293 blank line contains whitespace
-./backend/server.py:2874:1: W293 blank line contains whitespace
-./backend/server.py:2879:80: E501 line too long (96 > 79 characters)
-./backend/server.py:2880:1: W293 blank line contains whitespace
-./backend/server.py:2882:1: W293 blank line contains whitespace
-./backend/server.py:2890:80: E501 line too long (103 > 79 characters)
-./backend/server.py:2891:1: W293 blank line contains whitespace
-./backend/server.py:2894:80: E501 line too long (83 > 79 characters)
-./backend/server.py:2895:80: E501 line too long (86 > 79 characters)
-./backend/server.py:2896:80: E501 line too long (84 > 79 characters)
-./backend/server.py:2899:1: W293 blank line contains whitespace
-./backend/server.py:2901:80: E501 line too long (95 > 79 characters)
-./backend/server.py:2903:1: W293 blank line contains whitespace
-./backend/server.py:2908:32: F541 f-string is missing placeholders
-./backend/server.py:2910:32: F541 f-string is missing placeholders
-./backend/server.py:2910:80: E501 line too long (82 > 79 characters)
-./backend/server.py:2911:1: W293 blank line contains whitespace
-./backend/server.py:2916:1: W293 blank line contains whitespace
+./backend/server.py:2140:1: W293 blank line contains whitespace
+./backend/server.py:2147:1: W293 blank line contains whitespace
+./backend/server.py:2180:1: W293 blank line contains whitespace
+./backend/server.py:2181:80: E501 line too long (125 > 79 characters)
+./backend/server.py:2183:1: W293 blank line contains whitespace
+./backend/server.py:2186:80: E501 line too long (80 > 79 characters)
+./backend/server.py:2187:1: W293 blank line contains whitespace
+./backend/server.py:2193:1: W293 blank line contains whitespace
+./backend/server.py:2207:5: F811 redefinition of unused 'status' from line 3
+./backend/server.py:2235:1: W293 blank line contains whitespace
+./backend/server.py:2248:1: W293 blank line contains whitespace
+./backend/server.py:2269:1: W293 blank line contains whitespace
+./backend/server.py:2274:1: W293 blank line contains whitespace
+./backend/server.py:2276:1: W293 blank line contains whitespace
+./backend/server.py:2285:1: W293 blank line contains whitespace
+./backend/server.py:2292:80: E501 line too long (87 > 79 characters)
+./backend/server.py:2298:1: W293 blank line contains whitespace
+./backend/server.py:2314:1: W293 blank line contains whitespace
+./backend/server.py:2319:1: W293 blank line contains whitespace
+./backend/server.py:2323:1: W293 blank line contains whitespace
+./backend/server.py:2325:1: W293 blank line contains whitespace
+./backend/server.py:2336:1: W293 blank line contains whitespace
+./backend/server.py:2349:80: E501 line too long (96 > 79 characters)
+./backend/server.py:2350:80: E501 line too long (98 > 79 characters)
+./backend/server.py:2353:1: W293 blank line contains whitespace
+./backend/server.py:2368:1: W293 blank line contains whitespace
+./backend/server.py:2373:1: W293 blank line contains whitespace
+./backend/server.py:2377:1: W293 blank line contains whitespace
+./backend/server.py:2382:1: W293 blank line contains whitespace
+./backend/server.py:2385:1: W293 blank line contains whitespace
+./backend/server.py:2394:1: W293 blank line contains whitespace
+./backend/server.py:2408:80: E501 line too long (111 > 79 characters)
+./backend/server.py:2411:1: W293 blank line contains whitespace
+./backend/server.py:2428:1: W293 blank line contains whitespace
+./backend/server.py:2431:1: W293 blank line contains whitespace
+./backend/server.py:2434:1: W293 blank line contains whitespace
+./backend/server.py:2441:80: E501 line too long (103 > 79 characters)
+./backend/server.py:2452:1: W293 blank line contains whitespace
+./backend/server.py:2464:5: F401 'datetime.datetime' imported but unused
+./backend/server.py:2464:5: F401 'datetime.timezone' imported but unused
+./backend/server.py:2464:5: F401 'datetime.timedelta' imported but unused
+./backend/server.py:2465:1: W293 blank line contains whitespace
+./backend/server.py:2469:80: E501 line too long (84 > 79 characters)
+./backend/server.py:2471:1: W293 blank line contains whitespace
+./backend/server.py:2474:80: E501 line too long (83 > 79 characters)
+./backend/server.py:2475:80: E501 line too long (85 > 79 characters)
+./backend/server.py:2476:80: E501 line too long (83 > 79 characters)
+./backend/server.py:2477:1: W293 blank line contains whitespace
+./backend/server.py:2480:80: E501 line too long (97 > 79 characters)
+./backend/server.py:2481:1: W293 blank line contains whitespace
+./backend/server.py:2483:80: E501 line too long (81 > 79 characters)
+./backend/server.py:2484:1: W293 blank line contains whitespace
+./backend/server.py:2537:80: E501 line too long (83 > 79 characters)
+./backend/server.py:2569:80: E501 line too long (102 > 79 characters)
+./backend/server.py:2571:80: E501 line too long (313 > 79 characters)
+./backend/server.py:2574:1: W293 blank line contains whitespace
+./backend/server.py:2577:1: W293 blank line contains whitespace
+./backend/server.py:2585:1: W293 blank line contains whitespace
+./backend/server.py:2600:80: E501 line too long (82 > 79 characters)
+./backend/server.py:2612:80: E501 line too long (80 > 79 characters)
+./backend/server.py:2625:80: E501 line too long (91 > 79 characters)
+./backend/server.py:2640:80: E501 line too long (87 > 79 characters)
+./backend/server.py:2652:80: E501 line too long (80 > 79 characters)
+./backend/server.py:2665:80: E501 line too long (93 > 79 characters)
+./backend/server.py:2680:80: E501 line too long (89 > 79 characters)
+./backend/server.py:2713:80: E501 line too long (102 > 79 characters)
+./backend/server.py:2715:80: E501 line too long (297 > 79 characters)
+./backend/server.py:2718:1: W293 blank line contains whitespace
+./backend/server.py:2779:80: E501 line too long (80 > 79 characters)
+./backend/server.py:2800:80: E501 line too long (102 > 79 characters)
+./backend/server.py:2802:80: E501 line too long (301 > 79 characters)
+./backend/server.py:2805:1: W293 blank line contains whitespace
+./backend/server.py:2808:80: E501 line too long (88 > 79 characters)
+./backend/server.py:2823:1: E303 too many blank lines (3)
+./backend/server.py:2839:5: F811 redefinition of unused 'status' from line 3
+./backend/server.py:2858:80: E501 line too long (90 > 79 characters)
+./backend/server.py:2871:80: E501 line too long (80 > 79 characters)
+./backend/server.py:2879:5: F811 redefinition of unused 'status' from line 3
+./backend/server.py:2914:80: E501 line too long (81 > 79 characters)
+./backend/server.py:2932:1: W293 blank line contains whitespace
+./backend/server.py:2937:80: E501 line too long (82 > 79 characters)
+./backend/server.py:2940:1: W293 blank line contains whitespace
+./backend/server.py:2943:1: W293 blank line contains whitespace
+./backend/server.py:2945:80: E501 line too long (110 > 79 characters)
+./backend/server.py:2946:1: W293 blank line contains whitespace
+./backend/server.py:2956:1: W293 blank line contains whitespace
+./backend/server.py:2969:1: W293 blank line contains whitespace
+./backend/server.py:2982:1: W293 blank line contains whitespace
+./backend/server.py:2985:80: E501 line too long (92 > 79 characters)
+./backend/server.py:2986:1: W293 blank line contains whitespace
+./backend/server.py:2991:80: E501 line too long (82 > 79 characters)
+./backend/server.py:2994:1: W293 blank line contains whitespace
+./backend/server.py:2997:1: W293 blank line contains whitespace
+./backend/server.py:3001:1: W293 blank line contains whitespace
+./backend/server.py:3004:1: W293 blank line contains whitespace
+./backend/server.py:3006:80: E501 line too long (80 > 79 characters)
+./backend/server.py:3007:1: W293 blank line contains whitespace
+./backend/server.py:3014:80: E501 line too long (98 > 79 characters)
+./backend/server.py:3024:1: W293 blank line contains whitespace
+./backend/server.py:3025:80: E501 line too long (95 > 79 characters)
+./backend/server.py:3026:1: W293 blank line contains whitespace
+./backend/server.py:3035:80: E501 line too long (85 > 79 characters)
+./backend/server.py:3037:1: W293 blank line contains whitespace
+./backend/server.py:3042:1: W293 blank line contains whitespace
+./backend/server.py:3046:80: E501 line too long (134 > 79 characters)
+./backend/server.py:3048:1: W293 blank line contains whitespace
+./backend/server.py:3051:1: W293 blank line contains whitespace
+./backend/server.py:3058:1: W293 blank line contains whitespace
+./backend/server.py:3065:1: W293 blank line contains whitespace
+./backend/server.py:3074:80: E501 line too long (105 > 79 characters)
+./backend/server.py:3077:1: W293 blank line contains whitespace
+./backend/server.py:3091:1: W293 blank line contains whitespace
+./backend/server.py:3095:1: W293 blank line contains whitespace
+./backend/server.py:3098:80: E501 line too long (110 > 79 characters)
+./backend/server.py:3107:1: W293 blank line contains whitespace
+./backend/server.py:3110:1: W293 blank line contains whitespace
+./backend/server.py:3115:80: E501 line too long (126 > 79 characters)
+./backend/server.py:3119:1: W293 blank line contains whitespace
+./backend/server.py:3120:80: E501 line too long (114 > 79 characters)
+./backend/server.py:3122:1: W293 blank line contains whitespace
+./backend/server.py:3123:80: E501 line too long (83 > 79 characters)
+./backend/server.py:3136:1: W293 blank line contains whitespace
+./backend/server.py:3140:1: W293 blank line contains whitespace
+./backend/server.py:3151:1: W293 blank line contains whitespace
+./backend/server.py:3154:1: W293 blank line contains whitespace
+./backend/server.py:3163:1: W293 blank line contains whitespace
+./backend/server.py:3164:80: E501 line too long (116 > 79 characters)
+./backend/server.py:3166:1: W293 blank line contains whitespace
+./backend/server.py:3167:80: E501 line too long (82 > 79 characters)
+./backend/server.py:3189:1: W293 blank line contains whitespace
+./backend/server.py:3192:1: W293 blank line contains whitespace
+./backend/server.py:3195:1: W293 blank line contains whitespace
+./backend/server.py:3216:80: E501 line too long (80 > 79 characters)
+./backend/server.py:3223:1: W293 blank line contains whitespace
+./backend/server.py:3228:1: W293 blank line contains whitespace
+./backend/server.py:3232:80: E501 line too long (116 > 79 characters)
+./backend/server.py:3238:1: W293 blank line contains whitespace
+./backend/server.py:3245:1: W293 blank line contains whitespace
+./backend/server.py:3252:1: W293 blank line contains whitespace
+./backend/server.py:3255:1: W293 blank line contains whitespace
+./backend/server.py:3261:1: E303 too many blank lines (4)
+./backend/server.py:3266:1: W293 blank line contains whitespace
+./backend/server.py:3268:1: W293 blank line contains whitespace
+./backend/server.py:3273:40: W291 trailing whitespace
+./backend/server.py:3283:1: W293 blank line contains whitespace
+./backend/server.py:3285:1: W293 blank line contains whitespace
+./backend/server.py:3292:1: W293 blank line contains whitespace
+./backend/server.py:3300:1: W293 blank line contains whitespace
+./backend/server.py:3305:80: E501 line too long (83 > 79 characters)
+./backend/server.py:3314:1: W293 blank line contains whitespace
+./backend/server.py:3318:1: W293 blank line contains whitespace
+./backend/server.py:3335:5: F401 'bson.ObjectId' imported but unused
+./backend/server.py:3336:1: W293 blank line contains whitespace
+./backend/server.py:3338:1: W293 blank line contains whitespace
+./backend/server.py:3343:80: E501 line too long (96 > 79 characters)
+./backend/server.py:3344:1: W293 blank line contains whitespace
+./backend/server.py:3346:1: W293 blank line contains whitespace
+./backend/server.py:3354:80: E501 line too long (103 > 79 characters)
+./backend/server.py:3355:1: W293 blank line contains whitespace
+./backend/server.py:3358:80: E501 line too long (83 > 79 characters)
+./backend/server.py:3359:80: E501 line too long (86 > 79 characters)
+./backend/server.py:3360:80: E501 line too long (84 > 79 characters)
+./backend/server.py:3363:1: W293 blank line contains whitespace
+./backend/server.py:3365:80: E501 line too long (95 > 79 characters)
+./backend/server.py:3367:1: W293 blank line contains whitespace
+./backend/server.py:3372:32: F541 f-string is missing placeholders
+./backend/server.py:3374:32: F541 f-string is missing placeholders
+./backend/server.py:3374:80: E501 line too long (82 > 79 characters)
+./backend/server.py:3375:1: W293 blank line contains whitespace
+./backend/server.py:3380:1: W293 blank line contains whitespace
 ./backend/services/advanced_service.py:5:1: F401 'typing.Optional' imported but unused
 ./backend/services/advanced_service.py:7:1: F401 'uuid' imported but unused
 ./backend/services/advanced_service.py:9:80: E501 line too long (121 > 79 characters)
@@ -1351,31 +1092,36 @@ The application is a functional banking platform with a FastAPI backend and a Re
 ./backend/services/auth_service.py:24:1: W293 blank line contains whitespace
 ./backend/services/auth_service.py:34:1: W293 blank line contains whitespace
 ./backend/services/auth_service.py:37:1: W293 blank line contains whitespace
-./backend/services/auth_service.py:49:1: W293 blank line contains whitespace
-./backend/services/auth_service.py:52:1: W293 blank line contains whitespace
-./backend/services/auth_service.py:54:1: W293 blank line contains whitespace
-./backend/services/auth_service.py:55:80: E501 line too long (83 > 79 characters)
+./backend/services/auth_service.py:40:1: W293 blank line contains whitespace
+./backend/services/auth_service.py:46:1: W293 blank line contains whitespace
+./backend/services/auth_service.py:49:80: E501 line too long (99 > 79 characters)
+./backend/services/auth_service.py:57:1: W293 blank line contains whitespace
 ./backend/services/auth_service.py:60:1: W293 blank line contains whitespace
-./backend/services/auth_service.py:63:1: W293 blank line contains whitespace
-./backend/services/auth_service.py:65:1: W293 blank line contains whitespace
-./backend/services/auth_service.py:70:1: W293 blank line contains whitespace
-./backend/services/auth_service.py:72:1: W293 blank line contains whitespace
-./backend/services/auth_service.py:88:1: W293 blank line contains whitespace
-./backend/services/auth_service.py:92:1: W293 blank line contains whitespace
-./backend/services/auth_service.py:104:1: W293 blank line contains whitespace
-./backend/services/auth_service.py:110:1: W293 blank line contains whitespace
-./backend/services/auth_service.py:112:1: W293 blank line contains whitespace
-./backend/services/auth_service.py:113:80: E501 line too long (83 > 79 characters)
-./backend/services/auth_service.py:118:1: W293 blank line contains whitespace
+./backend/services/auth_service.py:62:1: W293 blank line contains whitespace
+./backend/services/auth_service.py:63:80: E501 line too long (83 > 79 characters)
+./backend/services/auth_service.py:68:1: W293 blank line contains whitespace
+./backend/services/auth_service.py:71:1: W293 blank line contains whitespace
+./backend/services/auth_service.py:73:80: E501 line too long (80 > 79 characters)
+./backend/services/auth_service.py:80:1: W293 blank line contains whitespace
+./backend/services/auth_service.py:82:1: W293 blank line contains whitespace
+./backend/services/auth_service.py:87:1: W293 blank line contains whitespace
+./backend/services/auth_service.py:89:1: W293 blank line contains whitespace
+./backend/services/auth_service.py:105:1: W293 blank line contains whitespace
+./backend/services/auth_service.py:109:1: W293 blank line contains whitespace
 ./backend/services/auth_service.py:121:1: W293 blank line contains whitespace
+./backend/services/auth_service.py:127:1: W293 blank line contains whitespace
 ./backend/services/auth_service.py:129:1: W293 blank line contains whitespace
+./backend/services/auth_service.py:130:80: E501 line too long (83 > 79 characters)
 ./backend/services/auth_service.py:135:1: W293 blank line contains whitespace
-./backend/services/auth_service.py:137:1: W293 blank line contains whitespace
-./backend/services/auth_service.py:143:1: W293 blank line contains whitespace
-./backend/services/auth_service.py:147:1: W293 blank line contains whitespace
-./backend/services/auth_service.py:153:1: W293 blank line contains whitespace
-./backend/services/auth_service.py:155:1: W293 blank line contains whitespace
-./backend/services/auth_service.py:161:47: W292 no newline at end of file
+./backend/services/auth_service.py:138:1: W293 blank line contains whitespace
+./backend/services/auth_service.py:146:1: W293 blank line contains whitespace
+./backend/services/auth_service.py:152:1: W293 blank line contains whitespace
+./backend/services/auth_service.py:154:1: W293 blank line contains whitespace
+./backend/services/auth_service.py:160:1: W293 blank line contains whitespace
+./backend/services/auth_service.py:164:1: W293 blank line contains whitespace
+./backend/services/auth_service.py:170:1: W293 blank line contains whitespace
+./backend/services/auth_service.py:172:1: W293 blank line contains whitespace
+./backend/services/auth_service.py:178:47: W292 no newline at end of file
 ./backend/services/banking_service.py:4:1: F401 'datetime.datetime' imported but unused
 ./backend/services/banking_service.py:5:1: F401 'fastapi.HTTPException' imported but unused
 ./backend/services/banking_service.py:8:1: F401 'schemas.banking.AccountStatus' imported but unused
@@ -1629,56 +1375,58 @@ The application is a functional banking platform with a FastAPI backend and a Re
 ./backend/services/kyc_service.py:32:1: W293 blank line contains whitespace
 ./backend/services/kyc_service.py:37:1: W293 blank line contains whitespace
 ./backend/services/kyc_service.py:39:1: W293 blank line contains whitespace
-./backend/services/kyc_service.py:50:1: W293 blank line contains whitespace
-./backend/services/kyc_service.py:57:1: W293 blank line contains whitespace
-./backend/services/kyc_service.py:66:1: W293 blank line contains whitespace
-./backend/services/kyc_service.py:72:1: W293 blank line contains whitespace
-./backend/services/kyc_service.py:74:1: W293 blank line contains whitespace
-./backend/services/kyc_service.py:82:1: W293 blank line contains whitespace
-./backend/services/kyc_service.py:84:80: E501 line too long (94 > 79 characters)
+./backend/services/kyc_service.py:49:1: W293 blank line contains whitespace
+./backend/services/kyc_service.py:53:1: W293 blank line contains whitespace
+./backend/services/kyc_service.py:60:1: W293 blank line contains whitespace
+./backend/services/kyc_service.py:69:1: W293 blank line contains whitespace
+./backend/services/kyc_service.py:73:1: W293 blank line contains whitespace
+./backend/services/kyc_service.py:79:1: W293 blank line contains whitespace
+./backend/services/kyc_service.py:81:1: W293 blank line contains whitespace
 ./backend/services/kyc_service.py:89:1: W293 blank line contains whitespace
-./backend/services/kyc_service.py:96:80: E501 line too long (84 > 79 characters)
-./backend/services/kyc_service.py:97:80: E501 line too long (88 > 79 characters)
-./backend/services/kyc_service.py:104:1: W293 blank line contains whitespace
-./backend/services/kyc_service.py:109:1: W293 blank line contains whitespace
-./backend/services/kyc_service.py:113:1: W293 blank line contains whitespace
-./backend/services/kyc_service.py:121:80: E501 line too long (82 > 79 characters)
-./backend/services/kyc_service.py:123:80: E501 line too long (80 > 79 characters)
-./backend/services/kyc_service.py:124:1: W293 blank line contains whitespace
-./backend/services/kyc_service.py:128:80: E501 line too long (94 > 79 characters)
-./backend/services/kyc_service.py:130:80: E501 line too long (99 > 79 characters)
+./backend/services/kyc_service.py:91:80: E501 line too long (94 > 79 characters)
+./backend/services/kyc_service.py:96:1: W293 blank line contains whitespace
+./backend/services/kyc_service.py:103:80: E501 line too long (84 > 79 characters)
+./backend/services/kyc_service.py:104:80: E501 line too long (88 > 79 characters)
+./backend/services/kyc_service.py:111:1: W293 blank line contains whitespace
+./backend/services/kyc_service.py:116:1: W293 blank line contains whitespace
+./backend/services/kyc_service.py:120:1: W293 blank line contains whitespace
+./backend/services/kyc_service.py:128:80: E501 line too long (82 > 79 characters)
+./backend/services/kyc_service.py:130:80: E501 line too long (80 > 79 characters)
 ./backend/services/kyc_service.py:131:1: W293 blank line contains whitespace
-./backend/services/kyc_service.py:136:80: E501 line too long (151 > 79 characters)
-./backend/services/kyc_service.py:137:1: W293 blank line contains whitespace
-./backend/services/kyc_service.py:140:80: E501 line too long (87 > 79 characters)
-./backend/services/kyc_service.py:141:80: E501 line too long (149 > 79 characters)
-./backend/services/kyc_service.py:142:1: W293 blank line contains whitespace
-./backend/services/kyc_service.py:143:80: E501 line too long (85 > 79 characters)
-./backend/services/kyc_service.py:148:1: W293 blank line contains whitespace
-./backend/services/kyc_service.py:152:1: W293 blank line contains whitespace
-./backend/services/kyc_service.py:154:80: E501 line too long (80 > 79 characters)
-./backend/services/kyc_service.py:157:80: E501 line too long (98 > 79 characters)
-./backend/services/kyc_service.py:160:1: W293 blank line contains whitespace
-./backend/services/kyc_service.py:163:80: E501 line too long (80 > 79 characters)
-./backend/services/kyc_service.py:166:1: W293 blank line contains whitespace
-./backend/services/kyc_service.py:167:80: E501 line too long (88 > 79 characters)
-./backend/services/kyc_service.py:168:80: E501 line too long (100 > 79 characters)
-./backend/services/kyc_service.py:178:1: W293 blank line contains whitespace
-./backend/services/kyc_service.py:179:80: E501 line too long (86 > 79 characters)
-./backend/services/kyc_service.py:180:80: E501 line too long (94 > 79 characters)
-./backend/services/kyc_service.py:208:37: W291 trailing whitespace
-./backend/services/kyc_service.py:209:80: E501 line too long (95 > 79 characters)
-./backend/services/kyc_service.py:211:1: W293 blank line contains whitespace
-./backend/services/kyc_service.py:225:1: W293 blank line contains whitespace
-./backend/services/kyc_service.py:226:80: E501 line too long (82 > 79 characters)
-./backend/services/kyc_service.py:235:1: W293 blank line contains whitespace
-./backend/services/kyc_service.py:240:1: W293 blank line contains whitespace
-./backend/services/kyc_service.py:241:80: E501 line too long (82 > 79 characters)
-./backend/services/kyc_service.py:243:1: W293 blank line contains whitespace
-./backend/services/kyc_service.py:247:80: E501 line too long (103 > 79 characters)
-./backend/services/kyc_service.py:249:1: W293 blank line contains whitespace
-./backend/services/kyc_service.py:253:1: W293 blank line contains whitespace
-./backend/services/kyc_service.py:254:20: W292 no newline at end of file
+./backend/services/kyc_service.py:135:80: E501 line too long (94 > 79 characters)
+./backend/services/kyc_service.py:137:80: E501 line too long (99 > 79 characters)
+./backend/services/kyc_service.py:138:1: W293 blank line contains whitespace
+./backend/services/kyc_service.py:143:80: E501 line too long (151 > 79 characters)
+./backend/services/kyc_service.py:144:1: W293 blank line contains whitespace
+./backend/services/kyc_service.py:147:80: E501 line too long (87 > 79 characters)
+./backend/services/kyc_service.py:148:80: E501 line too long (149 > 79 characters)
+./backend/services/kyc_service.py:149:1: W293 blank line contains whitespace
+./backend/services/kyc_service.py:150:80: E501 line too long (85 > 79 characters)
+./backend/services/kyc_service.py:155:1: W293 blank line contains whitespace
+./backend/services/kyc_service.py:159:1: W293 blank line contains whitespace
+./backend/services/kyc_service.py:161:80: E501 line too long (80 > 79 characters)
+./backend/services/kyc_service.py:164:80: E501 line too long (98 > 79 characters)
+./backend/services/kyc_service.py:167:1: W293 blank line contains whitespace
+./backend/services/kyc_service.py:170:80: E501 line too long (80 > 79 characters)
+./backend/services/kyc_service.py:173:1: W293 blank line contains whitespace
+./backend/services/kyc_service.py:174:80: E501 line too long (88 > 79 characters)
+./backend/services/kyc_service.py:175:80: E501 line too long (100 > 79 characters)
+./backend/services/kyc_service.py:185:1: W293 blank line contains whitespace
+./backend/services/kyc_service.py:186:80: E501 line too long (86 > 79 characters)
+./backend/services/kyc_service.py:187:80: E501 line too long (94 > 79 characters)
+./backend/services/kyc_service.py:215:37: W291 trailing whitespace
+./backend/services/kyc_service.py:216:80: E501 line too long (95 > 79 characters)
+./backend/services/kyc_service.py:218:1: W293 blank line contains whitespace
+./backend/services/kyc_service.py:232:1: W293 blank line contains whitespace
+./backend/services/kyc_service.py:233:80: E501 line too long (82 > 79 characters)
+./backend/services/kyc_service.py:242:1: W293 blank line contains whitespace
+./backend/services/kyc_service.py:247:1: W293 blank line contains whitespace
+./backend/services/kyc_service.py:248:80: E501 line too long (82 > 79 characters)
+./backend/services/kyc_service.py:250:1: W293 blank line contains whitespace
+./backend/services/kyc_service.py:254:80: E501 line too long (103 > 79 characters)
+./backend/services/kyc_service.py:256:1: W293 blank line contains whitespace
+./backend/services/kyc_service.py:260:1: W293 blank line contains whitespace
+./backend/services/kyc_service.py:261:20: W292 no newline at end of file
 ./backend/services/ledger_service.py:4:1: F401 'datetime.datetime' imported but unused
 ./backend/services/ledger_service.py:17:1: F401 'bson.ObjectId' imported but unused
 ./backend/services/ledger_service.py:22:1: W293 blank line contains whitespace
@@ -1954,12 +1702,262 @@ The application is a functional banking platform with a FastAPI backend and a Re
 ./backend_test.py:339:80: E501 line too long (96 > 79 characters)
 ./backend_test.py:342:80: E501 line too long (95 > 79 characters)
 ./backend_test.py:345:80: E501 line too long (98 > 79 characters)
-./backend_test.py:360:1: W293 blank line contains whitespace
-./backend_test.py:367:1: W293 blank line contains whitespace
-./backend_test.py:390:5: F841 local variable 'user_login_success' is assigned to but never used
+./backend_test.py:354:80: E501 line too long (80 > 79 characters)
+./backend_test.py:356:1: W293 blank line contains whitespace
+./backend_test.py:364:1: W293 blank line contains whitespace
+./backend_test.py:366:67: W291 trailing whitespace
+./backend_test.py:367:29: E128 continuation line under-indented for visual indent
+./backend_test.py:367:80: E501 line too long (95 > 79 characters)
+./backend_test.py:369:1: W293 blank line contains whitespace
+./backend_test.py:371:80: E501 line too long (98 > 79 characters)
+./backend_test.py:372:67: W291 trailing whitespace
+./backend_test.py:373:29: E128 continuation line under-indented for visual indent
+./backend_test.py:375:1: W293 blank line contains whitespace
+./backend_test.py:379:13: F841 local variable 'old_reason' is assigned to but never used
+./backend_test.py:380:1: W293 blank line contains whitespace
+./backend_test.py:389:1: W293 blank line contains whitespace
+./backend_test.py:390:80: E501 line too long (101 > 79 characters)
+./backend_test.py:398:1: W293 blank line contains whitespace
+./backend_test.py:402:80: E501 line too long (83 > 79 characters)
+./backend_test.py:402:84: W291 trailing whitespace
+./backend_test.py:405:1: W293 blank line contains whitespace
+./backend_test.py:406:80: E501 line too long (96 > 79 characters)
+./backend_test.py:410:75: W291 trailing whitespace
+./backend_test.py:411:37: E128 continuation line under-indented for visual indent
+./backend_test.py:414:71: W291 trailing whitespace
+./backend_test.py:415:33: E128 continuation line under-indented for visual indent
+./backend_test.py:418:80: E501 line too long (82 > 79 characters)
+./backend_test.py:420:80: E501 line too long (102 > 79 characters)
+./backend_test.py:421:80: E501 line too long (96 > 79 characters)
+./backend_test.py:424:71: W291 trailing whitespace
+./backend_test.py:425:33: E128 continuation line under-indented for visual indent
+./backend_test.py:428:67: W291 trailing whitespace
+./backend_test.py:429:29: E128 continuation line under-indented for visual indent
+./backend_test.py:429:80: E501 line too long (92 > 79 characters)
+./backend_test.py:431:1: W293 blank line contains whitespace
+./backend_test.py:441:1: W293 blank line contains whitespace
+./backend_test.py:444:80: E501 line too long (84 > 79 characters)
+./backend_test.py:446:1: W293 blank line contains whitespace
+./backend_test.py:454:1: W293 blank line contains whitespace
+./backend_test.py:456:62: W291 trailing whitespace
+./backend_test.py:457:29: E128 continuation line under-indented for visual indent
+./backend_test.py:457:80: E501 line too long (86 > 79 characters)
+./backend_test.py:459:1: W293 blank line contains whitespace
+./backend_test.py:461:80: E501 line too long (98 > 79 characters)
+./backend_test.py:470:1: W293 blank line contains whitespace
+./backend_test.py:471:80: E501 line too long (102 > 79 characters)
+./backend_test.py:472:66: W291 trailing whitespace
+./backend_test.py:473:33: E128 continuation line under-indented for visual indent
+./backend_test.py:475:1: W293 blank line contains whitespace
+./backend_test.py:479:1: W293 blank line contains whitespace
+./backend_test.py:486:1: W293 blank line contains whitespace
+./backend_test.py:488:80: E501 line too long (92 > 79 characters)
+./backend_test.py:489:80: E501 line too long (85 > 79 characters)
+./backend_test.py:494:80: E501 line too long (84 > 79 characters)
+./backend_test.py:497:62: W291 trailing whitespace
+./backend_test.py:498:29: E128 continuation line under-indented for visual indent
+./backend_test.py:498:80: E501 line too long (92 > 79 characters)
+./backend_test.py:500:1: W293 blank line contains whitespace
+./backend_test.py:510:1: W293 blank line contains whitespace
+./backend_test.py:524:1: W293 blank line contains whitespace
+./backend_test.py:526:78: W291 trailing whitespace
+./backend_test.py:527:29: E128 continuation line under-indented for visual indent
+./backend_test.py:527:80: E501 line too long (82 > 79 characters)
+./backend_test.py:529:1: W293 blank line contains whitespace
+./backend_test.py:532:80: E501 line too long (105 > 79 characters)
+./backend_test.py:534:1: W293 blank line contains whitespace
+./backend_test.py:541:1: W293 blank line contains whitespace
+./backend_test.py:543:78: W291 trailing whitespace
+./backend_test.py:544:29: E128 continuation line under-indented for visual indent
+./backend_test.py:546:1: W293 blank line contains whitespace
+./backend_test.py:553:1: W293 blank line contains whitespace
+./backend_test.py:555:78: W291 trailing whitespace
+./backend_test.py:556:29: E128 continuation line under-indented for visual indent
+./backend_test.py:558:1: W293 blank line contains whitespace
+./backend_test.py:565:1: W293 blank line contains whitespace
+./backend_test.py:567:78: W291 trailing whitespace
+./backend_test.py:568:29: E128 continuation line under-indented for visual indent
+./backend_test.py:568:80: E501 line too long (104 > 79 characters)
+./backend_test.py:570:1: W293 blank line contains whitespace
+./backend_test.py:572:1: W293 blank line contains whitespace
+./backend_test.py:575:78: W291 trailing whitespace
+./backend_test.py:576:29: E128 continuation line under-indented for visual indent
+./backend_test.py:578:1: W293 blank line contains whitespace
+./backend_test.py:580:78: W291 trailing whitespace
+./backend_test.py:581:29: E128 continuation line under-indented for visual indent
+./backend_test.py:583:1: W293 blank line contains whitespace
+./backend_test.py:589:78: W291 trailing whitespace
+./backend_test.py:590:29: E128 continuation line under-indented for visual indent
+./backend_test.py:593:78: W291 trailing whitespace
+./backend_test.py:594:29: E128 continuation line under-indented for visual indent
+./backend_test.py:594:80: E501 line too long (102 > 79 characters)
+./backend_test.py:596:1: W293 blank line contains whitespace
+./backend_test.py:598:80: E501 line too long (81 > 79 characters)
+./backend_test.py:604:80: E501 line too long (87 > 79 characters)
+./backend_test.py:606:1: W293 blank line contains whitespace
+./backend_test.py:614:1: W293 blank line contains whitespace
+./backend_test.py:616:74: W291 trailing whitespace
+./backend_test.py:617:29: E128 continuation line under-indented for visual indent
+./backend_test.py:617:80: E501 line too long (90 > 79 characters)
+./backend_test.py:619:1: W293 blank line contains whitespace
+./backend_test.py:622:80: E501 line too long (91 > 79 characters)
+./backend_test.py:624:1: W293 blank line contains whitespace
+./backend_test.py:632:1: W293 blank line contains whitespace
+./backend_test.py:634:74: W291 trailing whitespace
+./backend_test.py:635:29: E128 continuation line under-indented for visual indent
+./backend_test.py:635:80: E501 line too long (104 > 79 characters)
+./backend_test.py:637:1: W293 blank line contains whitespace
+./backend_test.py:639:1: W293 blank line contains whitespace
+./backend_test.py:642:74: W291 trailing whitespace
+./backend_test.py:643:29: E128 continuation line under-indented for visual indent
+./backend_test.py:645:1: W293 blank line contains whitespace
+./backend_test.py:647:74: W291 trailing whitespace
+./backend_test.py:648:29: E128 continuation line under-indented for visual indent
+./backend_test.py:650:1: W293 blank line contains whitespace
+./backend_test.py:651:80: E501 line too long (86 > 79 characters)
+./backend_test.py:653:80: E501 line too long (148 > 79 characters)
+./backend_test.py:655:1: W293 blank line contains whitespace
+./backend_test.py:661:80: E501 line too long (85 > 79 characters)
+./backend_test.py:663:80: E501 line too long (96 > 79 characters)
+./backend_test.py:665:1: W293 blank line contains whitespace
+./backend_test.py:675:80: E501 line too long (86 > 79 characters)
+./backend_test.py:675:87: W291 trailing whitespace
+./backend_test.py:676:33: E128 continuation line under-indented for visual indent
+./backend_test.py:678:1: W293 blank line contains whitespace
+./backend_test.py:681:1: W293 blank line contains whitespace
+./backend_test.py:684:80: E501 line too long (86 > 79 characters)
+./backend_test.py:684:87: W291 trailing whitespace
+./backend_test.py:685:33: E128 continuation line under-indented for visual indent
+./backend_test.py:687:1: W293 blank line contains whitespace
+./backend_test.py:690:80: E501 line too long (86 > 79 characters)
+./backend_test.py:690:87: W291 trailing whitespace
+./backend_test.py:691:33: E128 continuation line under-indented for visual indent
+./backend_test.py:693:1: W293 blank line contains whitespace
+./backend_test.py:695:80: E501 line too long (91 > 79 characters)
+./backend_test.py:696:80: E501 line too long (84 > 79 characters)
+./backend_test.py:697:1: W293 blank line contains whitespace
+./backend_test.py:698:80: E501 line too long (148 > 79 characters)
+./backend_test.py:701:80: E501 line too long (82 > 79 characters)
+./backend_test.py:701:83: W291 trailing whitespace
+./backend_test.py:702:29: E128 continuation line under-indented for visual indent
+./backend_test.py:705:80: E501 line too long (86 > 79 characters)
+./backend_test.py:713:1: W293 blank line contains whitespace
+./backend_test.py:722:80: E501 line too long (91 > 79 characters)
+./backend_test.py:724:1: W293 blank line contains whitespace
+./backend_test.py:727:80: E501 line too long (85 > 79 characters)
+./backend_test.py:729:1: W293 blank line contains whitespace
+./backend_test.py:736:1: W293 blank line contains whitespace
+./backend_test.py:738:80: E501 line too long (89 > 79 characters)
+./backend_test.py:740:1: W293 blank line contains whitespace
+./backend_test.py:743:1: W293 blank line contains whitespace
+./backend_test.py:751:1: W293 blank line contains whitespace
+./backend_test.py:759:1: W293 blank line contains whitespace
+./backend_test.py:762:80: E501 line too long (85 > 79 characters)
+./backend_test.py:766:72: W291 trailing whitespace
+./backend_test.py:767:37: E128 continuation line under-indented for visual indent
+./backend_test.py:770:68: W291 trailing whitespace
+./backend_test.py:771:33: E128 continuation line under-indented for visual indent
+./backend_test.py:774:64: W291 trailing whitespace
+./backend_test.py:775:29: E128 continuation line under-indented for visual indent
+./backend_test.py:775:80: E501 line too long (92 > 79 characters)
+./backend_test.py:786:1: W293 blank line contains whitespace
+./backend_test.py:795:80: E501 line too long (93 > 79 characters)
+./backend_test.py:797:1: W293 blank line contains whitespace
+./backend_test.py:800:80: E501 line too long (87 > 79 characters)
+./backend_test.py:802:1: W293 blank line contains whitespace
+./backend_test.py:809:1: W293 blank line contains whitespace
+./backend_test.py:811:80: E501 line too long (91 > 79 characters)
+./backend_test.py:813:1: W293 blank line contains whitespace
+./backend_test.py:815:1: W293 blank line contains whitespace
+./backend_test.py:825:1: W293 blank line contains whitespace
+./backend_test.py:832:1: W293 blank line contains whitespace
+./backend_test.py:834:79: W291 trailing whitespace
+./backend_test.py:835:29: E128 continuation line under-indented for visual indent
+./backend_test.py:835:80: E501 line too long (90 > 79 characters)
+./backend_test.py:837:1: W293 blank line contains whitespace
+./backend_test.py:844:1: W293 blank line contains whitespace
+./backend_test.py:847:80: E501 line too long (91 > 79 characters)
+./backend_test.py:848:1: W293 blank line contains whitespace
+./backend_test.py:853:80: E501 line too long (80 > 79 characters)
+./backend_test.py:856:1: W293 blank line contains whitespace
+./backend_test.py:858:80: E501 line too long (89 > 79 characters)
+./backend_test.py:861:80: E501 line too long (87 > 79 characters)
+./backend_test.py:861:88: W291 trailing whitespace
+./backend_test.py:862:37: E128 continuation line under-indented for visual indent
+./backend_test.py:865:70: W291 trailing whitespace
+./backend_test.py:866:33: E128 continuation line under-indented for visual indent
+./backend_test.py:869:66: W291 trailing whitespace
+./backend_test.py:870:29: E128 continuation line under-indented for visual indent
+./backend_test.py:877:80: E501 line too long (82 > 79 characters)
+./backend_test.py:885:1: W293 blank line contains whitespace
+./backend_test.py:888:65: W291 trailing whitespace
+./backend_test.py:889:29: E128 continuation line under-indented for visual indent
+./backend_test.py:891:1: W293 blank line contains whitespace
+./backend_test.py:895:65: W291 trailing whitespace
+./backend_test.py:896:29: E128 continuation line under-indented for visual indent
+./backend_test.py:898:1: W293 blank line contains whitespace
+./backend_test.py:902:65: W291 trailing whitespace
+./backend_test.py:903:29: E128 continuation line under-indented for visual indent
+./backend_test.py:903:80: E501 line too long (82 > 79 characters)
+./backend_test.py:905:1: W293 blank line contains whitespace
+./backend_test.py:907:65: W291 trailing whitespace
+./backend_test.py:908:29: E128 continuation line under-indented for visual indent
+./backend_test.py:910:1: W293 blank line contains whitespace
+./backend_test.py:911:80: E501 line too long (91 > 79 characters)
+./backend_test.py:913:1: W293 blank line contains whitespace
+./backend_test.py:927:1: W293 blank line contains whitespace
+./backend_test.py:934:1: W293 blank line contains whitespace
+./backend_test.py:957:5: F841 local variable 'user_login_success' is assigned to but never used
 ./check_pending_kyc.py:15:1: W293 blank line contains whitespace
 ./check_pending_kyc.py:21:1: W293 blank line contains whitespace
 ./check_pending_kyc.py:26:80: E501 line too long (127 > 79 characters)
+./cloudinary_backend_test.py:9:1: F401 'datetime.datetime' imported but unused
+./cloudinary_backend_test.py:53:80: E501 line too long (86 > 79 characters)
+./cloudinary_backend_test.py:77:80: E501 line too long (92 > 79 characters)
+./cloudinary_backend_test.py:80:80: E501 line too long (102 > 79 characters)
+./cloudinary_backend_test.py:92:80: E501 line too long (80 > 79 characters)
+./cloudinary_backend_test.py:104:80: E501 line too long (91 > 79 characters)
+./cloudinary_backend_test.py:107:80: E501 line too long (101 > 79 characters)
+./cloudinary_backend_test.py:119:1: W293 blank line contains whitespace
+./cloudinary_backend_test.py:132:80: E501 line too long (115 > 79 characters)
+./cloudinary_backend_test.py:144:1: W293 blank line contains whitespace
+./cloudinary_backend_test.py:158:80: E501 line too long (110 > 79 characters)
+./cloudinary_backend_test.py:170:1: W293 blank line contains whitespace
+./cloudinary_backend_test.py:175:1: W293 blank line contains whitespace
+./cloudinary_backend_test.py:179:1: W293 blank line contains whitespace
+./cloudinary_backend_test.py:186:1: W293 blank line contains whitespace
+./cloudinary_backend_test.py:194:80: E501 line too long (110 > 79 characters)
+./cloudinary_backend_test.py:201:80: E501 line too long (96 > 79 characters)
+./cloudinary_backend_test.py:206:1: W293 blank line contains whitespace
+./cloudinary_backend_test.py:214:1: W293 blank line contains whitespace
+./cloudinary_backend_test.py:216:80: E501 line too long (95 > 79 characters)
+./cloudinary_backend_test.py:218:1: W293 blank line contains whitespace
+./cloudinary_backend_test.py:221:1: W293 blank line contains whitespace
+./cloudinary_backend_test.py:224:80: E501 line too long (96 > 79 characters)
+./cloudinary_backend_test.py:226:1: W293 blank line contains whitespace
+./cloudinary_backend_test.py:230:1: W293 blank line contains whitespace
+./cloudinary_backend_test.py:234:80: E501 line too long (103 > 79 characters)
+./cloudinary_backend_test.py:237:1: W293 blank line contains whitespace
+./cloudinary_backend_test.py:238:80: E501 line too long (84 > 79 characters)
+./cloudinary_backend_test.py:243:80: E501 line too long (86 > 79 characters)
+./cloudinary_backend_test.py:245:80: E501 line too long (86 > 79 characters)
+./cloudinary_backend_test.py:249:80: E501 line too long (87 > 79 characters)
+./cloudinary_backend_test.py:253:1: W293 blank line contains whitespace
+./cloudinary_backend_test.py:257:80: E501 line too long (96 > 79 characters)
+./cloudinary_backend_test.py:269:1: W293 blank line contains whitespace
+./cloudinary_backend_test.py:282:80: E501 line too long (111 > 79 characters)
+./cloudinary_backend_test.py:294:1: W293 blank line contains whitespace
+./cloudinary_backend_test.py:307:80: E501 line too long (114 > 79 characters)
+./cloudinary_backend_test.py:318:1: W293 blank line contains whitespace
+./cloudinary_backend_test.py:323:1: W293 blank line contains whitespace
+./cloudinary_backend_test.py:326:80: E501 line too long (80 > 79 characters)
+./cloudinary_backend_test.py:327:1: W293 blank line contains whitespace
+./cloudinary_backend_test.py:330:1: W293 blank line contains whitespace
+./cloudinary_backend_test.py:336:1: W293 blank line contains whitespace
+./cloudinary_backend_test.py:340:1: W293 blank line contains whitespace
+./cloudinary_backend_test.py:348:1: W293 blank line contains whitespace
+./cloudinary_backend_test.py:353:1: W293 blank line contains whitespace
+./cloudinary_backend_test.py:355:1: W293 blank line contains whitespace
 ./create_test_kyc_user.py:8:1: F401 'datetime.datetime' imported but unused
 ./create_test_kyc_user.py:8:1: F401 'datetime.timedelta' imported but unused
 ./create_test_kyc_user.py:11:80: E501 line too long (135 > 79 characters)
@@ -2205,7 +2203,7 @@ The application is a functional banking platform with a FastAPI backend and a Re
 ./tests/backend_test.py:5:1: F401 'time' imported but unused
 ./tests/backend_test.py:6:1: F401 'datetime.datetime' imported but unused
 ./tests/backend_test.py:9:1: E302 expected 2 blank lines, found 1
-./tests/backend_test.py:10:80: E501 line too long (80 > 79 characters)
+./tests/backend_test.py:10:80: E501 line too long (86 > 79 characters)
 ./tests/backend_test.py:16:1: W293 blank line contains whitespace
 ./tests/backend_test.py:17:80: E501 line too long (111 > 79 characters)
 ./tests/backend_test.py:28:1: W293 blank line contains whitespace
@@ -2297,6 +2295,81 @@ The application is a functional banking platform with a FastAPI backend and a Re
 ./tests/backend_test.py:536:80: E501 line too long (81 > 79 characters)
 ./tests/backend_test.py:537:1: W293 blank line contains whitespace
 ./tests/backend_test.py:539:1: W293 blank line contains whitespace
+./tests/comprehensive_backend_test.py:5:1: F401 'time' imported but unused
+./tests/comprehensive_backend_test.py:6:1: F401 'datetime.datetime' imported but unused
+./tests/comprehensive_backend_test.py:9:1: E302 expected 2 blank lines, found 1
+./tests/comprehensive_backend_test.py:10:80: E501 line too long (86 > 79 characters)
+./tests/comprehensive_backend_test.py:16:1: W293 blank line contains whitespace
+./tests/comprehensive_backend_test.py:17:80: E501 line too long (111 > 79 characters)
+./tests/comprehensive_backend_test.py:28:1: W293 blank line contains whitespace
+./tests/comprehensive_backend_test.py:42:1: W293 blank line contains whitespace
+./tests/comprehensive_backend_test.py:48:1: W293 blank line contains whitespace
+./tests/comprehensive_backend_test.py:54:21: F541 f-string is missing placeholders
+./tests/comprehensive_backend_test.py:66:1: W293 blank line contains whitespace
+./tests/comprehensive_backend_test.py:68:80: E501 line too long (83 > 79 characters)
+./tests/comprehensive_backend_test.py:76:1: W293 blank line contains whitespace
+./tests/comprehensive_backend_test.py:86:1: W293 blank line contains whitespace
+./tests/comprehensive_backend_test.py:94:21: F541 f-string is missing placeholders
+./tests/comprehensive_backend_test.py:110:1: W293 blank line contains whitespace
+./tests/comprehensive_backend_test.py:120:1: W293 blank line contains whitespace
+./tests/comprehensive_backend_test.py:127:1: W293 blank line contains whitespace
+./tests/comprehensive_backend_test.py:135:80: E501 line too long (94 > 79 characters)
+./tests/comprehensive_backend_test.py:154:1: W293 blank line contains whitespace
+./tests/comprehensive_backend_test.py:156:80: E501 line too long (82 > 79 characters)
+./tests/comprehensive_backend_test.py:160:80: E501 line too long (102 > 79 characters)
+./tests/comprehensive_backend_test.py:164:1: W293 blank line contains whitespace
+./tests/comprehensive_backend_test.py:171:1: W293 blank line contains whitespace
+./tests/comprehensive_backend_test.py:178:80: E501 line too long (114 > 79 characters)
+./tests/comprehensive_backend_test.py:179:80: E501 line too long (109 > 79 characters)
+./tests/comprehensive_backend_test.py:198:1: W293 blank line contains whitespace
+./tests/comprehensive_backend_test.py:200:80: E501 line too long (85 > 79 characters)
+./tests/comprehensive_backend_test.py:208:1: W293 blank line contains whitespace
+./tests/comprehensive_backend_test.py:215:1: W293 blank line contains whitespace
+./tests/comprehensive_backend_test.py:222:80: E501 line too long (95 > 79 characters)
+./tests/comprehensive_backend_test.py:242:1: W293 blank line contains whitespace
+./tests/comprehensive_backend_test.py:244:80: E501 line too long (82 > 79 characters)
+./tests/comprehensive_backend_test.py:248:80: E501 line too long (108 > 79 characters)
+./tests/comprehensive_backend_test.py:252:1: W293 blank line contains whitespace
+./tests/comprehensive_backend_test.py:261:1: W293 blank line contains whitespace
+./tests/comprehensive_backend_test.py:269:1: W293 blank line contains whitespace
+./tests/comprehensive_backend_test.py:271:1: W293 blank line contains whitespace
+./tests/comprehensive_backend_test.py:273:13: F841 local variable 'document_found' is assigned to but never used
+./tests/comprehensive_backend_test.py:276:1: W293 blank line contains whitespace
+./tests/comprehensive_backend_test.py:283:1: W293 blank line contains whitespace
+./tests/comprehensive_backend_test.py:286:1: W293 blank line contains whitespace
+./tests/comprehensive_backend_test.py:293:1: W293 blank line contains whitespace
+./tests/comprehensive_backend_test.py:295:80: E501 line too long (88 > 79 characters)
+./tests/comprehensive_backend_test.py:299:1: W293 blank line contains whitespace
+./tests/comprehensive_backend_test.py:306:37: F541 f-string is missing placeholders
+./tests/comprehensive_backend_test.py:306:80: E501 line too long (100 > 79 characters)
+./tests/comprehensive_backend_test.py:307:80: E501 line too long (86 > 79 characters)
+./tests/comprehensive_backend_test.py:312:80: E501 line too long (83 > 79 characters)
+./tests/comprehensive_backend_test.py:315:80: E501 line too long (103 > 79 characters)
+./tests/comprehensive_backend_test.py:317:1: W293 blank line contains whitespace
+./tests/comprehensive_backend_test.py:322:80: E501 line too long (95 > 79 characters)
+./tests/comprehensive_backend_test.py:326:1: W293 blank line contains whitespace
+./tests/comprehensive_backend_test.py:328:80: E501 line too long (99 > 79 characters)
+./tests/comprehensive_backend_test.py:332:80: E501 line too long (100 > 79 characters)
+./tests/comprehensive_backend_test.py:336:1: W293 blank line contains whitespace
+./tests/comprehensive_backend_test.py:339:80: E501 line too long (83 > 79 characters)
+./tests/comprehensive_backend_test.py:340:1: W293 blank line contains whitespace
+./tests/comprehensive_backend_test.py:345:1: W293 blank line contains whitespace
+./tests/comprehensive_backend_test.py:350:80: E501 line too long (93 > 79 characters)
+./tests/comprehensive_backend_test.py:354:80: E501 line too long (98 > 79 characters)
+./tests/comprehensive_backend_test.py:362:80: E501 line too long (82 > 79 characters)
+./tests/comprehensive_backend_test.py:382:1: W293 blank line contains whitespace
+./tests/comprehensive_backend_test.py:384:80: E501 line too long (95 > 79 characters)
+./tests/comprehensive_backend_test.py:392:1: W293 blank line contains whitespace
+./tests/comprehensive_backend_test.py:395:1: W293 blank line contains whitespace
+./tests/comprehensive_backend_test.py:400:1: W293 blank line contains whitespace
+./tests/comprehensive_backend_test.py:403:1: W293 blank line contains whitespace
+./tests/comprehensive_backend_test.py:406:1: W293 blank line contains whitespace
+./tests/comprehensive_backend_test.py:409:1: W293 blank line contains whitespace
+./tests/comprehensive_backend_test.py:412:1: W293 blank line contains whitespace
+./tests/comprehensive_backend_test.py:424:1: W293 blank line contains whitespace
+./tests/comprehensive_backend_test.py:428:1: W293 blank line contains whitespace
+./tests/comprehensive_backend_test.py:430:1: W293 blank line contains whitespace
+./tests/comprehensive_backend_test.py:444:80: E501 line too long (96 > 79 characters)
 ./tests/test_core_atlas.py:15:1: F401 'os' imported but unused
 ./tests/test_core_atlas.py:22:1: E402 module level import not at top of file
 ./tests/test_core_atlas.py:28:1: E402 module level import not at top of file
@@ -2391,102 +2464,160 @@ The application is a functional banking platform with a FastAPI backend and a Re
 ./tests/test_core_atlas.py:478:1: W293 blank line contains whitespace
 ./tests/test_core_atlas.py:481:1: W293 blank line contains whitespace
 ./tests/test_core_atlas.py:483:80: E501 line too long (91 > 79 characters)
-./tests/test_core_atlas.py:486:80: E501 line too long (80 > 79 characters) warnings were identified but not fixed, including .
-
-**Known issue recurrence from previous fork**
-- None. The previous summary's issues (timezone, ObjectId mismatch) were not present here. However, a new regression (login bug due to missing import) was introduced and fixed within this session.
+./tests/test_core_atlas.py:486:80: E501 line too long (80 > 79 characters)
+./tests/test_transfer_admin_features.py:1:80: E501 line too long (81 > 79 characters)
+./tests/test_transfer_admin_features.py:9:1: E302 expected 2 blank lines, found 1
+./tests/test_transfer_admin_features.py:10:80: E501 line too long (86 > 79 characters)
+./tests/test_transfer_admin_features.py:16:1: W293 blank line contains whitespace
+./tests/test_transfer_admin_features.py:17:80: E501 line too long (111 > 79 characters)
+./tests/test_transfer_admin_features.py:28:1: W293 blank line contains whitespace
+./tests/test_transfer_admin_features.py:42:1: W293 blank line contains whitespace
+./tests/test_transfer_admin_features.py:52:1: W293 blank line contains whitespace
+./tests/test_transfer_admin_features.py:72:1: W293 blank line contains whitespace
+./tests/test_transfer_admin_features.py:85:1: W293 blank line contains whitespace
+./tests/test_transfer_admin_features.py:92:1: W293 blank line contains whitespace
+./tests/test_transfer_admin_features.py:105:1: W293 blank line contains whitespace
+./tests/test_transfer_admin_features.py:109:80: E501 line too long (115 > 79 characters)
+./tests/test_transfer_admin_features.py:111:1: W293 blank line contains whitespace
+./tests/test_transfer_admin_features.py:115:80: E501 line too long (88 > 79 characters)
+./tests/test_transfer_admin_features.py:119:80: E501 line too long (86 > 79 characters)
+./tests/test_transfer_admin_features.py:124:1: W293 blank line contains whitespace
+./tests/test_transfer_admin_features.py:128:80: E501 line too long (115 > 79 characters)
+./tests/test_transfer_admin_features.py:130:1: W293 blank line contains whitespace
+./tests/test_transfer_admin_features.py:139:1: W293 blank line contains whitespace
+./tests/test_transfer_admin_features.py:146:80: E501 line too long (95 > 79 characters)
+./tests/test_transfer_admin_features.py:148:1: W293 blank line contains whitespace
+./tests/test_transfer_admin_features.py:153:80: E501 line too long (96 > 79 characters)
+./tests/test_transfer_admin_features.py:156:1: W293 blank line contains whitespace
+./tests/test_transfer_admin_features.py:161:1: W293 blank line contains whitespace
+./tests/test_transfer_admin_features.py:162:15: F541 f-string is missing placeholders
+./tests/test_transfer_admin_features.py:167:1: W293 blank line contains whitespace
+./tests/test_transfer_admin_features.py:169:1: W293 blank line contains whitespace
+./tests/test_transfer_admin_features.py:177:1: W293 blank line contains whitespace
+./tests/test_transfer_admin_features.py:178:80: E501 line too long (90 > 79 characters)
+./tests/test_transfer_admin_features.py:179:1: W293 blank line contains whitespace
+./tests/test_transfer_admin_features.py:184:80: E501 line too long (80 > 79 characters)
+./tests/test_transfer_admin_features.py:196:21: F541 f-string is missing placeholders
+./tests/test_transfer_admin_features.py:196:80: E501 line too long (88 > 79 characters)
+./tests/test_transfer_admin_features.py:204:80: E501 line too long (90 > 79 characters)
+./tests/test_transfer_admin_features.py:205:80: E501 line too long (90 > 79 characters)
+./tests/test_transfer_admin_features.py:220:1: W293 blank line contains whitespace
+./tests/test_transfer_admin_features.py:223:1: W293 blank line contains whitespace
+./tests/test_transfer_admin_features.py:231:1: W293 blank line contains whitespace
+./tests/test_transfer_admin_features.py:236:1: W293 blank line contains whitespace
+./tests/test_transfer_admin_features.py:237:15: F541 f-string is missing placeholders
+./tests/test_transfer_admin_features.py:241:1: W293 blank line contains whitespace
+./tests/test_transfer_admin_features.py:242:80: E501 line too long (99 > 79 characters)
+./tests/test_transfer_admin_features.py:244:1: W293 blank line contains whitespace
+./tests/test_transfer_admin_features.py:246:1: W293 blank line contains whitespace
+./tests/test_transfer_admin_features.py:251:80: E501 line too long (103 > 79 characters)
+./tests/test_transfer_admin_features.py:252:1: W293 blank line contains whitespace
+./tests/test_transfer_admin_features.py:259:25: F541 f-string is missing placeholders
+./tests/test_transfer_admin_features.py:270:80: E501 line too long (128 > 79 characters)
+./tests/test_transfer_admin_features.py:291:1: W293 blank line contains whitespace
+./tests/test_transfer_admin_features.py:294:1: W293 blank line contains whitespace
+./tests/test_transfer_admin_features.py:298:1: W293 blank line contains whitespace
+./tests/test_transfer_admin_features.py:301:1: W293 blank line contains whitespace
+./tests/test_transfer_admin_features.py:303:15: F541 f-string is missing placeholders
+./tests/test_transfer_admin_features.py:305:1: W293 blank line contains whitespace
+./tests/test_transfer_admin_features.py:310:80: E501 line too long (81 > 79 characters)
+./tests/test_transfer_admin_features.py:317:80: E501 line too long (89 > 79 characters)
+./tests/test_transfer_admin_features.py:321:80: E501 line too long (84 > 79 characters)
+./tests/test_transfer_admin_features.py:325:1: W293 blank line contains whitespace
+./tests/test_transfer_admin_features.py:332:1: W293 blank line contains whitespace
+./tests/test_transfer_admin_features.py:333:80: E501 line too long (103 > 79 characters)
+./tests/test_transfer_admin_features.py:334:80: E501 line too long (87 > 79 characters)
+./tests/test_transfer_admin_features.py:335:1: W293 blank line contains whitespace
+./tests/test_transfer_admin_features.py:340:80: E501 line too long (96 > 79 characters)
+./tests/test_transfer_admin_features.py:347:80: E501 line too long (108 > 79 characters)
+./tests/test_transfer_admin_features.py:350:1: W293 blank line contains whitespace
+./tests/test_transfer_admin_features.py:351:80: E501 line too long (90 > 79 characters)
+./tests/test_transfer_admin_features.py:358:1: W293 blank line contains whitespace
+./tests/test_transfer_admin_features.py:360:80: E501 line too long (84 > 79 characters)
+./tests/test_transfer_admin_features.py:361:1: W293 blank line contains whitespace
+./tests/test_transfer_admin_features.py:363:1: W293 blank line contains whitespace
+./tests/test_transfer_admin_features.py:375:80: E501 line too long (80 > 79 characters)
+./tests/test_transfer_admin_features.py:390:1: W293 blank line contains whitespace
+./tests/test_transfer_admin_features.py:395:1: W293 blank line contains whitespace
+./tests/test_transfer_admin_features.py:411:1: W293 blank line contains whitespace
+./tests/test_transfer_admin_features.py:413:80: E501 line too long (81 > 79 characters)
+./tests/test_transfer_admin_features.py:414:1: W293 blank line contains whitespace
+./tests/test_transfer_admin_features.py:416:1: W293 blank line contains whitespace linting errors existed in . These were not addressed in this session and likely persist.
+- **Recurrence count**: 1
+- **Status**: NOT STARTED
 
 **Code Architecture**
 
 
 **Key Technical Concepts**
-- **Frontend Performance**: Solved an N+1 query problem by creating a dedicated backend endpoint to aggregate data, drastically improving admin panel load times.
-- **API Design**: Added several new REST endpoints for editing tickets, fetching aggregated account data, and getting analytics.
-- **React State Management**: Extensive use of  and  for managing complex UI state, including modals, inline editing, and the notification polling mechanism.
-- **Event Handling**: Fixed a modal bug by using  to prevent unintended modal closures.
-- **Polling**: Implemented a 30-second polling interval using  in a React component to create a live notification feature.
+- **Backend-assisted Downloads**: Using a backend endpoint with a query parameter () to serve a file with  headers, solving cross-origin download issues.
+- **Axios Interceptors**: Modifying global API client behavior to handle specific error cases (like 401 on login) differently from others.
+- **Defensive Coding**: Adding fallback values for UI text () to make the application more resilient against translation loading failures or race conditions.
+- **Database Migration Script**: Writing and executing a one-time Python script to iterate over and update existing records in the database (e.g., to fix name capitalization).
+- **Failsafe Logic**: Implementing redundant data synchronization (syncing  on every login) to proactively correct any potential state inconsistencies.
 
 **key DB schema**
--   **users**: 
--   **bank_accounts**: 
--   **transfers**: 
--   **tickets**: 
--   **kyc_applications**: 
+- No schema changes were made in this session.
 
 **changes in tech stack**
-- No changes to the fundamental tech stack.
+- Added  to  to support the KYC document download feature.
 
 **All files of reference**
--   : Major changes. Added new endpoints for analytics, editing tickets, and an optimized endpoint for fetching all accounts with user data. Fixed a critical bug by adding a missing import.
--   : Major changes. Integrated the notification bell, updated header layout, added logic for IBAN editing modals, and added retry logic for API calls.
--   : New file created for the entire notification feature.
--   : Major changes. Implemented the UI for editing ticket subjects and messages, and renamed UI labels.
--   : Modified to consume the new, faster API endpoint for listing accounts.
--   : Modified to fix Invalid Date bugs.
--   : Modified to display the transfer rejection reason.
--   : Modified to update UI labels in the sidebar.
+- : Modified to add message deletion and to handle document downloads.
+- : Modified to capitalize names on signup and sync passwords on login.
+- : Heavily modified to add UI for deleting tickets and messages.
+- : Modified for password visibility toggles and translation fallbacks.
+- : Modified to fix the login-failure-refresh bug.
+- : Modified to fix the Invalid Date bug.
+- : Modified to call the correct download URL.
 
 **Areas that need refactoring**:
--    is a very large file that handles routing, the main admin layout, and contains the logic for the entire user management view (including multiple modals). The admin panel section should be broken down into smaller, more manageable components.
+- The performance warnings regarding N+1 queries in  and  indicate these files need refactoring for scalability.
 
 **key api endpoints**
--   : **(New)** Optimized endpoint to fetch all accounts with their associated user data in a single call.
--   : **(New)** Updates the subject of a support ticket.
--   : **(New)** Updates the content of a specific message within a ticket.
--   : **(New)** Provides summary counts for dashboard widgets.
--   : Modified to include the  field in the account data.
+- **NEW**:  - Deletes a specific message from a ticket.
+- **MODIFIED**:  - Now accepts a  query parameter to force a file download.
 
 **Critical Info for New Agent**
--   **User is highly focused on UI/UX and no regressions.** You MUST test thoroughly after every single change. The user expects a real professional bank look and feel.
--   **The KYC document storage is not persistent.** Files are stored in  and are lost on server restart. Be prepared to explain this to the user if they report missing images again. This is an infrastructure issue, not a code bug.
--   ** is a monolith.** Be extremely careful when editing this file, as it controls a large portion of the admin panel's state and UI.
--   **The user's request to see/edit passwords is pending.** You need to follow up on the Reset Password proposal before implementing anything.
+- **Production Environment Mismatch**: The root cause of the final Login failed error was a misconfigured  in the user's deployment settings. The user has been instructed to fix it, but you must await their confirmation.
+- **Data Deletion Incident**: Be aware that a real user's transfer was permanently deleted by a testing agent in a prior session. This highlights the risk of running tests on production-like data and is the motivation for future tasks like implementing soft deletes.
+- **Password Sync Failsafe**: A mechanism has been added to sync the  field on every successful user login. This was a proactive fix to address the user's report of the field not updating, even though direct testing showed the password reset endpoint was working correctly.
 
 **documents and test reports created in this job**
--   /app/test_reports/iteration_32.json
--   /app/test_reports/iteration_33.json
--   /app/test_reports/iteration_34.json
--   /app/test_reports/iteration_35.json
--   /app/test_reports/iteration_36.json
--   /app/test_reports/iteration_37.json
--   /app/test_reports/iteration_38.json
--   /app/test_reports/iteration_39.json
+- 
+- 
 
 **Last 10 User Messages and any pending HUMAN messages**
-10. **User**: The Clear All notification button isn't working correctly; it doesn't clear the counts in the dropdown. (Status: **In Progress**)
-9.  **User**: The analytics endpoint is missing and a rejected transfer is missing a reason. Please make the test suite 100% pass. (Status: **Resolved**)
-8.  **User**: Reports Invalid Date in the KYC document viewer modal and that images are not loading/downloadable. (Status: **Partially Resolved** - Date fixed, image issue is due to temp storage)
-7.  **User**: Reports Invalid Date in the KYC Queue. (Status: **Resolved**)
-6.  **User**: The notification bell is in the wrong place and there's no space between the section title and ECOMMBX badge. (Status: **Resolved**)
-5.  **User**: Requests to move the bell to the far-right and add Mark/Clear All functionality. (Status: **Resolved**)
-4.  **User**: Asks for a notification bell for admins for new KYC, cards, transfers, and tickets. (Status: **Resolved**)
-3.  **User**: Asks to show the rejection reason for transfers. (Status: **Resolved**)
-2.  **User**: The Edit IBAN modal sometimes disappears while editing. (Status: **Resolved**)
-1.  **User**: Reports that the  indicator is showing on tickets, which they don't want. (Status: **Resolved**)
+10. **User**: Reports that login is failing on the production deployment . (Status: **In Progress**)
+9.  **User**: Confirms credentials for production are the same as preview and provides logs showing 200 OK on login. (Status: **Addressed**)
+8.  **User**: Asks for deployment readiness check. (Status: **Resolved**)
+7.  **User**: Asks if the app is 100% ready for redeployment. (Status: **Answered**)
+6.  **User**: Requests a final, comprehensive, full-application test. (Status: **Resolved**)
+5.  **User**: Reports that the name capitalization fix was not applied to existing users. (Status: **Resolved**)
+4.  **User**: Reports that the  field is still not updating and asks for name capitalization. (Status: **Resolved**)
+3.  **User**: Asks for a feature to delete messages within a support ticket. (Status: **Resolved**)
+2.  **User**: Reports the  field in the admin panel is not updating after a password reset. (Status: **Resolved**)
+1.  **User**: Reports that after a failed login, the page refreshes and clears the email field. (Status: **Resolved**)
 
 **Project Health Check:**
--   **Broken**: No features are critically broken. The login issue was a major regression that has been fixed.
--   **Mocked**: N/A
--   **Known Limitations**: File storage for KYC documents is temporary and not persistent across server restarts.
+- **Broken**: Login on the production environment is currently broken due to a configuration error. The user has been instructed on the fix.
+- **Mocked**: N/A
+- **Known Limitations**: The application has N+1 query patterns that could cause performance issues under high load.
 
 **3rd Party Integrations**
--   **MongoDB Atlas**: User's personal account, requires .
--   **Resend**: For transactional emails, requires .
+- **MongoDB Atlas** — requires User API Key ()
+- **Resend** (Transactional Emails) — requires User API Key ()
+- **Cloudinary** (Image/File Storage) — requires User API Key ( vars)
 
 **Testing status**
--   **Testing agent used after significant changes**: YES, frequently used.
--   **Troubleshoot agent used after agent stuck in loop**: NO
--   **Test files created**: 
--   **Known regressions**: A critical login bug was introduced when adding the Edit Ticket feature due to a missing import. It was caught and fixed.
+- **Testing agent used after significant changes**: YES
+- **Troubleshoot agent used after agent stuck in loop**: NO
+- **Test files created**: , 
+- **Known regressions**: None discovered in this session.
 
 **Credentials to test flow:**
--   **Admin**:
-    -   Email: 
-    -   Password: 
--   **User with account**:
-    -   Email: 
-    -   Password: 
+- **Admin**:  / 
+- **Existing User**:  / 
 
 **What agent forgot to execute**
-- The agent has not yet implemented the fix for the Clear All notification button's incomplete behavior.
-- The agent did not get a final confirmation from the user on the Reset Password feature approach before being interrupted by the critical login bug. This needs to be followed up on.</analysis>
+- The agent did not forget to execute any tasks. The session ended while waiting for the user to act on the final instruction to fix their production environment configuration.</analysis>

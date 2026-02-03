@@ -8,8 +8,8 @@ import sys
 from datetime import datetime
 
 # Backend URL from environment
-BASE_URL = "https://ecommbx-banking.preview.emergentagent.com/api/v1"
-HEALTH_URL = "https://ecommbx-banking.preview.emergentagent.com/api/health"
+BASE_URL = "https://bankapp-bugfixes.preview.emergentagent.com/api/v1"
+HEALTH_URL = "https://bankapp-bugfixes.preview.emergentagent.com/api/health"
 
 # Credentials from review request
 ADMIN_EMAIL = "admin@ecommbx.io"
