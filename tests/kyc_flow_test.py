@@ -149,17 +149,25 @@ class KYCFlowTester:
         # This simulates what would happen after a user clicks the verification link
         try:
             from pymongo import MongoClient
-            import os
+            from bson import ObjectId
             
             mongo_url = "mongodb+srv://pierangelamarcio232_db_user:yo123mama@cluster0.jqvhvbe.mongodb.net/ecommbx-prod?retryWrites=true&w=majority"
             client = MongoClient(mongo_url)
             db = client["ecommbx-prod"]
             
-            # Update user to verified status
-            result = db.users.update_one(
-                {"_id": self.user_id},
-                {"$set": {"email_verified": True}}
-            )
+            # Try to update user with ObjectId
+            try:
+                user_oid = ObjectId(self.user_id)
+                result = db.users.update_one(
+                    {"_id": user_oid},
+                    {"$set": {"email_verified": True}}
+                )
+            except:
+                # If ObjectId conversion fails, try with string ID
+                result = db.users.update_one(
+                    {"_id": self.user_id},
+                    {"$set": {"email_verified": True}}
+                )
             
             if result.modified_count > 0:
                 print(f"✓ Email verified in database for user {self.user_id}")
