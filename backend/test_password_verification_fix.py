@@ -140,19 +140,20 @@ class PasswordVerificationTester:
         
         # Use MongoDB to directly update email_verified status
         import subprocess
-        mongo_cmd = f"""mongosh mongodb://localhost:27017/ecommbx_db --quiet --eval 'db.users.updateOne({{_id: ObjectId("{self.test_user_id}")}}, {{$set: {{email_verified: true, status: "ACTIVE"}}}})' """
+        mongo_cmd = f"""mongosh mongodb://localhost:27017/atlas_banking --quiet --eval 'db.users.updateOne({{_id: ObjectId("{self.test_user_id}")}}, {{$set: {{email_verified: true, status: "ACTIVE"}}}})' """
         
         try:
             result = subprocess.run(mongo_cmd, shell=True, capture_output=True, text=True, timeout=10)
+            print(f"   MongoDB result: {result.stdout.strip()}")
             if "modifiedCount" in result.stdout or "acknowledged" in result.stdout:
                 print(f"   ✓ User email verified via MongoDB")
                 return True
             else:
-                print(f"   ⚠️  MongoDB update result: {result.stdout}")
-                return True  # Continue anyway
+                print(f"   ⚠️  MongoDB update may have failed")
+                return False
         except Exception as e:
-            print(f"   ⚠️  MongoDB update error: {e}")
-            return True  # Continue anyway
+            print(f"   ❌ MongoDB update error: {e}")
+            return False
 
     def login_test_user(self):
         """Login as test user"""
