@@ -93,6 +93,7 @@ export function P2PTransferForm({ onSuccess }) {
   const transferAmountCents = Math.round(parseFloat(formData.amount || 0) * 100);
   const hasEnoughBalance = transferAmountCents > 0 && transferAmountCents <= availableBalance;
 
+  // Step 1: When user clicks "Send", show password modal
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!hasEnoughBalance) {
@@ -100,6 +101,47 @@ export function P2PTransferForm({ onSuccess }) {
       return;
     }
     
+    // Show password authorization modal
+    setAuthPassword('');
+    setAuthError('');
+    setShowPasswordModal(true);
+  };
+
+  // Step 2: Verify password and process transfer
+  const handlePasswordVerification = async () => {
+    if (!authPassword.trim()) {
+      setAuthError(t('pleaseEnterPassword') || 'Please enter your password');
+      return;
+    }
+
+    setVerifyingPassword(true);
+    setAuthError('');
+
+    try {
+      // Verify password with backend
+      await api.post('/auth/verify-password', { password: authPassword });
+      
+      // Password verified - close modal and process transfer
+      setShowPasswordModal(false);
+      setAuthPassword('');
+      
+      // Now process the actual transfer
+      await processTransfer();
+      
+    } catch (err) {
+      const errorDetail = err.response?.data?.detail;
+      if (errorDetail === 'Incorrect password') {
+        setAuthError(t('incorrectPassword') || 'Incorrect password. Please try again.');
+      } else {
+        setAuthError(t('verificationFailed') || 'Verification failed. Please try again.');
+      }
+    } finally {
+      setVerifyingPassword(false);
+    }
+  };
+
+  // Step 3: Process the actual transfer after password verification
+  const processTransfer = async () => {
     setLoading(true);
 
     try {
