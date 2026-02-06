@@ -738,6 +738,12 @@ def main():
     tester.test_admin_manual_kyc_queue_nonexistent()
     tester.test_kyc_queue_contains_michele()
     
+    print("\n🔔 CLEAR NOTIFICATIONS FEATURE TESTS (New Feature)")
+    print("-"*80)
+    tester.test_admin_clear_notifications_endpoint()
+    tester.test_admin_clear_notifications_non_admin_access()
+    tester.test_admin_clear_notifications_invalid_user()
+    
     # Print summary
     return tester.print_summary()
 
