@@ -24,6 +24,13 @@ export function P2PTransferForm({ onSuccess }) {
   const [recipientValid, setRecipientValid] = useState(null);
   const [showReference, setShowReference] = useState(false);
   const [selectedAccount, setSelectedAccount] = useState(null);
+  
+  // Password Authorization State
+  const [showPasswordModal, setShowPasswordModal] = useState(false);
+  const [authPassword, setAuthPassword] = useState('');
+  const [authError, setAuthError] = useState('');
+  const [verifyingPassword, setVerifyingPassword] = useState(false);
+  const [showAuthPassword, setShowAuthPassword] = useState(false);
 
   useEffect(() => {
     fetchBeneficiaries();
