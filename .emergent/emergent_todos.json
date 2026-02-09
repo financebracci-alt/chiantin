@@ -5,11 +5,11 @@
   },
   {
     "content": "Create new backend API endpoint to get counts of items created AFTER cleared_at timestamp",
-    "status": "in_progress"
+    "status": "completed"
   },
   {
     "content": "Update AdminNotificationBell.js to use new smart counting endpoint",
-    "status": "pending"
+    "status": "in_progress"
   },
   {
     "content": "Update badge calculation to show count of NEW items only",
