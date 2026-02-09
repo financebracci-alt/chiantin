@@ -1,7 +1,7 @@
 [
   {
     "content": "Explore codebase to find ALL locations where balance is displayed",
-    "status": "pending"
+    "status": "in_progress"
   },
   {
     "content": "Create useBalanceVisibility hook with sessionStorage for state management",
