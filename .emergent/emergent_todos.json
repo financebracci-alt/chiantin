@@ -17,14 +17,14 @@
   },
   {
     "content": "Call testing agent for comprehensive testing with NEW test users only",
-    "status": "in_progress"
+    "status": "completed"
   },
   {
     "content": "Review test report and fix any critical issues found",
-    "status": "pending"
+    "status": "completed"
   },
   {
     "content": "Update plan.md to mark Phase 1 as COMPLETED",
-    "status": "pending"
+    "status": "in_progress"
   }
 ]
