@@ -2067,6 +2067,7 @@ function AdminDashboard() {
                       )}
                       
                       {/* Demote Admin Button - Only show for admin/super_admin users */}
+                      {console.log('User role check:', selectedUser?.user?.role, 'Type:', typeof selectedUser?.user?.role)}
                       {(selectedUser.user.role === 'ADMIN' || selectedUser.user.role === 'SUPER_ADMIN') && (
                         <button
                           onClick={() => {
