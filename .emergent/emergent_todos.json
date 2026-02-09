@@ -1,11 +1,11 @@
 [
   {
     "content": "Create ledger integrity check script to verify balance calculations and transfer linkages",
-    "status": "in_progress"
+    "status": "completed"
   },
   {
     "content": "Run integrity check script and save report to /app/test_reports/",
-    "status": "pending"
+    "status": "in_progress"
   },
   {
     "content": "Audit transfer service for destructive operations and ensure reversals are used instead of deletions",
