@@ -1,26 +1,14 @@
 [
   {
-    "content": "Check database schemas for creation timestamp fields (KYC, transfers, tickets, cards)",
-    "status": "completed"
+    "content": "Check current JWT token expiration settings",
+    "status": "pending"
   },
   {
-    "content": "Create new backend API endpoint to get counts of items created AFTER cleared_at timestamp",
-    "status": "completed"
+    "content": "Increase JWT expiration time for admin users (optional enhancement)",
+    "status": "pending"
   },
   {
-    "content": "Update AdminNotificationBell.js to use new smart counting endpoint",
-    "status": "completed"
-  },
-  {
-    "content": "Update badge calculation to show count of NEW items only",
-    "status": "completed"
-  },
-  {
-    "content": "Test with NEW admin user - clear → create new items → verify badge reappears",
-    "status": "completed"
-  },
-  {
-    "content": "Verify old items stay cleared while new items appear",
-    "status": "completed"
+    "content": "Re-run comprehensive tests to verify 100% success rate",
+    "status": "pending"
   }
 ]
