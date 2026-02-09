@@ -33,12 +33,6 @@ export function AdminNotificationBell({ onNavigate }) {
 
       const newTotal = kycCount + cardsCount + transfersCount + ticketsCount;
 
-      // If new items arrived after clearing, show badge again
-      if (isCleared && newTotal > lastClearedTotal) {
-        setIsCleared(false);
-        setIsRead(false);
-      }
-
       setCounts({
         kyc: kycCount,
         cards: cardsCount,
@@ -51,7 +45,7 @@ export function AdminNotificationBell({ onNavigate }) {
     } finally {
       setLoading(false);
     }
-  }, [isCleared, lastClearedTotal]);
+  }, []);
 
   // Fetch counts on mount and every 30 seconds
   useEffect(() => {
