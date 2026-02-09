@@ -21,6 +21,10 @@ export function AdminKYCReview() {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
   
+  // Edit mode state
+  const [isEditMode, setIsEditMode] = useState(false);
+  const [editedData, setEditedData] = useState({});
+  
   // Manual queue state
   const [showQueueModal, setShowQueueModal] = useState(false);
   const [queueEmail, setQueueEmail] = useState('');
