@@ -95,6 +95,9 @@ export function AdminNotificationBell({ onNavigate }) {
   // Shows only items created after last clear
   const badgeCount = counts.total;
   const showBadge = badgeCount > 0 && !isRead;
+  
+  // isCleared should be true when all counts are 0 and we have a cleared timestamp
+  const isCleared = clearedAt && counts.total === 0;
 
   const notificationItems = [
     {
