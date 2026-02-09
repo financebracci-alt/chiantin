@@ -5,19 +5,19 @@
   },
   {
     "content": "Create backend DELETE endpoint for KYC applications",
-    "status": "in_progress"
+    "status": "completed"
   },
   {
     "content": "Create backend PATCH endpoint for editing KYC data",
-    "status": "pending"
+    "status": "completed"
   },
   {
     "content": "Add audit logging service for KYC changes",
-    "status": "pending"
+    "status": "completed"
   },
   {
     "content": "Add Edit and Delete buttons to KYC detail panel UI",
-    "status": "pending"
+    "status": "in_progress"
   },
   {
     "content": "Make KYC fields editable in edit mode (personal info + documents)",
