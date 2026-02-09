@@ -992,6 +992,7 @@ function AccountsPage() {
   const navigate = useNavigate();
   const { t, language, setLanguage } = useLanguage();
   const { isDark, toggleTheme } = useTheme();
+  const { isBalanceVisible, toggleBalanceVisibility } = useBalanceVisibility();
   const [accounts, setAccounts] = useState([]);
   const [transactions, setTransactions] = useState([]);
   const [loading, setLoading] = useState(true);
