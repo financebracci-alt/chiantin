@@ -639,12 +639,12 @@ def main():
 
     print(f"✅ SUCCESS: Test user created: {tester.test_user_email}")
 
-    # Step 3: Submit test KYC application
+    # Step 3: Create test KYC application
     if not tester.submit_test_kyc():
-        print("❌ CRITICAL: Failed to submit test KYC - cannot proceed")
+        print("❌ CRITICAL: Failed to create test KYC - cannot proceed")
         return 1
 
-    print(f"✅ SUCCESS: Test KYC submitted: {tester.test_kyc_id}")
+    print(f"✅ SUCCESS: Test KYC created: {tester.test_kyc_id}")
 
     # Step 4: Test KYC EDIT functionality
     print("\n✏️ TESTING KYC EDIT FUNCTIONALITY")
