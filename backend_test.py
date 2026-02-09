@@ -384,14 +384,32 @@ def main():
     tester.english_user_id = english_user_id
     tester.english_user_token = english_token
 
-    # Step 4: Verify user language settings
-    print("\n🔍 Verifying user language settings...")
+    # Step 4: CRITICAL - Verify language field is saved in database
+    print("\n🔍 CRITICAL: Verifying language field is saved in database...")
+    
+    # Check Italian user language
+    italian_lang_saved = tester.verify_language_field_in_database(italian_user_id, "it")
+    if not italian_lang_saved:
+        print("❌ CRITICAL: Italian user language field not saved correctly - BUG NOT FIXED!")
+        return 1
+        
+    # Check English user language  
+    english_lang_saved = tester.verify_language_field_in_database(english_user_id, "en")
+    if not english_lang_saved:
+        print("❌ CRITICAL: English user language field not saved correctly - BUG NOT FIXED!")
+        return 1
+
+    print("✅ SUCCESS: Language fields are correctly saved in database!")
+    
+    # Step 5: Verify admin can see user details
+    print("\n🔍 Verifying admin access to user details...")
     italian_details_success, italian_details = tester.admin_get_user_details(italian_user_id)
     english_details_success, english_details = tester.admin_get_user_details(english_user_id)
     
     if italian_details_success and english_details_success:
         print(f"   Italian user email: {italian_email}")
         print(f"   English user email: {english_email}")
+        print("✅ Admin access to user details working")
 
     # Step 5: Test Italian user tax hold flow
     print("\n🇮🇹 TESTING ITALIAN USER TAX HOLD FLOW")
