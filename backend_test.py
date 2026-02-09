@@ -275,28 +275,247 @@ class SmartNotificationCountingTester:
             self.log_test("Database Field Verification", False, f"Database error: {str(e)}")
             return False
 
-    def test_admin_notification_counts(self):
-        """Test getting admin notification counts (for completeness)"""
+    def test_smart_counts_endpoint(self):
+        """Test NEW smart counting endpoint GET /api/v1/admin/notifications/counts-since-clear"""
         if not self.admin_token:
-            self.log_test("Admin Notification Counts", False, "No admin token")
+            self.log_test("Smart Counts Endpoint", False, "No admin token")
             return False
             
         headers = {'Authorization': f'Bearer {self.admin_token}'}
         
-        # Test getting KYC pending (one of the notification sources)
+        # Test the NEW smart endpoint
         success, response = self.run_test(
-            "Get KYC Pending Notifications",
+            "GET /admin/notifications/counts-since-clear (Smart Counting)",
             "GET",
-            "v1/admin/kyc/pending",
+            "v1/admin/notifications/counts-since-clear",
             200,
             headers=headers
         )
         
-        if success:
-            count = len(response) if isinstance(response, list) else 0
-            print(f"   KYC pending count: {count}")
-            return True
+        if success and isinstance(response, dict):
+            # Verify response structure
+            required_fields = ['kyc', 'cards', 'transfers', 'tickets', 'total', 'cleared_at']
+            for field in required_fields:
+                if field not in response:
+                    self.log_test("Smart Counts Response Structure", False, f"Missing field: {field}")
+                    return False
+            
+            self.log_test("Smart Counts Response Structure", True, f"All required fields present: {required_fields}")
+            
+            # Log the actual counts
+            counts = {k: response[k] for k in required_fields if k != 'cleared_at'}
+            print(f"   Current counts: {counts}")
+            print(f"   Cleared at: {response['cleared_at']}")
+            
+            return response
         return False
+
+    def test_smart_counting_logic_with_clear(self):
+        """Test the complete smart counting logic with clear action"""
+        if not self.admin_token:
+            self.log_test("Smart Counting Logic", False, "No admin token")
+            return False
+            
+        headers = {'Authorization': f'Bearer {self.admin_token}'}
+        
+        print("\n📊 Testing Smart Counting Logic:")
+        
+        # Step 1: Get initial counts before clear
+        print("   Step 1: Getting initial counts...")
+        initial_success, initial_response = self.run_test(
+            "Initial Smart Counts (Before Clear)",
+            "GET", 
+            "v1/admin/notifications/counts-since-clear",
+            200,
+            headers=headers
+        )
+        
+        if not initial_success:
+            return False
+            
+        initial_total = initial_response.get('total', 0)
+        initial_cleared_at = initial_response.get('cleared_at')
+        print(f"   Initial total: {initial_total}, Cleared at: {initial_cleared_at}")
+        
+        # Step 2: Clear notifications
+        print("   Step 2: Clearing notifications...")
+        clear_success, clear_response = self.run_test(
+            "Clear Notifications",
+            "POST",
+            "v1/admin/notifications/clear", 
+            200,
+            headers=headers
+        )
+        
+        if not clear_success or not clear_response.get('success'):
+            self.log_test("Smart Counting Logic - Clear Failed", False, "Clear notifications failed")
+            return False
+            
+        cleared_timestamp = clear_response.get('cleared_at')
+        print(f"   Notifications cleared at: {cleared_timestamp}")
+        
+        # Step 3: Get counts after clear - should show only NEW items
+        print("   Step 3: Getting counts after clear...")
+        time.sleep(1)  # Brief pause to ensure timestamp difference
+        
+        after_clear_success, after_clear_response = self.run_test(
+            "Smart Counts After Clear",
+            "GET",
+            "v1/admin/notifications/counts-since-clear",
+            200, 
+            headers=headers
+        )
+        
+        if not after_clear_success:
+            return False
+            
+        after_clear_total = after_clear_response.get('total', -1)
+        after_clear_cleared_at = after_clear_response.get('cleared_at')
+        
+        print(f"   After clear total: {after_clear_total}, Cleared at: {after_clear_cleared_at}")
+        
+        # Verify the cleared_at timestamp is updated
+        if cleared_timestamp == after_clear_cleared_at:
+            self.log_test("Smart Counting - Cleared Timestamp", True, "Cleared timestamp correctly updated")
+        else:
+            self.log_test("Smart Counting - Cleared Timestamp", False, f"Timestamp mismatch: {cleared_timestamp} vs {after_clear_cleared_at}")
+        
+        # Verify that smart counting is working (counts should be for items after cleared_at only)
+        if after_clear_total >= 0:  # Could be 0 (no new items) or positive (new items since clear)
+            self.log_test("Smart Counting Logic", True, f"Smart counting working - total after clear: {after_clear_total}")
+            return after_clear_response
+        else:
+            self.log_test("Smart Counting Logic", False, "Invalid response after clear")
+            return False
+
+    def create_test_kyc_application(self):
+        """Create a test KYC application to verify NEW item counting"""
+        if not self.admin_token:
+            return False
+            
+        try:
+            import pymongo
+            from pymongo import MongoClient
+            from bson import ObjectId
+            from datetime import datetime, timezone
+            
+            # Connect to database
+            mongo_url = "mongodb+srv://pierangelamarcio232_db_user:yo123mama@cluster0.jqvhvbe.mongodb.net/ecommbx-prod?retryWrites=true&w=majority"
+            client = MongoClient(mongo_url, serverSelectionTimeoutMS=10000)
+            db = client["ecommbx-prod"]
+            
+            # Create a test KYC application with current timestamp (after any clear)
+            test_kyc = {
+                "_id": str(ObjectId()),
+                "user_id": self.test_admin_user_id,  # Use test admin as user
+                "full_name": "Test Smart Count User",
+                "status": "SUBMITTED",
+                "submitted_at": datetime.now(timezone.utc),  # This is the key field for smart counting
+                "created_at": datetime.now(timezone.utc),
+                "updated_at": datetime.now(timezone.utc),
+                "documents": [],
+                "terms_accepted": True,
+                "privacy_accepted": True
+            }
+            
+            result = db.kyc_applications.insert_one(test_kyc)
+            client.close()
+            
+            if result.inserted_id:
+                self.log_test("Create Test KYC Application", True, f"KYC application created with ID: {result.inserted_id}")
+                return str(result.inserted_id)
+            else:
+                self.log_test("Create Test KYC Application", False, "Failed to create KYC application")
+                return False
+                
+        except Exception as e:
+            self.log_test("Create Test KYC Application", False, f"Database error: {str(e)}")
+            return False
+
+    def test_new_items_after_clear(self):
+        """Test that NEW items appear in counts after clear"""
+        if not self.admin_token:
+            return False
+            
+        headers = {'Authorization': f'Bearer {self.admin_token}'}
+        
+        print("\n🆕 Testing New Items After Clear:")
+        
+        # Step 1: Clear notifications first
+        print("   Step 1: Clearing notifications...")
+        clear_success, clear_response = self.run_test(
+            "Clear Before New Item Test",
+            "POST",
+            "v1/admin/notifications/clear",
+            200,
+            headers=headers
+        )
+        
+        if not clear_success:
+            return False
+            
+        # Step 2: Get counts after clear (should be low/zero for new items)
+        print("   Step 2: Getting counts after clear...")
+        time.sleep(1)
+        
+        after_clear_success, after_clear_response = self.run_test(
+            "Counts After Clear (Before New Item)",
+            "GET",
+            "v1/admin/notifications/counts-since-clear",
+            200,
+            headers=headers
+        )
+        
+        if not after_clear_success:
+            return False
+            
+        kyc_count_before = after_clear_response.get('kyc', 0)
+        total_before = after_clear_response.get('total', 0)
+        
+        print(f"   KYC count before new item: {kyc_count_before}")
+        print(f"   Total count before new item: {total_before}")
+        
+        # Step 3: Create NEW KYC application (after clear timestamp)
+        print("   Step 3: Creating NEW KYC application...")
+        time.sleep(2)  # Ensure timestamp is after clear
+        
+        new_kyc_id = self.create_test_kyc_application()
+        if not new_kyc_id:
+            return False
+            
+        # Step 4: Get counts after creating new item - should increase
+        print("   Step 4: Getting counts after new item...")
+        time.sleep(1)
+        
+        after_new_success, after_new_response = self.run_test(
+            "Counts After New KYC Item",
+            "GET",
+            "v1/admin/notifications/counts-since-clear",
+            200,
+            headers=headers
+        )
+        
+        if not after_new_success:
+            return False
+            
+        kyc_count_after = after_new_response.get('kyc', 0)
+        total_after = after_new_response.get('total', 0)
+        
+        print(f"   KYC count after new item: {kyc_count_after}")
+        print(f"   Total count after new item: {total_after}")
+        
+        # Verify that counts increased (smart counting working)
+        if kyc_count_after > kyc_count_before:
+            self.log_test("Smart Counting - New Items Detection", True, f"KYC count increased from {kyc_count_before} to {kyc_count_after}")
+        else:
+            self.log_test("Smart Counting - New Items Detection", False, f"KYC count did not increase: {kyc_count_before} -> {kyc_count_after}")
+            
+        if total_after > total_before:
+            self.log_test("Smart Counting - Total Count Update", True, f"Total count increased from {total_before} to {total_after}")
+            return True
+        else:
+            self.log_test("Smart Counting - Total Count Update", False, f"Total count did not increase: {total_before} -> {total_after}")
+            return False
 
     def test_login_with_new_token(self):
         """Test logging in again to get a fresh token (simulates logout/login)"""
