@@ -155,7 +155,7 @@ class BalanceToggleFixTester:
         success, response = self.run_test(
             "Create Test Admin",
             "POST",
-            "auth/signup",
+            "v1/auth/signup",
             201,
             data={
                 "email": unique_email,
