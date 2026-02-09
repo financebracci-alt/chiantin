@@ -2058,12 +2058,21 @@ async def remove_tax_hold(
     if result.modified_count == 0:
         raise HTTPException(status_code=404, detail="No active tax hold found for this user")
     
-    # Create notification for user
+    # Create notification for user in their preferred language
+    user_language = user_doc.get('language', 'en')
     notification_service = NotificationService(db)
+    
+    if user_language == 'it':
+        title = "Restrizioni Account Rimosse"
+        message = "Le restrizioni del tuo account sono state rimosse. Ora puoi eseguire tutte le operazioni bancarie."
+    else:  # Default to English
+        title = "Account Restriction Lifted"
+        message = "Your account restrictions have been removed. You can now perform all banking operations."
+    
     await notification_service.create_notification(
         user_id=actual_user_id,
-        title="Account Restriction Lifted",
-        message="Your account restrictions have been removed. You can now perform all banking operations.",
+        title=title,
+        message=message,
         notification_type="ACCOUNT"
     )
     
