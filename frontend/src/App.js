@@ -1737,15 +1737,7 @@ function AdminDashboard() {
   const [editingNotes, setEditingNotes] = useState(false);
   const [savingNotes, setSavingNotes] = useState(false);
 
-  useEffect(() => {
-    fetchUsers();
-  }, []);
-
-  useEffect(() => {
-    applyFilters();
-  }, [users, searchQuery, statusFilter, roleFilter, taxHoldFilter, notesFilter]);
-
-  const applyFilters = () => {
+  const applyFilters = useCallback(() => {
     let filtered = [...users];
 
     // Search filter
@@ -1784,9 +1776,9 @@ function AdminDashboard() {
     }
 
     setFilteredUsers(filtered);
-  };
+  }, [users, searchQuery, statusFilter, roleFilter, taxHoldFilter, notesFilter]);
 
-  const fetchUsers = async (retryCount = 0) => {
+  const fetchUsers = useCallback(async (retryCount = 0) => {
     try {
       setLoading(true);
       const response = await api.get('/admin/users');
@@ -1803,7 +1795,15 @@ function AdminDashboard() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [toast]);
+
+  useEffect(() => {
+    fetchUsers();
+  }, [fetchUsers]);
+
+  useEffect(() => {
+    applyFilters();
+  }, [applyFilters]);
 
   const viewUserDetails = async (userId) => {
     console.log('Fetching user details for:', userId);
