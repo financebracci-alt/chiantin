@@ -683,7 +683,11 @@ export function ProfessionalDashboard({ user, logout }) {
                       </div>
                     </div>
                     <div className="text-right">
-                      <p className="text-lg font-semibold text-gray-900">€{formatAmount(account.balance)}</p>
+                      <div className="flex items-center justify-end gap-2">
+                        <p className="text-lg font-semibold text-gray-900">
+                          {formatBalance(account.balance, isBalanceVisible)}
+                        </p>
+                      </div>
                       <button 
                         onClick={() => {
                           if (taxHoldStatus?.is_blocked) {
