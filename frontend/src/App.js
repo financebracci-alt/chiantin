@@ -1190,6 +1190,7 @@ function TransactionsPage() {
   const navigate = useNavigate();
   const { t, language, setLanguage } = useLanguage();
   const { isDark, toggleTheme } = useTheme();
+  const { isBalanceVisible, toggleBalanceVisibility } = useBalanceVisibility();
   const [account, setAccount] = useState(null);
   const [loading, setLoading] = useState(true);
 
