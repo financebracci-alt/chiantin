@@ -136,7 +136,7 @@ export function AdminAccountsControl() {
             <h3 className="text-lg font-semibold mb-4">{operation === 'topup' ? 'Top Up Account' : 'Withdraw from Account'}</h3>
             <div className="mb-4">
               <p className="text-sm text-gray-600">Account: {selectedAccount.iban || selectedAccount.account_number}</p>
-              <p className="text-sm text-gray-600">Current: €{(selectedAccount.balance / 100).toFixed(2)}</p>
+              <p className="text-sm text-gray-600">Current: {formatBalance(selectedAccount.balance, isBalanceVisible)}</p>
             </div>
             <div className="space-y-4">
               <div>
