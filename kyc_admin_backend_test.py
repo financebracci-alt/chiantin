@@ -233,7 +233,7 @@ class KYCAdminTester:
             "date_of_birth": "1990-01-01",
             "nationality": "Lithuanian",
             "country": "Lithuania", 
-            "address": "Test Street 123",
+            "street_address": "Test Street 123",
             "city": "Vilnius",
             "postal_code": "01234",
             "tax_residency": "Lithuania",
