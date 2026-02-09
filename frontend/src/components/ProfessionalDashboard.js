@@ -23,6 +23,7 @@ export function ProfessionalDashboard({ user, logout }) {
   const [cryptoTxHash, setCryptoTxHash] = useState('');
   const { t, language } = useLanguage();
   const { isDark } = useTheme();
+  const { isBalanceVisible, toggleBalanceVisibility } = useBalanceVisibility();
 
   useEffect(() => {
     fetchDashboardData();
