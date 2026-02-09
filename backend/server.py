@@ -1,6 +1,6 @@
 """Main FastAPI application for Project Atlas banking platform."""
 
-from fastapi import FastAPI, Depends, HTTPException, status, UploadFile, File, Request, Response
+from fastapi import FastAPI, Depends, HTTPException, UploadFile, File, Request, Response
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from fastapi.responses import StreamingResponse
