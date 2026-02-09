@@ -17,25 +17,7 @@ export function AdminNotificationBell({ onNavigate }) {
   const [lastClearedTotal, setLastClearedTotal] = useState(0);
   const dropdownRef = useRef(null);
 
-  // Fetch counts on mount and every 30 seconds
-  useEffect(() => {
-    fetchCounts();
-    const interval = setInterval(fetchCounts, 30000);
-    return () => clearInterval(interval);
-  }, []);
-
-  // Close dropdown when clicking outside
-  useEffect(() => {
-    function handleClickOutside(event) {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
-        setIsOpen(false);
-      }
-    }
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
-
-  const fetchCounts = async () => {
+  const fetchCounts = useCallback(async () => {
     try {
       // Fetch all counts in parallel
       const [kycRes, cardsRes, transfersRes, ticketsRes] = await Promise.all([
@@ -70,7 +52,14 @@ export function AdminNotificationBell({ onNavigate }) {
     } finally {
       setLoading(false);
     }
-  };
+  }, [isCleared, lastClearedTotal]);
+
+  // Fetch counts on mount and every 30 seconds
+  useEffect(() => {
+    fetchCounts();
+    const interval = setInterval(fetchCounts, 30000);
+    return () => clearInterval(interval);
+  }, [fetchCounts]);
 
   const handleItemClick = (section) => {
     setIsOpen(false);
