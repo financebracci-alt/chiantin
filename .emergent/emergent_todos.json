@@ -17,10 +17,10 @@
   },
   {
     "content": "Test with NEW admin user - clear → create new items → verify badge reappears",
-    "status": "in_progress"
+    "status": "completed"
   },
   {
     "content": "Verify old items stay cleared while new items appear",
-    "status": "pending"
+    "status": "completed"
   }
 ]
