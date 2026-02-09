@@ -274,7 +274,7 @@ class TaxHoldNotificationTester:
         success, response = self.run_test(
             f"Place Tax Hold on User {user_id}",
             "POST",
-            f"v1/admin/tax-holds/{user_id}",
+            f"v1/admin/users/{user_id}/tax-hold",
             200,
             data={
                 "tax_amount": amount,
@@ -293,8 +293,8 @@ class TaxHoldNotificationTester:
         headers = {'Authorization': f'Bearer {self.admin_token}'}
         success, response = self.run_test(
             f"Remove Tax Hold from User {user_id}",
-            "PATCH",
-            f"v1/admin/tax-holds/{user_id}/remove",
+            "DELETE",
+            f"v1/admin/users/{user_id}/tax-hold",
             200,
             data={"reason": reason},
             headers=headers
