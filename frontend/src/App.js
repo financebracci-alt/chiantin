@@ -907,7 +907,7 @@ function VerifyEmailPage() {
     };
 
     verifyEmail();
-  }, [location.search]);
+  }, [location.search, t]);
 
   return (
     <div className={`min-h-screen flex flex-col ${isDark ? 'bg-gray-900' : 'bg-white'}`}>
