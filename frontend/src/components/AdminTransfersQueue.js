@@ -15,11 +15,7 @@ export function AdminTransfersQueue() {
   const [savingRejectReason, setSavingRejectReason] = useState(false);
   const [deletingTransfer, setDeletingTransfer] = useState(false);
 
-  useEffect(() => {
-    fetchTransfers();
-  }, [activeTab]);
-
-  const fetchTransfers = async () => {
+  const fetchTransfers = useCallback(async () => {
     setLoading(true);
     try {
       const response = await api.get(`/admin/transfers?status=${activeTab}`);
@@ -29,7 +25,11 @@ export function AdminTransfersQueue() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [activeTab, toast]);
+
+  useEffect(() => {
+    fetchTransfers();
+  }, [fetchTransfers]);
 
   const handleApprove = async (id) => {
     try {
