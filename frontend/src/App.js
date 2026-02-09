@@ -2160,7 +2160,7 @@ function AdminDashboard() {
                         </svg>
                         <span>Admin Notes</span>
                       </h3>
-                      <p className="text-sm text-gray-500 mt-1">Private notes about this user (only visible to admins)</p>
+                      <p className="text-sm text-gray-700 mt-1">Private notes about this user (only visible to admins)</p>
                     </div>
                     {!editingNotes && (
                       <button
