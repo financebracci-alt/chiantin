@@ -3391,6 +3391,62 @@ async def admin_withdraw_account(
     return {"ok": True, "message": "Debit successful", "new_balance": new_balance}
 
 
+
+# ==================== ADMIN NOTIFICATION MANAGEMENT ====================
+
+@app.post("/api/v1/admin/notifications/clear")
+async def clear_admin_notifications(
+    current_user: dict = Depends(require_admin),
+    db: AsyncIOMotorDatabase = Depends(get_database)
+):
+    """
+    Mark admin notifications as cleared by storing the current timestamp.
+    This persists across sessions and page reloads.
+    """
+    from datetime import datetime, timezone
+    
+    cleared_at = datetime.now(timezone.utc)
+    
+    # Update the admin user's document with the cleared timestamp
+    result = await db.users.update_one(
+        {"_id": current_user["id"]},
+        {"$set": {"admin_notifications_cleared_at": cleared_at}}
+    )
+    
+    if result.modified_count == 0:
+        # Also handle if document doesn't exist (shouldn't happen but be safe)
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    return {
+        "success": True,
+        "cleared_at": cleared_at.isoformat()
+    }
+
+
+@app.get("/api/v1/admin/notifications/cleared-at")
+async def get_admin_notifications_cleared_at(
+    current_user: dict = Depends(require_admin),
+    db: AsyncIOMotorDatabase = Depends(get_database)
+):
+    """
+    Get the timestamp when admin last cleared notifications.
+    Returns None if never cleared.
+    """
+    user = await db.users.find_one(
+        {"_id": current_user["id"]},
+        {"admin_notifications_cleared_at": 1}
+    )
+    
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    cleared_at = user.get("admin_notifications_cleared_at")
+    
+    return {
+        "cleared_at": cleared_at.isoformat() if cleared_at else None
+    }
+
+
 # Health check endpoint at root path for deployment health checks
 @app.get("/health")
 async def root_health_check():
