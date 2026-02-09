@@ -1194,6 +1194,169 @@ async def create_account(
     )
 
 
+
+@app.delete("/api/v1/admin/kyc/{application_id}")
+async def delete_kyc_application(
+    application_id: str,
+    current_user: dict = Depends(require_admin),
+    db: AsyncIOMotorDatabase = Depends(get_database)
+):
+    """
+    HARD DELETE a KYC application (before approval).
+    Only allowed for pending statuses: SUBMITTED, UNDER_REVIEW, NEEDS_MORE_INFO, DRAFT, REJECTED.
+    User account remains - they can resubmit KYC.
+    """
+    from bson import ObjectId
+    from bson.errors import InvalidId
+    
+    # Find the KYC application
+    kyc_app = await db.kyc_applications.find_one({"_id": application_id})
+    if not kyc_app:
+        try:
+            kyc_app = await db.kyc_applications.find_one({"_id": ObjectId(application_id)})
+        except InvalidId:
+            pass
+    
+    if not kyc_app:
+        raise HTTPException(status_code=404, detail="KYC application not found")
+    
+    # Check status - only allow deletion of pending/unapproved applications
+    status = kyc_app.get("status")
+    if status == "APPROVED":
+        raise HTTPException(
+            status_code=400, 
+            detail="Cannot delete approved KYC applications. This would affect verified client accounts."
+        )
+    
+    user_id = str(kyc_app.get("user_id"))
+    
+    # Get user info for logging
+    user_doc = await db.users.find_one({"_id": user_id})
+    if not user_doc:
+        try:
+            user_doc = await db.users.find_one({"_id": ObjectId(user_id)})
+        except InvalidId:
+            pass
+    
+    user_email = user_doc.get("email", "unknown") if user_doc else "unknown"
+    
+    # Perform hard delete
+    result = await db.kyc_applications.delete_one({"_id": kyc_app["_id"]})
+    
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=500, detail="Failed to delete KYC application")
+    
+    # Audit log
+    logger.warning(
+        f"KYC DELETION: Application {application_id} for user {user_email} "
+        f"(status: {status}) deleted by admin {current_user['email']} "
+        f"(ID: {current_user['id']})"
+    )
+    
+    return {
+        "success": True,
+        "message": f"KYC application for {user_email} has been deleted",
+        "application_id": application_id,
+        "status_was": status
+    }
+
+
+@app.patch("/api/v1/admin/kyc/{application_id}")
+async def edit_kyc_application(
+    application_id: str,
+    updates: dict,
+    current_user: dict = Depends(require_admin),
+    db: AsyncIOMotorDatabase = Depends(get_database)
+):
+    """
+    EDIT a KYC application (before approval).
+    Allows updating personal information and document references.
+    Creates audit trail of all changes.
+    Only allowed for pending statuses.
+    """
+    from bson import ObjectId
+    from bson.errors import InvalidId
+    
+    # Find the KYC application
+    kyc_app = await db.kyc_applications.find_one({"_id": application_id})
+    if not kyc_app:
+        try:
+            kyc_app = await db.kyc_applications.find_one({"_id": ObjectId(application_id)})
+        except InvalidId:
+            pass
+    
+    if not kyc_app:
+        raise HTTPException(status_code=404, detail="KYC application not found")
+    
+    # Check status - only allow editing of pending applications
+    status = kyc_app.get("status")
+    if status == "APPROVED":
+        raise HTTPException(
+            status_code=400, 
+            detail="Cannot edit approved KYC applications. Contact compliance team for approved application changes."
+        )
+    
+    # Track what changed for audit log
+    changes_made = {}
+    allowed_fields = [
+        "full_name", "date_of_birth", "nationality", "country_of_residence",
+        "address", "city", "postal_code", "tax_residency", "tax_id",
+        "passport_document", "proof_of_address_document", "selfie_document"
+    ]
+    
+    # Filter to only allowed fields and track changes
+    update_data = {}
+    for field, new_value in updates.items():
+        if field in allowed_fields:
+            old_value = kyc_app.get(field)
+            if old_value != new_value:
+                update_data[field] = new_value
+                changes_made[field] = {"old": old_value, "new": new_value}
+    
+    if not update_data:
+        return {
+            "success": True,
+            "message": "No changes detected",
+            "changes": {}
+        }
+    
+    # Add audit metadata
+    update_data["edited_at"] = datetime.now(timezone.utc)
+    update_data["edited_by"] = current_user["id"]
+    
+    # Perform update
+    result = await db.kyc_applications.update_one(
+        {"_id": kyc_app["_id"]},
+        {"$set": update_data}
+    )
+    
+    if result.modified_count == 0:
+        raise HTTPException(status_code=500, detail="Failed to update KYC application")
+    
+    # Get user email for logging
+    user_doc = await db.users.find_one({"_id": kyc_app.get("user_id")})
+    if not user_doc:
+        try:
+            user_doc = await db.users.find_one({"_id": ObjectId(str(kyc_app.get("user_id")))})
+        except InvalidId:
+            pass
+    
+    user_email = user_doc.get("email", "unknown") if user_doc else "unknown"
+    
+    # Audit log
+    logger.warning(
+        f"KYC EDIT: Application {application_id} for user {user_email} "
+        f"edited by admin {current_user['email']}. Changes: {list(changes_made.keys())}"
+    )
+    
+    return {
+        "success": True,
+        "message": f"KYC application for {user_email} has been updated",
+        "application_id": application_id,
+        "changes": changes_made
+    }
+
+
 @app.get("/api/v1/accounts", response_model=List[AccountResponse])
 async def get_accounts(
     current_user: dict = Depends(get_current_user),
