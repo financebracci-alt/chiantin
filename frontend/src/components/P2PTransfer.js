@@ -336,7 +336,17 @@ export function P2PTransferForm({ onSuccess }) {
                   </div>
                   <div className="text-right">
                     <p className={`text-sm ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>{t('available')}</p>
-                    <p className={`font-semibold ${isDark ? 'text-white' : 'text-gray-900'}`}>€{(availableBalance / 100).toFixed(2)}</p>
+                    <div className="flex items-center gap-2 justify-end">
+                      <p className={`font-semibold ${isDark ? 'text-white' : 'text-gray-900'}`}>
+                        {formatBalance(availableBalance, isBalanceVisible)}
+                      </p>
+                      <BalanceToggle 
+                        isVisible={isBalanceVisible} 
+                        onToggle={toggleBalanceVisibility} 
+                        isDark={isDark}
+                        size="small"
+                      />
+                    </div>
                   </div>
                 </div>
               ) : (
