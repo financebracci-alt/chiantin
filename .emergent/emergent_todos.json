@@ -1,34 +1,30 @@
 [
   {
-    "content": "FIX 1: Update CardsPage to table layout with Order Card button",
-    "status": "in_progress"
-  },
-  {
-    "content": "FIX 2: Wire CardOrderingModal to CardsPage",
+    "content": "Create ledger integrity check script to verify balance calculations and transfer linkages",
     "status": "pending"
   },
   {
-    "content": "FIX 3: Wire NewTransferModal to TransfersPage",
+    "content": "Run integrity check script and save report to /app/test_reports/",
     "status": "pending"
   },
   {
-    "content": "FIX 4: Add AdminCardRequestsQueue to admin sidebar",
+    "content": "Audit transfer service for destructive operations and ensure reversals are used instead of deletions",
     "status": "pending"
   },
   {
-    "content": "FIX 5: Add AdminTransfersQueue to admin sidebar",
+    "content": "Fix backend linting warnings in server.py (flake8 issues)",
     "status": "pending"
   },
   {
-    "content": "FIX 6: Fix notifications endpoint",
+    "content": "Call testing agent for comprehensive testing with NEW test users only",
     "status": "pending"
   },
   {
-    "content": "FIX 7: Add rejected transfer red display",
+    "content": "Review test report and fix any critical issues found",
     "status": "pending"
   },
   {
-    "content": "TEST: Complete end-to-end testing",
+    "content": "Update plan.md to mark Phase 1 as COMPLETED",
     "status": "pending"
   }
 ]
