@@ -9,11 +9,11 @@
   },
   {
     "content": "Update backend to send notification in user's preferred language",
-    "status": "in_progress"
+    "status": "completed"
   },
   {
     "content": "Test with NEW test user only (create Italian-speaking test user)",
-    "status": "pending"
+    "status": "in_progress"
   },
   {
     "content": "Verify translation works correctly",
