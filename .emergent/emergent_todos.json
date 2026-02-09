@@ -5,15 +5,15 @@
   },
   {
     "content": "Design backend solution (add last_cleared_at field to admin user or separate collection)",
-    "status": "in_progress"
+    "status": "completed"
   },
   {
     "content": "Create backend API endpoint to save cleared notification timestamp",
-    "status": "pending"
+    "status": "completed"
   },
   {
     "content": "Update AdminNotificationBell.js to call backend API when clearing",
-    "status": "pending"
+    "status": "in_progress"
   },
   {
     "content": "Update frontend to compare current counts with last cleared timestamp",
