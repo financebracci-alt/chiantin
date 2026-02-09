@@ -1,0 +1,66 @@
+{
+  "timestamp": "2026-02-09T08:37:19.393228+00:00",
+  "database": "ecommbx-prod",
+  "checks": {
+    "no_persisted_balance": {
+      "passed": true,
+      "accounts_with_balance": 0
+    },
+    "transaction_balance": {
+      "passed": true,
+      "total_transactions": 173,
+      "unbalanced_count": 0
+    },
+    "orphan_entries": {
+      "passed": true,
+      "orphan_transaction_ids": 0
+    },
+    "transfer_linkage": {
+      "passed": true,
+      "total_transfers": 58,
+      "invalid_links": 0
+    },
+    "negative_balances": {
+      "passed": true,
+      "negative_count": 0
+    },
+    "ledger_accounts_exist": {
+      "passed": false,
+      "total_bank_accounts": 46,
+      "missing_ledger": 1
+    }
+  },
+  "anomalies": [
+    {
+      "type": "MISSING_LEDGER_ACCOUNT",
+      "severity": "CRITICAL",
+      "count": 1,
+      "details": [
+        {
+          "bank_account_id": "bank_acc_6970f413cbcaff0d863a31ab",
+          "ledger_account_id": "ledger_acc_6970f413cbcaff0d863a31ab",
+          "user_id": "6970f413cbcaff0d863a31ab",
+          "issue": "LEDGER_ACCOUNT_NOT_FOUND"
+        }
+      ]
+    }
+  ],
+  "summary": {
+    "total_checks": 6,
+    "passed": 5,
+    "failed": 1,
+    "anomaly_count": 1,
+    "overall_status": "ISSUES_DETECTED"
+  },
+  "statistics": {
+    "total_users": 60,
+    "total_bank_accounts": 46,
+    "total_ledger_accounts": 53,
+    "total_ledger_transactions": 173,
+    "total_ledger_entries": 346,
+    "total_transfers": 58,
+    "completed_transfers": 2,
+    "pending_transfers": 13,
+    "rejected_transfers": 43
+  }
+}
