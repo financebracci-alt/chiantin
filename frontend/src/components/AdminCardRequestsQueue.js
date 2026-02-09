@@ -22,12 +22,7 @@ export function AdminCardRequestsQueue() {
     country: 'Germany'
   });
 
-  useEffect(() => {
-    setSelectedRequest(null); // Clear selection when tab changes
-    fetchRequests();
-  }, [activeTab]);
-
-  const fetchRequests = async () => {
+  const fetchRequests = useCallback(async () => {
     setLoading(true);
     try {
       const response = await api.get(`/admin/card-requests?status=${activeTab}`);
@@ -59,7 +54,12 @@ export function AdminCardRequestsQueue() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [activeTab, toast]);
+
+  useEffect(() => {
+    setSelectedRequest(null); // Clear selection when tab changes
+    fetchRequests();
+  }, [fetchRequests]);
 
   const handleFulfill = async () => {
     try {
