@@ -91,13 +91,9 @@ export function AdminNotificationBell({ onNavigate }) {
     }
   };
 
-  // Calculate badge count based on cleared timestamp
-  // If notifications were cleared, show 0 until new items appear
-  // TODO: In a full implementation, we would need to check if any pending items
-  // were created/submitted after the clearedAt timestamp to show new notifications
-  // For now, if cleared, show 0 (this fixes the immediate persistence issue)
-  const isCleared = clearedAt !== null;
-  const badgeCount = isCleared ? 0 : counts.total;
+  // Badge calculation - backend already handles smart counting
+  // Shows only items created after last clear
+  const badgeCount = counts.total;
   const showBadge = badgeCount > 0 && !isRead;
 
   const notificationItems = [
