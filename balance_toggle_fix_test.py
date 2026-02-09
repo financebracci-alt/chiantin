@@ -381,7 +381,7 @@ class BalanceToggleFixTester:
         success, response = self.run_test(
             "POST /auth/verify-password",
             "POST",
-            "auth/verify-password",
+            "v1/auth/verify-password",
             200,
             data={"password": "TestUser123!"},
             headers=headers
