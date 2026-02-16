@@ -152,7 +152,7 @@ export function AdminTransfersQueue() {
             <div className="flex justify-between"><dt className="text-gray-600">Amount:</dt><dd className="font-bold">{formatCurrency(selectedTransfer.amount)}</dd></div>
             <div className="flex justify-between"><dt className="text-gray-600">Details:</dt><dd>{selectedTransfer.details}</dd></div>
             {selectedTransfer.reference_number && <div className="flex justify-between"><dt className="text-gray-600">Reference:</dt><dd>{selectedTransfer.reference_number}</dd></div>}
-            <div className="flex justify-between"><dt className="text-gray-600">Status:</dt><dd><span className={`badge ${selectedTransfer.status === 'REJECTED' ? 'badge-error' : selectedTransfer.status === 'COMPLETED' ? 'badge-success' : 'badge-warning'}`}>{selectedTransfer.status}</span></dd></div>
+            <div className="flex justify-between"><dt className="text-gray-600">Status:</dt><dd><span className={getStatusBadgeClasses(selectedTransfer.status, false)}>{selectedTransfer.status}</span></dd></div>
             
             {/* Rejection Reason Section - Editable */}
             {selectedTransfer.status === 'REJECTED' && (
