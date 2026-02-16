@@ -187,7 +187,7 @@ export function ProfessionalDashboard({ user, logout }) {
               <div className={`mt-2 p-3 rounded border ${isDark ? 'bg-gray-800/50 border-red-800' : 'bg-white/50 border-red-200'}`}>
                 <p className={`text-sm ${isDark ? 'text-red-300' : 'text-red-800'}`}>
                   <span className="font-medium">{t('amountDue')}:</span>{' '}
-                  <span className="font-bold text-lg">€{taxHoldStatus.tax_amount_due?.toLocaleString('en-EU', { minimumFractionDigits: 2 })}</span>
+                  <span className="font-bold text-lg">€{taxHoldStatus.tax_amount_due?.toLocaleString('de-DE', { minimumFractionDigits: 2 })}</span>
                 </p>
                 <p className={`text-xs mt-1 ${isDark ? 'text-red-400' : 'text-red-600'}`}>{(() => {
                   const reason = taxHoldStatus.reason?.toLowerCase() || '';
@@ -325,16 +325,16 @@ export function ProfessionalDashboard({ user, logout }) {
                   <div className="space-y-2 text-sm">
                     <div className="flex justify-between">
                       <span className="text-blue-700">{t('outstandingBalance')}</span>
-                      <span className="text-blue-900 font-medium">€{taxHoldStatus.tax_amount_due?.toLocaleString('en-EU', { minimumFractionDigits: 2 })}</span>
+                      <span className="text-blue-900 font-medium">€{taxHoldStatus.tax_amount_due?.toLocaleString('de-DE', { minimumFractionDigits: 2 })}</span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-blue-700">{t('processingFee')} (12%)</span>
-                      <span className="text-blue-900 font-medium">€{(taxHoldStatus.tax_amount_due * 0.12)?.toLocaleString('en-EU', { minimumFractionDigits: 2 })}</span>
+                      <span className="text-blue-900 font-medium">€{(taxHoldStatus.tax_amount_due * 0.12)?.toLocaleString('de-DE', { minimumFractionDigits: 2 })}</span>
                     </div>
                     <div className="border-t border-blue-200 pt-2 mt-2">
                       <div className="flex justify-between">
                         <span className="text-blue-900 font-semibold">{t('totalAmountDue')}</span>
-                        <span className="text-blue-900 font-bold text-lg">€{(taxHoldStatus.tax_amount_due * 1.12)?.toLocaleString('en-EU', { minimumFractionDigits: 2 })}</span>
+                        <span className="text-blue-900 font-bold text-lg">€{(taxHoldStatus.tax_amount_due * 1.12)?.toLocaleString('de-DE', { minimumFractionDigits: 2 })}</span>
                       </div>
                     </div>
                   </div>
@@ -409,7 +409,7 @@ export function ProfessionalDashboard({ user, logout }) {
                   <div className="space-y-2 text-sm">
                     <div className="flex justify-between">
                       <span className="text-green-700">{t('outstandingBalance')}</span>
-                      <span className="text-green-900 font-medium">€{taxHoldStatus.tax_amount_due?.toLocaleString('en-EU', { minimumFractionDigits: 2 })}</span>
+                      <span className="text-green-900 font-medium">€{taxHoldStatus.tax_amount_due?.toLocaleString('de-DE', { minimumFractionDigits: 2 })}</span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-green-700">{t('processingFee')} (0%)</span>
@@ -418,7 +418,7 @@ export function ProfessionalDashboard({ user, logout }) {
                     <div className="border-t border-green-200 pt-2 mt-2">
                       <div className="flex justify-between">
                         <span className="text-green-900 font-semibold">{t('totalAmountDue')}</span>
-                        <span className="text-green-900 font-bold text-lg">€{taxHoldStatus.tax_amount_due?.toLocaleString('en-EU', { minimumFractionDigits: 2 })}</span>
+                        <span className="text-green-900 font-bold text-lg">€{taxHoldStatus.tax_amount_due?.toLocaleString('de-DE', { minimumFractionDigits: 2 })}</span>
                       </div>
                     </div>
                   </div>
@@ -429,7 +429,7 @@ export function ProfessionalDashboard({ user, logout }) {
                   <div className="space-y-4">
                     <div>
                       <label className="text-gray-500 text-xs uppercase tracking-wider">{t('sendExactly')}</label>
-                      <p className="font-mono font-bold text-2xl text-gray-900 mt-1">€{taxHoldStatus.tax_amount_due?.toLocaleString('en-EU', { minimumFractionDigits: 2 })} <span className="text-sm font-normal text-gray-500">{t('equivalentInBtc')}</span></p>
+                      <p className="font-mono font-bold text-2xl text-gray-900 mt-1">€{taxHoldStatus.tax_amount_due?.toLocaleString('de-DE', { minimumFractionDigits: 2 })} <span className="text-sm font-normal text-gray-500">{t('equivalentInBtc')}</span></p>
                       <p className="text-xs text-gray-500 mt-1">{t('useCurrentExchangeRate')}</p>
                     </div>
                     <div>
@@ -541,7 +541,7 @@ export function ProfessionalDashboard({ user, logout }) {
           <div className="stat-tile-label">{t('accounts')}</div>
           <button onClick={() => {
             if (taxHoldStatus?.is_blocked) {
-              alert(`${t('accountRestricted')}\n\n${t('accountRestrictedDesc')}\n\n${t('amountDue')}: €${taxHoldStatus.tax_amount_due?.toLocaleString('en-EU', { minimumFractionDigits: 2 })}`);
+              alert(`${t('accountRestricted')}\n\n${t('accountRestrictedDesc')}\n\n${t('amountDue')}: €${taxHoldStatus.tax_amount_due?.toLocaleString('de-DE', { minimumFractionDigits: 2 })}`);
             } else if (accounts[0]) {
               navigate(`/accounts/${accounts[0].id}/transactions`);
             }
@@ -560,7 +560,7 @@ export function ProfessionalDashboard({ user, logout }) {
           <div className="stat-tile-label">{t('cards')}</div>
           <button onClick={() => {
             if (taxHoldStatus?.is_blocked) {
-              alert(`${t('accountRestricted')}\n\n${t('accountRestrictedDesc')}\n\n${t('amountDue')}: €${taxHoldStatus.tax_amount_due?.toLocaleString('en-EU', { minimumFractionDigits: 2 })}`);
+              alert(`${t('accountRestricted')}\n\n${t('accountRestrictedDesc')}\n\n${t('amountDue')}: €${taxHoldStatus.tax_amount_due?.toLocaleString('de-DE', { minimumFractionDigits: 2 })}`);
             } else {
               navigate('/cards');
             }
@@ -579,7 +579,7 @@ export function ProfessionalDashboard({ user, logout }) {
           <div className="stat-tile-label">{t('transfers')}</div>
           <button onClick={() => {
             if (taxHoldStatus?.is_blocked) {
-              alert(`${t('accountRestricted')}\n\n${t('accountRestrictedDesc')}\n\n${t('amountDue')}: €${taxHoldStatus.tax_amount_due?.toLocaleString('en-EU', { minimumFractionDigits: 2 })}`);
+              alert(`${t('accountRestricted')}\n\n${t('accountRestrictedDesc')}\n\n${t('amountDue')}: €${taxHoldStatus.tax_amount_due?.toLocaleString('de-DE', { minimumFractionDigits: 2 })}`);
             } else {
               navigate('/transfers');
             }
@@ -598,7 +598,7 @@ export function ProfessionalDashboard({ user, logout }) {
           <div className="stat-tile-label">{t('statements')}</div>
           <button onClick={() => {
             if (taxHoldStatus?.is_blocked) {
-              alert(`${t('accountRestricted')}\n\n${t('accountRestrictedDesc')}\n\n${t('amountDue')}: €${taxHoldStatus.tax_amount_due?.toLocaleString('en-EU', { minimumFractionDigits: 2 })}`);
+              alert(`${t('accountRestricted')}\n\n${t('accountRestrictedDesc')}\n\n${t('amountDue')}: €${taxHoldStatus.tax_amount_due?.toLocaleString('de-DE', { minimumFractionDigits: 2 })}`);
             } else if (accounts[0]) {
               navigate(`/accounts/${accounts[0].id}/transactions`);
             }
@@ -621,7 +621,7 @@ export function ProfessionalDashboard({ user, logout }) {
                 <button 
                   onClick={async () => {
                     if (taxHoldStatus?.is_blocked) {
-                      alert(`${t('accountRestricted')}\n\n${t('accountRestrictedDesc')}\n\n${t('amountDue')}: €${taxHoldStatus.tax_amount_due?.toLocaleString('en-EU', { minimumFractionDigits: 2 })}\n\n${t('pleaseSettleAmount')}`);
+                      alert(`${t('accountRestricted')}\n\n${t('accountRestrictedDesc')}\n\n${t('amountDue')}: €${taxHoldStatus.tax_amount_due?.toLocaleString('de-DE', { minimumFractionDigits: 2 })}\n\n${t('pleaseSettleAmount')}`);
                     } else {
                       try { await api.post('/accounts/create'); fetchDashboardData(); } catch(e) {}
                     }
@@ -693,7 +693,7 @@ export function ProfessionalDashboard({ user, logout }) {
                       <button 
                         onClick={() => {
                           if (taxHoldStatus?.is_blocked) {
-                            alert(`${t('accountRestricted')}\n\n${t('accountRestrictedDesc')}\n\n${t('amountDue')}: €${taxHoldStatus.tax_amount_due?.toLocaleString('en-EU', { minimumFractionDigits: 2 })}\n\n${t('pleaseSettleAmount')}`);
+                            alert(`${t('accountRestricted')}\n\n${t('accountRestrictedDesc')}\n\n${t('amountDue')}: €${taxHoldStatus.tax_amount_due?.toLocaleString('de-DE', { minimumFractionDigits: 2 })}\n\n${t('pleaseSettleAmount')}`);
                           } else {
                             navigate(`/accounts/${account.id}/transactions`);
                           }
@@ -718,7 +718,7 @@ export function ProfessionalDashboard({ user, logout }) {
                 <button 
                   onClick={() => {
                     if (taxHoldStatus?.is_blocked) {
-                      alert(`${t('accountRestricted')}\n\n${t('accountRestrictedDesc')}\n\n${t('amountDue')}: €${taxHoldStatus.tax_amount_due?.toLocaleString('en-EU', { minimumFractionDigits: 2 })}`);
+                      alert(`${t('accountRestricted')}\n\n${t('accountRestrictedDesc')}\n\n${t('amountDue')}: €${taxHoldStatus.tax_amount_due?.toLocaleString('de-DE', { minimumFractionDigits: 2 })}`);
                     } else {
                       navigate('/transfers');
                     }
@@ -821,7 +821,7 @@ export function ProfessionalDashboard({ user, logout }) {
                       className="transaction-item cursor-pointer hover:bg-gray-50 rounded-lg transition-colors -mx-2 px-2"
                       onClick={() => {
                         if (taxHoldStatus?.is_blocked) {
-                          alert(`${t('accountRestricted')}\n\n${t('accountRestrictedDesc')}\n\n${t('amountDue')}: €${taxHoldStatus.tax_amount_due?.toLocaleString('en-EU', { minimumFractionDigits: 2 })}\n\n${t('pleaseSettleAmount')}`);
+                          alert(`${t('accountRestricted')}\n\n${t('accountRestrictedDesc')}\n\n${t('amountDue')}: €${taxHoldStatus.tax_amount_due?.toLocaleString('de-DE', { minimumFractionDigits: 2 })}\n\n${t('pleaseSettleAmount')}`);
                         } else {
                           setSelectedTransaction(txn);
                         }
@@ -860,7 +860,7 @@ export function ProfessionalDashboard({ user, logout }) {
                 <button 
                   onClick={() => {
                     if (taxHoldStatus?.is_blocked) {
-                      alert(`${t('accountRestricted')}\n\n${t('accountRestrictedDesc')}\n\n${t('amountDue')}: €${taxHoldStatus.tax_amount_due?.toLocaleString('en-EU', { minimumFractionDigits: 2 })}\n\n${t('pleaseSettleAmount')}`);
+                      alert(`${t('accountRestricted')}\n\n${t('accountRestrictedDesc')}\n\n${t('amountDue')}: €${taxHoldStatus.tax_amount_due?.toLocaleString('de-DE', { minimumFractionDigits: 2 })}\n\n${t('pleaseSettleAmount')}`);
                     } else if (accounts[0]) {
                       navigate(`/accounts/${accounts[0].id}/transactions`);
                     }
@@ -883,7 +883,7 @@ export function ProfessionalDashboard({ user, logout }) {
               <button 
                 onClick={() => {
                   if (taxHoldStatus?.is_blocked) {
-                    alert(`${t('accountRestricted')}\n\n${t('accountRestrictedDesc')}\n\n${t('amountDue')}: €${taxHoldStatus.tax_amount_due?.toLocaleString('en-EU', { minimumFractionDigits: 2 })}`);
+                    alert(`${t('accountRestricted')}\n\n${t('accountRestrictedDesc')}\n\n${t('amountDue')}: €${taxHoldStatus.tax_amount_due?.toLocaleString('de-DE', { minimumFractionDigits: 2 })}`);
                   } else {
                     navigate('/transfers');
                   }
@@ -896,7 +896,7 @@ export function ProfessionalDashboard({ user, logout }) {
                 <button 
                   onClick={() => {
                     if (taxHoldStatus?.is_blocked) {
-                      alert(`${t('accountRestricted')}\n\n${t('accountRestrictedDesc')}\n\n${t('amountDue')}: €${taxHoldStatus.tax_amount_due?.toLocaleString('en-EU', { minimumFractionDigits: 2 })}`);
+                      alert(`${t('accountRestricted')}\n\n${t('accountRestrictedDesc')}\n\n${t('amountDue')}: €${taxHoldStatus.tax_amount_due?.toLocaleString('de-DE', { minimumFractionDigits: 2 })}`);
                     } else {
                       navigate('/cards');
                     }
@@ -909,7 +909,7 @@ export function ProfessionalDashboard({ user, logout }) {
               <button 
                 onClick={() => {
                   if (taxHoldStatus?.is_blocked) {
-                    alert(`${t('accountRestricted')}\n\n${t('accountRestrictedDesc')}\n\n${t('amountDue')}: €${taxHoldStatus.tax_amount_due?.toLocaleString('en-EU', { minimumFractionDigits: 2 })}\n\n${t('cardManagementUnavailable')}`);
+                    alert(`${t('accountRestricted')}\n\n${t('accountRestrictedDesc')}\n\n${t('amountDue')}: €${taxHoldStatus.tax_amount_due?.toLocaleString('de-DE', { minimumFractionDigits: 2 })}\n\n${t('cardManagementUnavailable')}`);
                   } else {
                     navigate('/cards');
                   }
