@@ -25,27 +25,22 @@ ecommbx is a full-stack EU-licensed digital banking platform built with React fr
 ## Recent Changes (February 2025)
 
 ### Professional Banking Transaction Display (Feb 16, 2025)
-**Problem:** Transaction status badges were using simple CSS classes without professional banking styling.
+**Problem:** Transaction display showed processing status (Posted/Submitted) instead of transaction type.
 
 **Solution:**
-- Created `/app/frontend/src/utils/transactions.js` utility with status badge configuration
-- Implemented professional color-coded status badges:
-  - **POSTED/COMPLETED:** Green badge (bg-green-50, text-green-700)
-  - **SUBMITTED/PENDING:** Amber badge (bg-amber-50, text-amber-700)
-  - **REJECTED/FAILED:** Red badge (bg-red-50, text-red-700)
-  - **PROCESSING:** Blue badge (bg-blue-50, text-blue-700)
-  - **CANCELLED:** Gray badge (bg-gray-100, text-gray-600)
-  - **REVERSED:** Purple badge (bg-purple-50, text-purple-700)
-- Credit amounts show as **+€X.XXX,XX** in GREEN
-- Debit amounts show as **-€X.XXX,XX** in RED
+- Changed terminology:
+  - "Posted" → **"Credit"** (EN) / **"Accredito"** (IT) - GREEN badge for incoming money
+  - "Submitted" → **"Debit"** (EN) / **"Addebito"** (IT) - RED badge for outgoing money
+- Credit amounts: **+€X.XXX,XX** in GREEN
+- Debit amounts: **-€X.XXX,XX** in RED
+- Badges show transaction TYPE, not processing status
 
 **Files Changed:**
-- `/app/frontend/src/utils/transactions.js` - NEW: Transaction display utility
+- `/app/frontend/src/translations.js` - Added credit/debit translations
 - `/app/frontend/src/components/ProfessionalDashboard.js` - Customer transactions
 - `/app/frontend/src/components/Transactions.js` - Transaction list and modal
-- `/app/frontend/src/components/AdminTransfersQueue.js` - Admin transfers
 
-**Verification:** 100% test pass rate - All status badges display correctly
+**Verification:** 100% test pass rate
 
 ### EU Currency Formatting (Feb 16, 2025)
 **Format:** €24.650,00 (dot for thousands, comma for decimals)
