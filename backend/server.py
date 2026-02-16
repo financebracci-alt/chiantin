@@ -2812,7 +2812,8 @@ async def upload_ticket_attachment(
     ticket_id: str,
     files: List[UploadFile] = File(...),
     current_user: dict = Depends(get_current_user),
-    db: AsyncIOMotorDatabase = Depends(get_database)
+    db: AsyncIOMotorDatabase = Depends(get_database),
+    storage: CloudinaryStorage = Depends(get_storage)
 ):
     """Upload file attachments for a ticket message."""
     from services.ticket_service import MAX_FILES_PER_MESSAGE
