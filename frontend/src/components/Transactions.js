@@ -245,58 +245,49 @@ export function TransactionsList({ accountId, isAdmin = false }) {
           </p>
         </div>
       ) : (
-        <div className={`rounded-lg shadow divide-y ${isDark ? 'bg-gray-800 divide-gray-700' : 'bg-white'}`}>
-          {filteredTransactions.map((txn) => (
-            <div
-              key={txn.id}
-              onClick={() => {
-                setSelectedTxn(txn);
-                setShowDetails(true);
-              }}
-              className={`p-4 cursor-pointer ${isDark ? 'hover:bg-gray-700' : 'hover:bg-gray-50'}`}
-              data-testid={`transaction-${txn.id}`}
-            >
-              <div className="flex justify-between items-start">
-                <div className="flex-1">
-                  <div className="flex items-center space-x-2">
-                    <span className={`font-medium ${getTypeColor(txn.transaction_type)}`}>
-                      {getTypeLabel(txn.transaction_type)}
-                    </span>
-                    <span className={`text-xs px-2 py-1 rounded ${
-                      txn.status === 'POSTED' 
-                        ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400'
-                        : txn.status === 'REVERSED'
-                        ? 'bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-400'
-                        : txn.status === 'REJECTED'
-                        ? 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400'
-                        : txn.status === 'SUBMITTED'
-                        ? 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400'
-                        : 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300'
-                    }`}>
+        <div className={`rounded-lg shadow divide-y ${isDark ? 'bg-gray-800 divide-gray-700' : 'bg-white divide-gray-100'}`}>
+          {filteredTransactions.map((txn) => {
+            // Determine if credit or debit
+            const isCredit = isTransactionCredit(txn);
+            
+            return (
+              <div
+                key={txn.id}
+                onClick={() => {
+                  setSelectedTxn(txn);
+                  setShowDetails(true);
+                }}
+                className={`p-4 cursor-pointer transition-colors ${isDark ? 'hover:bg-gray-700/50' : 'hover:bg-gray-50'}`}
+                data-testid={`transaction-${txn.id}`}
+              >
+                <div className="flex justify-between items-center">
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center space-x-2">
+                      <span className={`font-medium ${isDark ? 'text-white' : 'text-gray-900'}`}>
+                        {getTypeLabel(txn.transaction_type)}
+                      </span>
+                    </div>
+                    {txn.reason && (
+                      <p className={`text-sm mt-1 truncate ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>{txn.reason}</p>
+                    )}
+                    <p className={`text-xs mt-1 ${isDark ? 'text-gray-500' : 'text-gray-500'}`}>
+                      {formatDate(txn.created_at)}
+                    </p>
+                  </div>
+                  <div className="text-right flex-shrink-0 ml-4">
+                    {/* Professional banking amount display: +/- with color */}
+                    <p className={`text-base font-bold ${isCredit ? 'text-green-600' : 'text-red-600'}`}>
+                      {formatTransactionAmount(txn.amount, isCredit)}
+                    </p>
+                    {/* Professional status badge */}
+                    <span className={getStatusBadgeClasses(txn.status, isDark)}>
                       {getStatusLabel(txn.status)}
                     </span>
                   </div>
-                  {txn.reason && (
-                    <p className={`text-sm mt-1 ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>{txn.reason}</p>
-                  )}
-                  <p className={`text-xs mt-1 ${isDark ? 'text-gray-500' : 'text-gray-500'}`}>
-                    {formatDate(txn.created_at)}
-                  </p>
                 </div>
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setSelectedTxn(txn);
-                    setShowDetails(true);
-                  }}
-                  className="text-sm text-blue-600 hover:text-blue-700"
-                  data-testid={`view-details-${txn.id}`}
-                >
-                  {t('viewDetailsArrow')}
-                </button>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       )}
 
