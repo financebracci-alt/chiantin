@@ -1627,13 +1627,24 @@ async def admin_internal_transfer(
 async def get_all_users(
     current_user: dict = Depends(require_admin),
     db: AsyncIOMotorDatabase = Depends(get_database),
-    search: Optional[str] = None
+    search: Optional[str] = None,
+    page: int = 1,
+    limit: int = 50
 ):
-    """Get all users (admin) with tax hold status and notes.
+    """Get users (admin) with pagination, tax hold status and notes.
     
-    Supports optional search parameter to filter by name or email.
-    Returns ALL users (no limit) to ensure all clients are visible.
+    Supports:
+    - search: Filter by name or email (searches ALL users in DB, not just current page)
+    - page: Page number (1-indexed)
+    - limit: Users per page (20, 50, or 100)
+    
+    When search is provided, pagination is ignored and ALL matching users are returned.
+    This ensures admins can find any user regardless of which page they're on.
     """
+    # Validate limit
+    if limit not in [20, 50, 100]:
+        limit = 50
+    
     # Build query - if search provided, filter by name or email
     query = {}
     if search and search.strip():
@@ -1646,9 +1657,8 @@ async def get_all_users(
             ]
         }
     
-    # Fetch ALL users (removed limit of 100 that was causing users to be hidden)
-    cursor = db.users.find(query).sort("created_at", -1)
-    users = []
+    # Get total count for pagination info
+    total_count = await db.users.count_documents(query)
     
     # Get all active tax holds for quick lookup
     tax_holds_cursor = db.tax_holds.find({"is_active": True})
@@ -1656,6 +1666,16 @@ async def get_all_users(
     async for hold in tax_holds_cursor:
         tax_hold_user_ids.add(hold["user_id"])
     
+    # When searching, return ALL matching users (no pagination)
+    # This ensures the admin can find any user regardless of page
+    if search and search.strip():
+        cursor = db.users.find(query).sort("created_at", -1)
+    else:
+        # Apply pagination only when not searching
+        skip = (page - 1) * limit
+        cursor = db.users.find(query).sort("created_at", -1).skip(skip).limit(limit)
+    
+    users = []
     async for doc in cursor:
         user_id = str(doc["_id"])
         users.append({
@@ -1669,7 +1689,21 @@ async def get_all_users(
             "has_tax_hold": user_id in tax_hold_user_ids,
             "admin_notes": doc.get("admin_notes", "")
         })
-    return users
+    
+    # Calculate pagination info
+    total_pages = (total_count + limit - 1) // limit if not (search and search.strip()) else 1
+    
+    return {
+        "users": users,
+        "pagination": {
+            "page": page,
+            "limit": limit,
+            "total_users": total_count,
+            "total_pages": total_pages,
+            "has_next": page < total_pages if not (search and search.strip()) else False,
+            "has_prev": page > 1 if not (search and search.strip()) else False
+        }
+    }
 
 
 @app.get("/api/v1/admin/users/{user_id}")
