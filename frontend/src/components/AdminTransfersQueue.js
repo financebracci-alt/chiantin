@@ -2,6 +2,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import api from '../api';
 import { useToast } from './Toast';
+import { formatCurrency } from '../utils/currency';
 
 export function AdminTransfersQueue() {
   const toast = useToast();

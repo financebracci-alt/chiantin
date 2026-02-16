@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend } from 'recharts';
 import api from '../api';
 import { useLanguage, useTheme } from '../contexts/AppContext';
+import { formatCurrency, formatNumber, formatEuroAmount } from '../utils/currency';
 
 export function SpendingInsights() {
   const [data, setData] = useState([]);

@@ -2,6 +2,7 @@
 import React, { useState } from 'react';
 import api from '../api';
 import { useToast } from './Toast';
+import { formatEuroAmount } from '../utils/currency';
 
 const TRANSACTION_DISPLAY_TYPES = [
   { value: 'SEPA Transfer', label: 'SEPA Transfer' },
