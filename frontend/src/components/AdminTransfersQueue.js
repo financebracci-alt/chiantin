@@ -269,7 +269,7 @@ export function AdminTransfersQueue() {
                   <td className="text-xs">{new Date(t.created_at).toLocaleDateString()}</td>
                   <td>{t.beneficiary_name}</td>
                   <td className="font-semibold">{formatCurrency(t.amount)}</td>
-                  <td><span className={`badge ${t.status === 'REJECTED' ? 'badge-error' : t.status === 'COMPLETED' ? 'badge-success' : 'badge-warning'}`}>{t.status}</span></td>
+                  <td><span className={getStatusBadgeClasses(t.status, false)}>{t.status}</span></td>
                   {activeTab === 'REJECTED' && (
                     <td className="max-w-xs">
                       <span className="text-xs text-red-600 truncate block" title={t.reject_reason}>
