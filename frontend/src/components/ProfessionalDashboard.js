@@ -848,9 +848,13 @@ export function ProfessionalDashboard({ user, logout }) {
                           <p className={`text-base font-bold ${isCredit ? 'text-green-600' : 'text-red-600'}`}>
                             {formatTransactionAmount(amount, isCredit)}
                           </p>
-                          {/* Professional status badge */}
-                          <span className={getStatusBadgeClasses(txn.status, isDark)}>
-                            {translateStatus(txn.status)}
+                          {/* Transaction type badge: Credit (green) / Debit (red) */}
+                          <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${
+                            isCredit 
+                              ? 'bg-green-50 border-green-200 text-green-700' 
+                              : 'bg-red-50 border-red-200 text-red-700'
+                          }`}>
+                            {isCredit ? t('credit') : t('debit')}
                           </span>
                         </div>
                       </div>
