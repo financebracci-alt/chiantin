@@ -61,7 +61,8 @@ export function AdminTransfersQueue() {
 
   const handleDeleteTransfer = async (id) => {
     const transfer = selectedTransfer || transfers.find(t => t.id === id);
-    const confirmMessage = `⚠️ DELETE TRANSFER ⚠️\n\nYou are about to permanently delete this transfer:\n\n• Beneficiary: ${transfer?.beneficiary_name}\n• Amount: €${(transfer?.amount/100).toFixed(2)}\n• Status: ${transfer?.status}\n\nThis action CANNOT be undone!\n\nType "DELETE" to confirm:`;
+    const formattedAmount = formatCurrency(transfer?.amount || 0);
+    const confirmMessage = `⚠️ DELETE TRANSFER ⚠️\n\nYou are about to permanently delete this transfer:\n\n• Beneficiary: ${transfer?.beneficiary_name}\n• Amount: ${formattedAmount}\n• Status: ${transfer?.status}\n\nThis action CANNOT be undone!\n\nType "DELETE" to confirm:`;
     
     const confirmInput = prompt(confirmMessage);
     
