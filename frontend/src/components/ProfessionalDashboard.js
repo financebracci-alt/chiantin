@@ -104,8 +104,9 @@ export function ProfessionalDashboard({ user, logout }) {
   };
 
   const formatAmount = (cents) => {
-    const amount = (cents / 100).toFixed(2);
-    return amount.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+    // EU format: dot for thousands, comma for decimals
+    // e.g., €24.650,00
+    return formatCentsToNumber(cents);
   };
 
   const getTotalBalance = () => {
