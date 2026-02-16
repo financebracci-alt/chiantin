@@ -78,7 +78,7 @@ export function EnhancedLedgerTools({ account, onSuccess }) {
         admin_note: creditForm.admin_note || null
       });
       
-      toast.success(`€${parseFloat(creditForm.amount).toFixed(2)} credited to account`);
+      toast.success(`${formatEuroAmount(parseFloat(creditForm.amount))} credited to account`);
       setCreditForm({
         amount: '',
         display_type: 'Bank Transfer',
