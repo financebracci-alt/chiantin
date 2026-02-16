@@ -1706,6 +1706,18 @@ function AdminDashboard() {
   const [taxHoldFilter, setTaxHoldFilter] = useState('all'); // 'all', 'with_tax_hold', 'no_tax_hold'
   const [notesFilter, setNotesFilter] = useState('all'); // 'all', 'with_notes', 'no_notes'
   
+  // Pagination state
+  const [currentPage, setCurrentPage] = useState(1);
+  const [usersPerPage, setUsersPerPage] = useState(50);
+  const [pagination, setPagination] = useState({
+    page: 1,
+    limit: 50,
+    total_users: 0,
+    total_pages: 1,
+    has_next: false,
+    has_prev: false
+  });
+  
   // Tax Hold Modal State
   const [showTaxHoldModal, setShowTaxHoldModal] = useState(false);
   const [taxHoldAmount, setTaxHoldAmount] = useState('');
