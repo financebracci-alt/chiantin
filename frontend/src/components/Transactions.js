@@ -364,6 +364,18 @@ function TransactionDetailsModal({ transaction, onClose }) {
         </div>
 
         <div className="p-6 space-y-6">
+          {/* Transaction Amount Header - Professional Banking Style */}
+          <div className={`text-center p-6 rounded-xl ${isDark ? 'bg-gray-700/50' : 'bg-gray-50'}`}>
+            <p className={`text-3xl font-bold ${isCredit ? 'text-green-600' : 'text-red-600'}`}>
+              {formatTransactionAmount(transaction.amount, isCredit)}
+            </p>
+            <div className="mt-2">
+              <span className={getStatusBadgeClasses(transaction.status, isDark)}>
+                {getStatusLabel(transaction.status)}
+              </span>
+            </div>
+          </div>
+          
           {/* Transaction Info */}
           <div>
             <h4 className={`font-semibold mb-3 ${isDark ? 'text-white' : 'text-gray-900'}`}>{t('transactionInformation')}</h4>
