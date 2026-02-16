@@ -81,7 +81,7 @@ export function SpendingInsights() {
         <div>
           <div className="mb-6">
             <p className={`text-sm mb-1 ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>{t('totalSpending')}</p>
-            <p className={`text-3xl font-bold ${isDark ? 'text-white' : 'text-gray-900'}`} data-testid="insights-total">€{(total / 100).toFixed(2)}</p>
+            <p className={`text-3xl font-bold ${isDark ? 'text-white' : 'text-gray-900'}`} data-testid="insights-total">{formatCurrency(total)}</p>
           </div>
           
           {data.length > 0 && (
@@ -103,7 +103,7 @@ export function SpendingInsights() {
                     ))}
                   </Pie>
                   <Tooltip 
-                    formatter={(value) => `€${value.toFixed(2)}`} 
+                    formatter={(value) => formatEuroAmount(value)} 
                     contentStyle={{ 
                       backgroundColor: isDark ? '#1f2937' : '#ffffff',
                       border: `1px solid ${isDark ? '#374151' : '#e5e7eb'}`,
@@ -121,7 +121,7 @@ export function SpendingInsights() {
                       <div className="w-3 h-3 rounded-full" style={{ backgroundColor: COLORS[idx % COLORS.length] }}></div>
                       <span>{item.name}</span>
                     </div>
-                    <span className="font-semibold">€{item.value.toFixed(2)}</span>
+                    <span className="font-semibold">{formatEuroAmount(item.value)}</span>
                   </div>
                 ))}
               </div>
