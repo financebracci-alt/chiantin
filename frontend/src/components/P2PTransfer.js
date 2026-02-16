@@ -510,7 +510,7 @@ export function P2PTransferForm({ onSuccess }) {
               <div className={`rounded-lg p-4 mb-5 ${isDark ? 'bg-gray-700' : 'bg-gray-50'}`}>
                 <div className="flex justify-between items-center mb-2">
                   <span className={`text-sm ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>{t('amount') || 'Amount'}</span>
-                  <span className={`text-xl font-bold ${isDark ? 'text-white' : 'text-gray-900'}`}>€{parseFloat(formData.amount || 0).toFixed(2)}</span>
+                  <span className={`text-xl font-bold ${isDark ? 'text-white' : 'text-gray-900'}`}>{formatEuroAmount(parseFloat(formData.amount || 0))}</span>
                 </div>
                 <div className="flex justify-between items-center">
                   <span className={`text-sm ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>{t('to') || 'To'}</span>
