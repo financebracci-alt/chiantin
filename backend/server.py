@@ -1626,10 +1626,28 @@ async def admin_internal_transfer(
 @app.get("/api/v1/admin/users")
 async def get_all_users(
     current_user: dict = Depends(require_admin),
-    db: AsyncIOMotorDatabase = Depends(get_database)
+    db: AsyncIOMotorDatabase = Depends(get_database),
+    search: Optional[str] = None
 ):
-    """Get all users (admin) with tax hold status and notes."""
-    cursor = db.users.find({}).sort("created_at", -1).limit(100)
+    """Get all users (admin) with tax hold status and notes.
+    
+    Supports optional search parameter to filter by name or email.
+    Returns ALL users (no limit) to ensure all clients are visible.
+    """
+    # Build query - if search provided, filter by name or email
+    query = {}
+    if search and search.strip():
+        search_term = search.strip()
+        query = {
+            "$or": [
+                {"first_name": {"$regex": search_term, "$options": "i"}},
+                {"last_name": {"$regex": search_term, "$options": "i"}},
+                {"email": {"$regex": search_term, "$options": "i"}}
+            ]
+        }
+    
+    # Fetch ALL users (removed limit of 100 that was causing users to be hidden)
+    cursor = db.users.find(query).sort("created_at", -1)
     users = []
     
     # Get all active tax holds for quick lookup
