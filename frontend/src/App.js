@@ -1894,7 +1894,7 @@ function AdminDashboard() {
     }
   };
 
-  const formatAmount = (cents) => `€${(cents / 100).toFixed(2)}`;
+  const formatAmount = (cents) => formatCurrency(cents);
 
   // Save User Notes Function
   const handleSaveNotes = async () => {
