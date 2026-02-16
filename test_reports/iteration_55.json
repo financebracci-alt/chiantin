@@ -153,7 +153,7 @@
   },
   
   "test_environment": {
-    "backend_url": "https://banking-auth-debug.preview.emergentagent.com",
+    "backend_url": "https://elated-vaughan-1.preview.emergentagent.com",
     "test_date": "2026-02-03",
     "admin_credentials": "admin@ecommbx.io",
     "test_user": "ashleyalt003@gmail.com",

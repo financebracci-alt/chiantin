@@ -102,7 +102,7 @@
     "frontend_features_tested": {
       "admin_login": {
         "status": "PASS",
-        "url": "https://banking-auth-debug.preview.emergentagent.com/admin"
+        "url": "https://elated-vaughan-1.preview.emergentagent.com/admin"
       },
       "admin_dashboard": {
         "status": "PASS",
@@ -136,7 +136,7 @@
   },
   
   "test_environment": {
-    "base_url": "https://banking-auth-debug.preview.emergentagent.com",
+    "base_url": "https://elated-vaughan-1.preview.emergentagent.com",
     "admin_credentials": "admin@ecommbx.io / Admin@123456",
     "database": "ecommbx-prod",
     "cloudinary_configured": true
