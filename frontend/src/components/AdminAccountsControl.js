@@ -4,6 +4,7 @@ import api from '../api';
 import { useToast } from './Toast';
 import { useBalanceVisibility, formatBalance } from '../hooks/useBalanceVisibility';
 import BalanceToggle from './BalanceToggle';
+import { formatCurrency } from '../utils/currency';
 
 export function AdminAccountsControl() {
   const toast = useToast();
