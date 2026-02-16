@@ -289,6 +289,8 @@ const translations = {
     allStatus: 'All Status',
     posted: 'Posted',
     reversed: 'Reversed',
+    credit: 'Credit',
+    debit: 'Debit',
     fromDate: 'From Date',
     toDate: 'To Date',
     search: 'Search',
