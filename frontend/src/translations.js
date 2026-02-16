@@ -1121,6 +1121,8 @@ const translations = {
     allStatus: 'Tutti gli Stati',
     posted: 'Registrato',
     reversed: 'Stornato',
+    credit: 'Accredito',
+    debit: 'Addebito',
     fromDate: 'Da Data',
     toDate: 'A Data',
     search: 'Cerca',
