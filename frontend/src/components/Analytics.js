@@ -12,6 +12,7 @@ export function AnalyticsDashboard() {
     totalTransactions: 0,
     totalVolume: 0
   });
+  const [monthlyData, setMonthlyData] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -20,9 +21,14 @@ export function AnalyticsDashboard() {
 
   const fetchAnalytics = async () => {
     try {
-      // Use the analytics/overview endpoint which has comprehensive stats
-      const analyticsRes = await api.get('/admin/analytics/overview');
+      // Fetch both overview stats and monthly data in parallel
+      const [analyticsRes, monthlyRes] = await Promise.all([
+        api.get('/admin/analytics/overview'),
+        api.get('/admin/analytics/monthly')
+      ]);
+      
       const analytics = analyticsRes.data;
+      const monthly = monthlyRes.data;
       
       // Volume is in cents, convert to euros
       const volumeInEuros = (analytics.transfers?.volume_cents || 0) / 100;
@@ -35,6 +41,11 @@ export function AnalyticsDashboard() {
         totalTransactions: analytics.transfers?.total || 0,
         totalVolume: volumeInEuros
       });
+      
+      // Set real monthly data from backend
+      if (monthly.monthly_data && monthly.monthly_data.length > 0) {
+        setMonthlyData(monthly.monthly_data);
+      }
     } catch (err) {
       console.error('Failed to fetch analytics:', err);
     } finally {
