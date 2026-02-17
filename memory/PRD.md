@@ -26,6 +26,33 @@ ecommbx is a full-stack EU-licensed digital banking platform built with React fr
 
 ## Recent Changes (February 2025)
 
+### Dark Mode Recent Activity Fix (Feb 17, 2025)
+**Problem:** In dark mode, the "Recent Activity" list on the customer dashboard showed transaction type labels (Card Payment, SEPA Transfer, Top Up) as invisible - white text on white-ish card background, making the transactions unreadable.
+
+**Root Cause:** The `.card` CSS class in `index.css` used `bg-white` without any dark mode variant. When dark mode was enabled via the toggle, the card background stayed white, but the text inside (using `text-white` for dark mode) became invisible.
+
+**Solution:** Added comprehensive dark mode CSS rules:
+- `.dark .card { bg-gray-800, border-gray-700 }` - Dark card backgrounds
+- `.dark .stat-tile-number { text-white }` - Stat tile numbers visible
+- `.dark .stat-tile-label { text-gray-400 }` - Stat tile labels with proper contrast
+- `.dark .section-header { text-gray-400 }` - Section headers visible
+- `.dark .badge-success/warning/error` - Status badges with dark backgrounds
+- `.dark .overview-label, .dark .balance-large, .dark .balance-small` - Balance display elements
+- `.dark .account-item { bg-gray-800, border-gray-700 }` - Account items
+- Updated credit/debit badges in ProfessionalDashboard.js with `isDark` conditional styling
+
+**Files Changed:**
+- `/app/frontend/src/index.css` - Added dark mode variants for .card, .stat-tile-*, .section-header, .badge-* classes
+- `/app/frontend/src/App.css` - Added dark mode variants for .overview-label, .balance-large, .balance-small, .account-item classes
+- `/app/frontend/src/components/ProfessionalDashboard.js` - Updated credit/debit badge styling with isDark conditionals
+
+**Verification:** Testing agent confirmed 100% pass rate (iteration_76.json):
+- Theme toggle works correctly
+- Dark mode: All cards have gray-800 backgrounds
+- Dark mode: All text is visible with proper contrast
+- Light mode: No regressions - white backgrounds maintained
+- Transaction labels (Card Payment, SEPA Transfer, Top Up) now clearly visible in dark mode
+
 ### Admin Dashboard Analytics Fix (Feb 17, 2025)
 **Problem:** Admin Dashboard Overview page was showing all zeros for statistics (Total Users, Active Users, Pending KYC, Transactions).
 
