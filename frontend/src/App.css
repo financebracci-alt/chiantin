@@ -127,11 +127,22 @@ body {
   border-radius: 8px;
   margin-bottom: 12px;
   transition: all 0.15s;
+  background-color: white;
+}
+
+.dark .account-item {
+  border-color: #374151;
+  background-color: #1f2937;
 }
 
 .account-item:hover {
   border-color: #D32F2F;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.04);
+}
+
+.dark .account-item:hover {
+  border-color: #EF5350;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 }
 
 /* Transaction List */
