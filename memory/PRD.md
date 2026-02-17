@@ -44,6 +44,27 @@ ecommbx is a full-stack EU-licensed digital banking platform built with React fr
 
 **Verification:** 100% test pass rate (iteration_75.json) - All 5 stat tiles display correct values, all 4 charts render correctly
 
+### Header Spacing Consistency Fix (Feb 17, 2025)
+**Problem:** On the Dashboard page, the logo was pushed to the far left and controls (EN / theme / bell / logout) were pushed to the far right, leaving a huge empty gap in the middle. The Transaction History page had proper header spacing.
+
+**Root Cause:** The Dashboard header used `px-4 flex items-center justify-between` directly on the `<header>` element, which stretched the content to the full screen width. Other pages like Transaction History had an inner `max-w-7xl mx-auto` container.
+
+**Solution:** Updated all page headers to use a consistent two-level structure:
+1. `<header>` - Full-width background with border
+2. `<div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-full flex items-center justify-between">` - Constrained content container
+
+**Pages Fixed:**
+- Dashboard (DashboardPage/ProfessionalDashboard)
+- Transactions
+- Support
+- Insights
+- All other authenticated pages already had correct structure
+
+**Files Changed:**
+- `/app/frontend/src/App.js`
+
+**Verification:** Code analysis confirms all 8 `<header>` elements now have the `max-w-7xl mx-auto` inner container pattern.
+
 ### Support Ticket Real-Time Message Update Fix (Feb 17, 2025)
 **Problem:** After sending a message in support tickets, the new message did not appear until the page was reloaded or the ticket was re-selected.
 
