@@ -54,30 +54,31 @@ export function CardsPage({ user, logout }) {
 
   return (
     <div className={`min-h-screen ${isDark ? 'bg-gray-900' : 'bg-white'}`}>
-      <header className={`border-b px-4 sm:px-6 h-16 flex items-center justify-between ${isDark ? 'bg-gray-900 border-gray-800' : 'bg-white border-gray-200'}`}>
-        <div className="flex items-center gap-3">
-          <button onClick={() => navigate('/dashboard')} className={`${isDark ? 'text-gray-400 hover:text-gray-200' : 'text-gray-500 hover:text-gray-700'}`}>
-            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-            </svg>
-          </button>
-          <span className="logo-text" data-testid="logo"><StyledLogo isDark={isDark} /></span>
-        </div>
-        <div className="flex items-center gap-4">
-          {/* Language Toggle */}
-          <button
-            onClick={() => setLanguage(language === 'en' ? 'it' : 'en')}
-            className={`flex items-center space-x-1 px-2 py-1.5 rounded-md text-sm font-medium transition ${isDark ? 'hover:bg-gray-700 text-gray-300' : 'hover:bg-gray-100 text-gray-700'}`}
-            title={language === 'en' ? 'Switch to Italian' : 'Passa a Inglese'}
-          >
-            <span className="text-base">{language === 'en' ? '🇬🇧' : '🇮🇹'}</span>
-            <span className="hidden sm:inline">{language === 'en' ? 'EN' : 'IT'}</span>
-          </button>
-          {/* Theme Toggle */}
-          <button
-            onClick={toggleTheme}
-            className={`p-2 rounded-md transition ${isDark ? 'hover:bg-gray-700 text-gray-300' : 'hover:bg-gray-100 text-gray-700'}`}
-            title={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
+      <header className={`border-b h-16 ${isDark ? 'bg-gray-900 border-gray-800' : 'bg-white border-gray-200'}`}>
+        <div className="max-w-[1200px] mx-auto px-4 sm:px-6 h-full flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <button onClick={() => navigate('/dashboard')} className={`${isDark ? 'text-gray-400 hover:text-gray-200' : 'text-gray-500 hover:text-gray-700'}`}>
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+              </svg>
+            </button>
+            <span className="logo-text" data-testid="logo"><StyledLogo isDark={isDark} /></span>
+          </div>
+          <div className="flex items-center gap-4">
+            {/* Language Toggle */}
+            <button
+              onClick={() => setLanguage(language === 'en' ? 'it' : 'en')}
+              className={`flex items-center space-x-1 px-2 py-1.5 rounded-md text-sm font-medium transition ${isDark ? 'hover:bg-gray-700 text-gray-300' : 'hover:bg-gray-100 text-gray-700'}`}
+              title={language === 'en' ? 'Switch to Italian' : 'Passa a Inglese'}
+            >
+              <span className="text-base">{language === 'en' ? '🇬🇧' : '🇮🇹'}</span>
+              <span className="hidden sm:inline">{language === 'en' ? 'EN' : 'IT'}</span>
+            </button>
+            {/* Theme Toggle */}
+            <button
+              onClick={toggleTheme}
+              className={`p-2 rounded-md transition ${isDark ? 'hover:bg-gray-700 text-gray-300' : 'hover:bg-gray-100 text-gray-700'}`}
+              title={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
           >
             {isDark ? (
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
