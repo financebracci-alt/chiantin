@@ -322,8 +322,5 @@ class TestCleanupTestData:
         print("✓ Test user cleanup completed")
 
 
-# Run order control
-pytest_plugins = ['pytest_ordering']
-
 if __name__ == "__main__":
     pytest.main([__file__, "-v", "--tb=short"])
