@@ -3827,24 +3827,44 @@ async def admin_delete_transfer(
 @app.get("/api/v1/admin/accounts-with-users")
 async def get_all_accounts_with_users(
     current_user: dict = Depends(require_admin),
-    db: AsyncIOMotorDatabase = Depends(get_database)
+    db: AsyncIOMotorDatabase = Depends(get_database),
+    search: Optional[str] = None,
+    page: int = 1,
+    limit: int = 50
 ):
-    """Get all bank accounts with their user information (efficient single query)."""
+    """Get all bank accounts with their user information, real ledger balances, search and pagination.
+    
+    Supports:
+    - search: Filter by user name, email, IBAN, or account number (searches ALL accounts in DB)
+    - page: Page number (1-indexed)
+    - limit: Accounts per page (20, 50, or 100)
+    
+    When search is provided, pagination is ignored and ALL matching accounts are returned.
+    """
     from bson import ObjectId
     
-    # Get all bank accounts
+    # Validate limit
+    if limit not in [20, 50, 100]:
+        limit = 50
+    
+    # Get ledger engine for balance calculation
+    ledger_engine = LedgerEngine(db)
+    
+    # Get all bank accounts first (we need to join with users for search)
     accounts_cursor = db.bank_accounts.find({})
-    accounts = []
+    all_accounts = []
     user_ids = set()
     
     async for acc in accounts_cursor:
         user_id = acc.get("user_id")
         if user_id:
-            user_ids.add(user_id if isinstance(user_id, ObjectId) else ObjectId(user_id) if ObjectId.is_valid(str(user_id)) else None)
-        accounts.append(acc)
-    
-    # Remove None values
-    user_ids = {uid for uid in user_ids if uid is not None}
+            try:
+                uid = user_id if isinstance(user_id, ObjectId) else ObjectId(user_id) if ObjectId.is_valid(str(user_id)) else None
+                if uid:
+                    user_ids.add(uid)
+            except:
+                pass
+        all_accounts.append(acc)
     
     # Fetch all users in one query
     users_map = {}
@@ -3853,26 +3873,80 @@ async def get_all_accounts_with_users(
         async for user in users_cursor:
             users_map[str(user["_id"])] = user
     
-    # Combine accounts with user info
-    result = []
-    for acc in accounts:
+    # Combine accounts with user info and calculate real ledger balance
+    enriched_accounts = []
+    for acc in all_accounts:
         user_id = acc.get("user_id")
         user_id_str = str(user_id) if user_id else None
         user = users_map.get(user_id_str, {})
         
-        result.append({
+        # Calculate REAL balance from ledger
+        ledger_account_id = acc.get("ledger_account_id")
+        balance = 0
+        if ledger_account_id:
+            try:
+                balance = await ledger_engine.get_balance(ledger_account_id)
+            except Exception as e:
+                logger.error(f"Failed to get balance for ledger account {ledger_account_id}: {e}")
+                balance = 0
+        
+        user_name = f"{user.get('first_name', '')} {user.get('last_name', '')}".strip() or "Unknown"
+        user_email = user.get("email", "Unknown")
+        account_number = acc.get("account_number", "")
+        iban = acc.get("iban") or ""
+        
+        enriched_accounts.append({
             "id": str(acc["_id"]),
-            "account_number": acc.get("account_number", ""),
-            "iban": acc.get("iban"),
+            "account_number": account_number,
+            "iban": iban,
             "bic": acc.get("bic"),
-            "balance": acc.get("balance_in_cents", 0),
+            "balance": balance,  # Real ledger balance in cents
             "currency": acc.get("currency", "EUR"),
             "userId": user_id_str,
-            "userName": f"{user.get('first_name', '')} {user.get('last_name', '')}".strip() or "Unknown",
-            "userEmail": user.get("email", "Unknown")
+            "userName": user_name,
+            "userEmail": user_email,
+            "created_at": acc.get("created_at"),
+            # Search fields for filtering
+            "_search_text": f"{user_name} {user_email} {account_number} {iban}".lower()
         })
     
-    return result
+    # Apply search filter if provided
+    if search and search.strip():
+        search_term = search.strip().lower()
+        enriched_accounts = [
+            acc for acc in enriched_accounts 
+            if search_term in acc["_search_text"]
+        ]
+    
+    # Get total count before pagination
+    total_count = len(enriched_accounts)
+    
+    # Apply pagination only when not searching
+    if search and search.strip():
+        # Return all matching results for search
+        paginated_accounts = enriched_accounts
+        total_pages = 1
+    else:
+        # Apply pagination
+        skip = (page - 1) * limit
+        paginated_accounts = enriched_accounts[skip:skip + limit]
+        total_pages = (total_count + limit - 1) // limit
+    
+    # Remove search text field before returning
+    for acc in paginated_accounts:
+        acc.pop("_search_text", None)
+    
+    return {
+        "accounts": paginated_accounts,
+        "pagination": {
+            "page": page,
+            "limit": limit,
+            "total_accounts": total_count,
+            "total_pages": total_pages,
+            "has_next": page < total_pages if not (search and search.strip()) else False,
+            "has_prev": page > 1 if not (search and search.strip()) else False
+        }
+    }
 
 
 @app.post("/api/v1/admin/accounts/{account_id}/topup")
