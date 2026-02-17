@@ -44,6 +44,41 @@ ecommbx is a full-stack EU-licensed digital banking platform built with React fr
 
 **Verification:** 100% test pass rate (iteration_75.json) - All 5 stat tiles display correct values, all 4 charts render correctly
 
+### Admin Accounts Tab - Real Balances, Search & Pagination (Feb 17, 2025)
+**Problem:** 
+1. Account balances showing €0,00 for all accounts
+2. No search functionality
+3. No pagination - all accounts shown in one page
+
+**Root Cause:** The `/admin/accounts-with-users` endpoint was returning `balance_in_cents` from the bank_accounts collection, but this is a ledger-based system where **real balances must be calculated from ledger entries**.
+
+**Solution:**
+- Updated backend to calculate **real ledger balances** using `LedgerEngine.get_balance()`
+- Added search functionality that searches by name, email, IBAN, or account number across **ALL** accounts
+- Added pagination: 20/50/100 per page with 50 as default
+- Search returns ALL matching results regardless of which page they're on
+
+**Files Changed:**
+- `/app/backend/server.py` - Enhanced `get_all_accounts_with_users()` with ledger balance calculation, search, and pagination
+- `/app/frontend/src/components/AdminAccountsControl.js` - Added search bar, pagination controls, per-page selector
+
+**API Response Format:**
+```json
+{
+  "accounts": [...],
+  "pagination": {
+    "page": 1,
+    "limit": 50,
+    "total_accounts": 57,
+    "total_pages": 2,
+    "has_next": true,
+    "has_prev": false
+  }
+}
+```
+
+**Verification:** Screenshots and API tests confirm real balances (€29,950.00, €94,996.11, €132,088.24, etc.), search working across all accounts, and pagination functioning correctly.
+
 ### Admin Dashboard Charts - Real Data (Feb 17, 2025)
 **Problem:** Charts were showing hardcoded fake data (Jan, Feb, Mar, Apr with fictional numbers) instead of real data from the database.
 
