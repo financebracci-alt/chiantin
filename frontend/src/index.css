@@ -156,6 +156,10 @@
     @apply text-xl font-semibold text-gray-900 mb-1;
   }
   
+  .dark .stat-tile-number {
+    @apply text-white;
+  }
+
   @media (min-width: 640px) {
     .stat-tile-number {
       @apply text-2xl;
@@ -164,6 +168,10 @@
   
   .stat-tile-label {
     @apply text-sm text-gray-600 mb-2;
+  }
+  
+  .dark .stat-tile-label {
+    @apply text-gray-400;
   }
   
   .stat-tile-link {
