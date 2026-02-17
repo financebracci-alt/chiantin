@@ -507,12 +507,12 @@ export function ProfessionalDashboard({ user, logout }) {
       </div>
 
       {/* Overview Card */}
-      <div className={`overview-card ${isDark ? 'bg-gray-800 border-gray-700' : ''}`}>
+      <div className="overview-card">
         <div className="overview-label">{t('overview')}</div>
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4">
           <div className="flex-1">
             <div className="flex items-center gap-3">
-              <div className={`balance-large text-3xl sm:text-5xl ${isDark ? 'text-white' : ''}`}>
+              <div className="balance-large text-3xl sm:text-5xl">
                 {formatBalance(getTotalBalance(), isBalanceVisible)}
               </div>
               <BalanceToggle 
@@ -522,7 +522,7 @@ export function ProfessionalDashboard({ user, logout }) {
                 size="default"
               />
             </div>
-            <div className={`balance-small ${isDark ? 'text-gray-400' : ''}`}>{t('availableBalance')}</div>
+            <div className="balance-small">{t('availableBalance')}</div>
           </div>
           <button onClick={() => accounts[0] && navigate(`/accounts/${accounts[0].id}/transactions`)} className="btn-primary w-full sm:w-auto" disabled={accounts.length === 0}>
             {t('viewAccount')}
