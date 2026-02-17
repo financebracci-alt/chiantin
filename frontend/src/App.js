@@ -1500,59 +1500,60 @@ function CustomerDashboard() {
   return (
     <div className={`min-h-screen ${isDark ? 'bg-gray-900' : 'bg-white'}`}>
       {/* Simple Professional Header */}
-      <header className={`h-16 px-4 sm:px-6 flex items-center justify-between ${isDark ? 'bg-gray-900 border-b border-gray-800' : 'bg-white border-b border-gray-200'}`}>
-        <h1 className={`header-logo font-bold text-xl ${isDark ? 'text-white' : 'text-gray-900'}`}><StyledLogo isDark={isDark} /></h1>
-        <div className="flex items-center space-x-2 sm:space-x-4">
-          {/* Language Toggle */}
-          <button
-            onClick={() => setLanguage(language === 'en' ? 'it' : 'en')}
-            className={`px-2 py-1 rounded font-bold text-xs sm:text-sm transition ${isDark ? 'bg-gray-800 hover:bg-gray-700 text-gray-300' : 'bg-gray-100 hover:bg-gray-200 text-gray-700'}`}
-            title={language === 'en' ? 'Switch to Italian' : 'Passa all\'Inglese'}
-          >
-            {language === 'en' ? 'EN' : 'IT'}
-          </button>
-          
-          {/* Theme Toggle */}
-          <button
-            onClick={toggleTheme}
-            className={`p-2 rounded-lg transition ${isDark ? 'hover:bg-gray-800 text-yellow-400' : 'hover:bg-gray-100 text-gray-600'}`}
-            title={isDark ? t('lightMode') : t('darkMode')}
-          >
-            {isDark ? (
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
-              </svg>
-            ) : (
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
-              </svg>
-            )}
-          </button>
-          
-          <NotificationBell />
-          
-          {/* Desktop: Show Logout button */}
-          <button onClick={logout} className={`hidden sm:block text-sm hover:text-gray-900 ${isDark ? 'text-gray-400 hover:text-white' : 'text-gray-600'}`} data-testid="logout-button">
-            {t('logout')}
-          </button>
-          
-          {/* Mobile: Show User Avatar */}
-          <div className="sm:hidden relative">
+      <header className={`h-16 ${isDark ? 'bg-gray-900 border-b border-gray-800' : 'bg-white border-b border-gray-200'}`}>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-full flex items-center justify-between">
+          <h1 className={`header-logo font-bold text-xl ${isDark ? 'text-white' : 'text-gray-900'}`}><StyledLogo isDark={isDark} /></h1>
+          <div className="flex items-center space-x-2 sm:space-x-4">
+            {/* Language Toggle */}
             <button
-              onClick={() => setShowUserMenu(!showUserMenu)}
-              className="w-9 h-9 rounded-full bg-gradient-to-br from-red-500 to-red-600 text-white font-semibold text-sm flex items-center justify-center shadow-md hover:shadow-lg transition-shadow"
-              data-testid="user-avatar-btn"
+              onClick={() => setLanguage(language === 'en' ? 'it' : 'en')}
+              className={`px-2 py-1 rounded font-bold text-xs sm:text-sm transition ${isDark ? 'bg-gray-800 hover:bg-gray-700 text-gray-300' : 'bg-gray-100 hover:bg-gray-200 text-gray-700'}`}
+              title={language === 'en' ? 'Switch to Italian' : 'Passa all\'Inglese'}
             >
-              {getInitials()}
+              {language === 'en' ? 'EN' : 'IT'}
             </button>
             
-            {/* Mobile User Menu Dropdown */}
-            {showUserMenu && (
-              <>
-                <div
-                  className="fixed inset-0 z-10"
-                  onClick={() => setShowUserMenu(false)}
-                />
+            {/* Theme Toggle */}
+            <button
+              onClick={toggleTheme}
+              className={`p-2 rounded-lg transition ${isDark ? 'hover:bg-gray-800 text-yellow-400' : 'hover:bg-gray-100 text-gray-600'}`}
+              title={isDark ? t('lightMode') : t('darkMode')}
+            >
+              {isDark ? (
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+                </svg>
+              ) : (
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+                </svg>
+              )}
+            </button>
+            
+            <NotificationBell />
+            
+            {/* Desktop: Show Logout button */}
+            <button onClick={logout} className={`hidden sm:block text-sm hover:text-gray-900 ${isDark ? 'text-gray-400 hover:text-white' : 'text-gray-600'}`} data-testid="logout-button">
+              {t('logout')}
+            </button>
+            
+            {/* Mobile: Show User Avatar */}
+            <div className="sm:hidden relative">
+              <button
+                onClick={() => setShowUserMenu(!showUserMenu)}
+                className="w-9 h-9 rounded-full bg-gradient-to-br from-red-500 to-red-600 text-white font-semibold text-sm flex items-center justify-center shadow-md hover:shadow-lg transition-shadow"
+                data-testid="user-avatar-btn"
+              >
+                {getInitials()}
+              </button>
+              
+              {/* Mobile User Menu Dropdown */}
+              {showUserMenu && (
+                <>
+                  <div
+                    className="fixed inset-0 z-10"
+                    onClick={() => setShowUserMenu(false)}
+                  />
                   <div className={`fixed left-4 right-4 top-16 rounded-xl shadow-xl border z-20 overflow-hidden ${isDark ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'}`}>
                     {/* User Info Header */}
                     <div className="p-4 bg-gradient-to-r from-red-500 to-red-600 text-white">
