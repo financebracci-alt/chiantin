@@ -428,7 +428,7 @@ export function KYCApplication() {
             <button
               type="button"
               onClick={() => setStep(1)}
-              className="px-6 py-2 border border-gray-300 rounded-lg hover:bg-gray-50"
+              className="px-6 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 text-gray-900"
             >
               {t('back')}
             </button>
