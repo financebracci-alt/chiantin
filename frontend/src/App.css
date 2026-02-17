@@ -60,8 +60,15 @@ body {
   line-height: 1.2;
 }
 
+/* In dark mode, balance on overview card should remain dark for readability on white background */
+/* The overview card stays white, so text must be dark */
+.dark .overview-card .balance-large {
+  color: #212121;
+}
+
+/* For other contexts where balance-large might be on dark backgrounds */
 .dark .balance-large {
-  color: #F5F5F5;
+  color: #212121;
 }
 
 @media (min-width: 640px) {
