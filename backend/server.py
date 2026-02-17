@@ -3177,6 +3177,7 @@ async def get_admin_analytics_overview(
     total_users = await db.users.count_documents({})
     active_users = await db.users.count_documents({"status": "ACTIVE"})
     pending_kyc = await db.kyc_applications.count_documents({"status": "SUBMITTED"})
+    approved_kyc = await db.kyc_applications.count_documents({"status": "APPROVED"})
     total_accounts = await db.bank_accounts.count_documents({})
     
     # Get transfer stats
@@ -3192,13 +3193,29 @@ async def get_admin_analytics_overview(
     # Get card request stats
     pending_cards = await db.card_requests.count_documents({"status": "PENDING"})
     
+    # Calculate total transaction volume from ledger entries (only credits/debits to customer accounts)
+    total_volume_cents = 0
+    try:
+        # Sum all credit amounts from ledger_entries (represents money flowing through platform)
+        volume_pipeline = [
+            {"$match": {"direction": "CREDIT"}},
+            {"$group": {"_id": None, "total": {"$sum": "$amount"}}}
+        ]
+        volume_result = await db.ledger_entries.aggregate(volume_pipeline).to_list(1)
+        if volume_result:
+            total_volume_cents = volume_result[0].get("total", 0)
+    except Exception as e:
+        logger.error(f"Failed to calculate transaction volume: {e}")
+        total_volume_cents = 0
+    
     return {
         "users": {
             "total": total_users,
             "active": active_users
         },
         "kyc": {
-            "pending": pending_kyc
+            "pending": pending_kyc,
+            "approved": approved_kyc
         },
         "accounts": {
             "total": total_accounts
@@ -3207,7 +3224,8 @@ async def get_admin_analytics_overview(
             "total": total_transfers,
             "pending": pending_transfers,
             "completed": completed_transfers,
-            "rejected": rejected_transfers
+            "rejected": rejected_transfers,
+            "volume_cents": total_volume_cents
         },
         "tickets": {
             "total": total_tickets,
