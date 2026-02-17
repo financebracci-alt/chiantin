@@ -409,6 +409,11 @@ function TicketDetails({ ticket, onUpdate, onDelete, isAdmin = false, onRefreshT
       
       setNewMessage('');
       setSelectedFiles([]);
+      
+      // Refresh the ticket to show new message immediately
+      if (onRefreshTicket) {
+        await onRefreshTicket(ticket.id);
+      }
       onUpdate();
     } catch (err) {
       const errorMsg = err.response?.data?.detail || 'Failed to send message';
