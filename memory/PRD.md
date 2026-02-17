@@ -44,6 +44,21 @@ ecommbx is a full-stack EU-licensed digital banking platform built with React fr
 
 **Verification:** 100% test pass rate (iteration_75.json) - All 5 stat tiles display correct values, all 4 charts render correctly
 
+### Support Ticket Real-Time Message Update Fix (Feb 17, 2025)
+**Problem:** After sending a message in support tickets, the new message did not appear until the page was reloaded or the ticket was re-selected.
+
+**Root Cause:** The `handleSendMessage` function called `onUpdate()` which refreshed the ticket list, but **did not update the `selectedTicket` state**. The displayed ticket still had the old messages.
+
+**Solution:**
+- Added `refreshSelectedTicket()` function in `SupportTickets` component to fetch and update the currently viewed ticket
+- Added `onRefreshTicket` prop to `TicketDetails` component
+- Updated all handlers (`handleSendMessage`, `handleStatusChange`, `handleSaveSubject`, `handleSaveMessage`, `handleDeleteMessage`) to call `onRefreshTicket()` after successful operations
+
+**Files Changed:**
+- `/app/frontend/src/components/Support.js`
+
+**Verification:** Screenshots confirm that after sending "Test real-time update - 1771322923", the message appears immediately in the conversation without any page reload or re-clicking the ticket.
+
 ### Admin Accounts Tab - Real Balances, Search & Pagination (Feb 17, 2025)
 **Problem:** 
 1. Account balances showing €0,00 for all accounts
