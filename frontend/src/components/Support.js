@@ -533,6 +533,10 @@ function TicketDetails({ ticket, onUpdate, onDelete, isAdmin = false, onRefreshT
       await api.delete(`/admin/tickets/${ticket.id}/messages/${deletingMessageIndex}`);
       setConfirmDeleteMessage(false);
       setDeletingMessageIndex(null);
+      // Refresh the ticket to show messages without deleted one
+      if (onRefreshTicket) {
+        await onRefreshTicket(ticket.id);
+      }
       onUpdate();
     } catch (err) {
       alert('Failed to delete message: ' + (err.response?.data?.detail || err.message));
