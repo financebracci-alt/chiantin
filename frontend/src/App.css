@@ -32,6 +32,10 @@ body {
   align-items: center;
 }
 
+.dark .overview-label {
+  color: #9E9E9E;
+}
+
 .overview-label::before {
   content: '';
   width: 3px;
@@ -50,6 +54,10 @@ body {
   line-height: 1.2;
 }
 
+.dark .balance-large {
+  color: #F5F5F5;
+}
+
 @media (min-width: 640px) {
   .balance-large {
     font-size: 48px;
@@ -60,6 +68,10 @@ body {
   font-size: 13px;
   color: #757575;
   margin-top: 4px;
+}
+
+.dark .balance-small {
+  color: #9E9E9E;
 }
 
 @media (min-width: 640px) {
