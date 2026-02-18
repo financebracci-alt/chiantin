@@ -33,6 +33,9 @@ class Notification(BaseModel):
     entity_type: Optional[str] = None
     entity_id: Optional[str] = None
     
+    # Counter for grouped notifications (e.g., multiple ticket replies)
+    reply_count: int = 1
+    
     created_at: datetime = Field(default_factory=datetime.utcnow)
     
     class Config:
