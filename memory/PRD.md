@@ -96,6 +96,29 @@ ecommbx is a full-stack EU-licensed digital banking platform built with React fr
 
 **Verification:** 100% test pass rate (iteration_81.json) - 12/12 backend tests, all frontend verification passed
 
+### Notification Aggregation for Ticket Replies (Feb 18, 2025)
+**Enhancement:** Implemented notification grouping/aggregation for support ticket replies to prevent flooding.
+
+**Problem Solved:** Previously, if an admin sent 5 messages on the same ticket, the user received 5 identical notifications flooding the dropdown.
+
+**Features:**
+- One notification per ticket thread (no duplicates)
+- Counter increments for subsequent replies (e.g., "5 new messages")
+- Professional message format: "New replies on your ticket: <subject> (X new messages)"
+- Timestamp reflects the latest message in the group
+- Clicking "View details" opens ticket and marks notification as read
+- Persists across logout/login (stored in database)
+
+**Backend Changes:**
+- `/app/backend/schemas/notifications.py` - Added `reply_count` field (default: 1)
+- `/app/backend/services/notification_service.py` - Added `create_or_update_support_reply_notification()` method:
+  - Checks for existing unread notification for same ticket
+  - If exists: increments `reply_count`, updates `message` and `timestamp`
+  - If not: creates new notification with `reply_count=1`
+- `/app/backend/server.py` - Updated `add_ticket_message` endpoints to use aggregation method
+
+**Verification:** 100% test pass rate (iteration_82.json) - 11/11 backend tests, all frontend verification passed
+
 ### Admin Transfers Queue - Sender Information (Feb 18, 2025)
 **Enhancement:** Added sender information to the Admin Transfers Queue so admins can clearly see who initiated each transfer.
 
