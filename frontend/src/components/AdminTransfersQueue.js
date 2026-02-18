@@ -147,8 +147,21 @@ export function AdminTransfersQueue() {
             <button onClick={() => setSelectedTransfer(null)} className="text-gray-600 hover:text-gray-800">×</button>
           </div>
           <dl className="space-y-2 text-sm">
-            <div className="flex justify-between"><dt className="text-gray-600">To:</dt><dd className="font-medium">{selectedTransfer.beneficiary_name}</dd></div>
-            <div className="flex justify-between"><dt className="text-gray-600">IBAN:</dt><dd className="font-mono text-xs">{selectedTransfer.beneficiary_iban}</dd></div>
+            {/* Sender Section */}
+            <div className="pb-3 mb-3 border-b border-gray-200">
+              <dt className="text-gray-500 text-xs uppercase tracking-wider mb-1">Sender (From)</dt>
+              <dd className="font-medium">{selectedTransfer.sender_name || 'Unknown'}</dd>
+              {selectedTransfer.sender_email && <dd className="text-xs text-gray-500">{selectedTransfer.sender_email}</dd>}
+              {selectedTransfer.sender_iban && <dd className="text-xs text-gray-400 font-mono mt-1">{selectedTransfer.sender_iban}</dd>}
+            </div>
+            
+            {/* Beneficiary Section */}
+            <div className="pb-3 mb-3 border-b border-gray-200">
+              <dt className="text-gray-500 text-xs uppercase tracking-wider mb-1">Beneficiary (To)</dt>
+              <dd className="font-medium">{selectedTransfer.beneficiary_name}</dd>
+              <dd className="text-xs text-gray-400 font-mono mt-1">{selectedTransfer.beneficiary_iban}</dd>
+            </div>
+            
             <div className="flex justify-between"><dt className="text-gray-600">Amount:</dt><dd className="font-bold">{formatCurrency(selectedTransfer.amount)}</dd></div>
             <div className="flex justify-between"><dt className="text-gray-600">Details:</dt><dd>{selectedTransfer.details}</dd></div>
             {selectedTransfer.reference_number && <div className="flex justify-between"><dt className="text-gray-600">Reference:</dt><dd>{selectedTransfer.reference_number}</dd></div>}
