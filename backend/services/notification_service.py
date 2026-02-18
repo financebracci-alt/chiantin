@@ -1,8 +1,8 @@
 """Notification service."""
 
 from motor.motor_asyncio import AsyncIOMotorDatabase
-from datetime import datetime
-from typing import List
+from datetime import datetime, timezone
+from typing import List, Optional
 
 from schemas.notifications import Notification, NotificationType
 from utils.common import serialize_doc
@@ -28,13 +28,85 @@ class NotificationService:
             title=title,
             message=message,
             action_url=action_url,
-            metadata=metadata or {}
+            metadata=metadata or {},
+            reply_count=1
         )
         
         notif_dict = notification.model_dump(by_alias=True)
         await self.db.notifications.insert_one(notif_dict)
         
         return notification
+    
+    async def create_or_update_support_reply_notification(
+        self,
+        user_id: str,
+        ticket_id: str,
+        ticket_subject: str,
+        action_url: str = "/support"
+    ) -> Notification:
+        """
+        Create or update a support ticket reply notification.
+        Groups multiple replies to the same ticket into a single notification.
+        
+        If an unread notification exists for this ticket, increments the reply_count.
+        Otherwise creates a new notification.
+        """
+        # Check for existing unread notification for this ticket
+        existing = await self.db.notifications.find_one({
+            "user_id": user_id,
+            "notification_type": "SUPPORT",
+            "metadata.ticket_id": ticket_id,
+            "metadata.is_reply": True,
+            "read": False
+        })
+        
+        now = datetime.now(timezone.utc)
+        
+        if existing:
+            # Update existing notification - increment counter and update timestamp
+            new_count = existing.get("reply_count", 1) + 1
+            
+            # Build the message with count
+            if new_count == 1:
+                new_message = f"Support has replied to your ticket: {ticket_subject}"
+            else:
+                new_message = f"New replies on your ticket: {ticket_subject} ({new_count} new messages)"
+            
+            await self.db.notifications.update_one(
+                {"_id": existing["_id"]},
+                {
+                    "$set": {
+                        "reply_count": new_count,
+                        "message": new_message,
+                        "created_at": now,  # Update timestamp to latest
+                        "title": "New Replies on Your Ticket" if new_count > 1 else "New Reply on Your Ticket"
+                    }
+                }
+            )
+            
+            # Return the updated notification
+            updated_doc = await self.db.notifications.find_one({"_id": existing["_id"]})
+            return Notification(**serialize_doc(updated_doc))
+        else:
+            # Create new notification
+            notification = Notification(
+                user_id=user_id,
+                notification_type=NotificationType.SUPPORT,
+                title="New Reply on Your Ticket",
+                message=f"Support has replied to your ticket: {ticket_subject}",
+                action_url=action_url,
+                metadata={
+                    "ticket_id": ticket_id,
+                    "is_reply": True
+                },
+                reply_count=1
+            )
+            
+            notif_dict = notification.model_dump(by_alias=True)
+            notif_dict["created_at"] = now
+            await self.db.notifications.insert_one(notif_dict)
+            
+            return notification
     
     async def get_user_notifications(
         self,
@@ -59,6 +131,8 @@ class NotificationService:
                     serialized["message"] = serialized.get("title", "Notification")
                 if "read" not in serialized:
                     serialized["read"] = serialized.get("is_read", False)
+                if "reply_count" not in serialized:
+                    serialized["reply_count"] = 1  # Default for older notifications
                 
                 notifications.append(Notification(**serialized))
             except Exception as e:
@@ -75,7 +149,7 @@ class NotificationService:
             {
                 "$set": {
                     "read": True,
-                    "read_at": datetime.utcnow()
+                    "read_at": datetime.now(timezone.utc)
                 }
             }
         )
@@ -88,7 +162,7 @@ class NotificationService:
             {
                 "$set": {
                     "read": True,
-                    "read_at": datetime.utcnow()
+                    "read_at": datetime.now(timezone.utc)
                 }
             }
         )
