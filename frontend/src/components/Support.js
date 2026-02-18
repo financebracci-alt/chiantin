@@ -2,6 +2,7 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import api from '../api';
 import { useLanguage, useTheme } from '../contexts/AppContext';
+import { toast } from 'sonner';
 
 export function SupportTickets({ isAdmin = false }) {
   const [tickets, setTickets] = useState([]);
