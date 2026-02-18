@@ -2816,10 +2816,11 @@ async def get_my_tickets(
     current_user: dict = Depends(get_current_user),
     db: AsyncIOMotorDatabase = Depends(get_database)
 ):
-    """Get current user's tickets."""
+    """Get current user's tickets with unread counts."""
     ticket_service = TicketService(db)
     tickets = await ticket_service.get_user_tickets(current_user["id"])
-    return [t.model_dump() for t in tickets]
+    # get_user_tickets now returns a list of dicts with unread_count
+    return tickets
 
 
 @app.post("/api/v1/tickets/{ticket_id}/messages")
