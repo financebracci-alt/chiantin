@@ -860,11 +860,12 @@ function TicketDetails({ ticket, onUpdate, onDelete, isAdmin = false, onRefreshT
       });
       setEditingMessageIndex(null);
       setEditedMessageContent('');
+      toast.success('Message updated');
       // Refresh the ticket to show updated message
       if (onRefreshTicket) {
         await onRefreshTicket(ticket.id);
       }
-      onUpdate();
+      // No full refetch needed
     } catch (err) {
       alert('Failed to update message');
     } finally {
@@ -882,6 +883,7 @@ function TicketDetails({ ticket, onUpdate, onDelete, isAdmin = false, onRefreshT
     try {
       await api.delete(`/admin/tickets/${ticket.id}`);
       setShowDeleteConfirm(false);
+      toast.success('Ticket deleted');
       if (onDelete) {
         onDelete(ticket.id);
       }
@@ -899,11 +901,12 @@ function TicketDetails({ ticket, onUpdate, onDelete, isAdmin = false, onRefreshT
       await api.delete(`/admin/tickets/${ticket.id}/messages/${deletingMessageIndex}`);
       setConfirmDeleteMessage(false);
       setDeletingMessageIndex(null);
+      toast.success('Message deleted');
       // Refresh the ticket to show messages without deleted one
       if (onRefreshTicket) {
         await onRefreshTicket(ticket.id);
       }
-      onUpdate();
+      // No full refetch needed
     } catch (err) {
       alert('Failed to delete message: ' + (err.response?.data?.detail || err.message));
     }
