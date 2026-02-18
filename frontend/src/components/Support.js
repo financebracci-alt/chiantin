@@ -224,7 +224,9 @@ export function SupportTickets({ isAdmin = false }) {
       {tickets.length === 0 ? (
         <div className={`card-blue-accent p-8 text-center animate-card ${isDark ? 'bg-gray-800 border-gray-700' : ''}`}>
           <div className="circle-pattern">
-            <p className={isDark ? 'text-gray-400' : 'text-gray-600'}>{t('noSupportTicketsYet')}</p>
+            <p className={isDark ? 'text-gray-400' : 'text-gray-600'}>
+              {searchQuery ? 'No tickets found matching your search' : t('noSupportTicketsYet')}
+            </p>
           </div>
         </div>
       ) : (
@@ -233,20 +235,41 @@ export function SupportTickets({ isAdmin = false }) {
           <div className="lg:col-span-1">
             <div className={`card-enhanced ${isDark ? 'bg-gray-800 border-gray-700' : ''}`}>
               <div className={`p-4 border-b ${isDark ? 'bg-gray-700/50 border-gray-600' : 'bg-blue-50/30'}`}>
-                <h3 className={`font-semibold ${isDark ? 'text-white' : 'text-gray-900'}`}>{t('yourTickets')}</h3>
+                <h3 className={`font-semibold ${isDark ? 'text-white' : 'text-gray-900'}`}>{isAdmin ? 'All Tickets' : t('yourTickets')}</h3>
                 <p className={`text-sm mt-1 ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>{tickets.length} {t('ticketCount')}</p>
               </div>
-              <div className="divide-y max-h-[600px] overflow-y-auto">
+              <div className={`divide-y max-h-[600px] overflow-y-auto ${isDark ? 'divide-gray-700' : ''}`}>
                 {tickets.map((ticket) => (
                   <div
                     key={ticket.id}
-                    onClick={() => setSelectedTicket(ticket)}
-                    className={`p-4 cursor-pointer hover-blue-bg ${
-                      selectedTicket?.id === ticket.id ? 'bg-blue-50' : ''
-                    } ${isDark ? 'hover:bg-gray-700' : ''}`}
+                    onClick={() => handleSelectTicket(ticket)}
+                    className={`p-4 cursor-pointer transition-colors ${
+                      selectedTicket?.id === ticket.id 
+                        ? (isDark ? 'bg-gray-700' : 'bg-blue-50') 
+                        : (isDark ? 'hover:bg-gray-700' : 'hover:bg-blue-50/50')
+                    }`}
                     data-testid={`ticket-${ticket.id}`}
                   >
-                    <p className={`font-medium ${isDark ? 'text-white' : 'text-gray-900'}`}>{ticket.subject}</p>
+                    <div className="flex items-start justify-between gap-2">
+                      <p className={`font-medium flex-1 ${isDark ? 'text-white' : 'text-gray-900'}`}>
+                        {ticket.subject}
+                        {/* "Created by Support" tag */}
+                        {ticket.created_by_admin && (
+                          <span className={`ml-2 text-xs px-2 py-0.5 rounded-full ${isDark ? 'bg-purple-900/50 text-purple-300' : 'bg-purple-100 text-purple-700'}`}>
+                            Created by Support
+                          </span>
+                        )}
+                      </p>
+                      {/* Unread badge for admin */}
+                      {isAdmin && ticket.unread_count > 0 && (
+                        <span 
+                          className="flex-shrink-0 bg-red-500 text-white text-xs font-bold rounded-full h-5 min-w-[20px] px-1.5 flex items-center justify-center"
+                          data-testid={`unread-badge-${ticket.id}`}
+                        >
+                          {ticket.unread_count > 9 ? '9+' : ticket.unread_count}
+                        </span>
+                      )}
+                    </div>
                     {/* Show client name for admin view */}
                     {isAdmin && ticket.user_name && (
                       <p className={`text-xs mt-1 ${isDark ? 'text-blue-400' : 'text-blue-600'}`}>
@@ -264,7 +287,7 @@ export function SupportTickets({ isAdmin = false }) {
                     </div>
                     {ticket.messages && ticket.messages.length > 1 && (
                       <p className={`text-xs mt-1 ${isDark ? 'text-gray-500' : 'text-gray-500'}`}>
-                        {ticket.messages.length} {t('ticketCount')}
+                        {ticket.messages.length} messages
                       </p>
                     )}
                   </div>
