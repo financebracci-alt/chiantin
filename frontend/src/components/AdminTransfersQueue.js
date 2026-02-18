@@ -78,8 +78,18 @@ export function AdminTransfersQueue() {
     try {
       await api.delete(`/admin/transfers/${id}`);
       toast.success('Transfer permanently deleted');
+      
+      // Remove from local state without full refetch (SPA behavior)
+      setTransfers(prev => prev.filter(t => t.id !== id));
       setSelectedTransfer(null);
-      fetchTransfers();
+      
+      // Optionally refresh in background without showing loading state
+      // This ensures data consistency without visual reload
+      setTimeout(() => {
+        api.get(`/admin/transfers?status=${activeTab}`)
+          .then(res => setTransfers(res.data.data))
+          .catch(() => {}); // Silently fail background refresh
+      }, 1000);
     } catch (err) {
       toast.error('Failed to delete transfer: ' + (err.response?.data?.detail || err.message));
     } finally {
