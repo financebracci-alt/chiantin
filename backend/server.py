@@ -2191,51 +2191,6 @@ async def demote_admin_to_user(
 
 
 # ==================== ADMIN PROMOTE/DEMOTE ====================
-    
-    # Prevent demoting yourself
-    if actual_user_id == current_user["id"]:
-        raise HTTPException(
-            status_code=400, 
-            detail="You cannot demote yourself. Another SUPER_ADMIN must do this."
-        )
-    
-    # Check if user is actually an admin
-    if current_role not in ["SUPER_ADMIN", "ADMIN"]:
-        raise HTTPException(
-            status_code=400, 
-            detail=f"User {user_email} is already a regular user (role: {current_role})"
-        )
-    
-    # Perform the demotion
-    result = await db.users.update_one(
-        {"_id": user_doc["_id"]},
-        {
-            "$set": {
-                "role": "USER",
-                "demoted_at": datetime.now(timezone.utc),
-                "demoted_by": current_user["id"]
-            }
-        }
-    )
-    
-    if result.modified_count == 0:
-        raise HTTPException(status_code=500, detail="Failed to demote user")
-    
-    # Log the demotion for audit trail
-    logger.warning(
-        f"ROLE CHANGE: User {user_email} (ID: {actual_user_id}) "
-        f"demoted from {current_role} to USER by admin {current_user['email']} "
-        f"(ID: {current_user['id']})"
-    )
-    
-    return {
-        "success": True,
-        "message": f"User {user_email} has been demoted from {current_role} to USER",
-        "user_id": actual_user_id,
-        "old_role": current_role,
-        "new_role": "USER"
-    }
-
 
 
 # ==================== TAX HOLD MANAGEMENT ====================
