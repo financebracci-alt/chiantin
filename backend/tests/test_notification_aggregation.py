@@ -141,7 +141,8 @@ class TestNotificationAggregationBackend:
         assert response.status_code == 200
         
         result = response.json()
-        assert 'marked_count' in result or 'success' in result
+        # API returns 'marked_read' field with count of notifications marked
+        assert 'marked_read' in result or 'marked_count' in result or 'success' in result
         print(f"Mark all as read result: {result}")
 
 
