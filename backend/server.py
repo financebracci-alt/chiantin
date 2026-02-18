@@ -3677,10 +3677,11 @@ async def admin_get_transfers(
     current_user: dict = Depends(require_admin),
     db: AsyncIOMotorDatabase = Depends(get_database)
 ):
-    """Admin: Get transfers."""
+    """Admin: Get transfers with sender information."""
     workflows = BankingWorkflowsService(db)
     transfers = await workflows.get_admin_transfers(status)
-    return {"ok": True, "data": [t.model_dump() for t in transfers]}
+    # transfers is now a list of dicts with sender info included
+    return {"ok": True, "data": transfers}
 
 
 @app.post("/api/v1/admin/transfers/{transfer_id}/approve")
