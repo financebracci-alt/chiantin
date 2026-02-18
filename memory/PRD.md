@@ -143,7 +143,30 @@ ecommbx is a full-stack EU-licensed digital banking platform built with React fr
 - `onRefreshTicket(ticketId)` for single-ticket updates
 - Replaced `alert()` with `toast.success()` for better UX
 
-**Verification:** 100% test pass rate (iteration_84.json) - All frontend tests passed
+**Verification:** 100% test pass rate (iteration_84.json)
+
+### Admin Manual Email Verification (Feb 18, 2025)
+**Enhancement:** Added ability for admins to manually verify user emails when users have trouble receiving verification emails.
+
+**Problem Solved:** Users sometimes have issues receiving verification emails (spam filters, typos, etc.) and couldn't log in. Now admins can manually verify their email.
+
+**Features:**
+1. **"Verify Email" button** - Visible in User Details panel when email is not verified
+2. **"Email Verified" status** - Shows green "Verified" badge or yellow "Not Verified" badge
+3. **Confirmation dialog** - Warns admin before verification
+4. **Audit logging** - All manual verifications are logged
+
+**Backend Changes:**
+- `/app/backend/server.py` - Added `POST /api/v1/admin/users/{user_id}/verify-email` endpoint
+- Added `email_verified` field to user details response
+
+**Frontend Changes:**
+- `/app/frontend/src/App.js`:
+  - Added "Verify Email" button (blue, only shows when email not verified)
+  - Added "Email Verified" status field with visual badges
+  - Confirmation dialog before verification
+
+**Verification:** 100% test pass rate (iteration_85.json) - 8/8 backend tests, all frontend tests passed - All frontend tests passed
 
 ### Admin Transfers Queue - Sender Information (Feb 18, 2025)
 **Enhancement:** Added sender information to the Admin Transfers Queue so admins can clearly see who initiated each transfer.
