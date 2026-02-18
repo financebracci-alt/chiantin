@@ -247,8 +247,8 @@ class BankingWorkflowsService:
             return None
         return Transfer(**serialize_doc(doc))
     
-    async def get_admin_transfers(self, status: Optional[str] = None) -> List[Transfer]:
-        """Admin: Get transfers filtered by status."""
+    async def get_admin_transfers(self, status: Optional[str] = None) -> List[dict]:
+        """Admin: Get transfers filtered by status with sender information."""
         query = {}
         if status:
             query["status"] = status
@@ -256,7 +256,35 @@ class BankingWorkflowsService:
         cursor = self.db.transfers.find(query).sort("created_at", -1).limit(100)
         transfers = []
         async for doc in cursor:
-            transfers.append(Transfer(**serialize_doc(doc)))
+            transfer = Transfer(**serialize_doc(doc))
+            transfer_dict = transfer.model_dump()
+            
+            # Get sender (user) information
+            user_id = doc.get("user_id")
+            if user_id:
+                user = await self.db.users.find_one({"_id": user_id})
+                if user:
+                    transfer_dict["sender_name"] = f"{user.get('first_name', '')} {user.get('last_name', '')}".strip()
+                    transfer_dict["sender_email"] = user.get("email", "")
+                else:
+                    transfer_dict["sender_name"] = "Unknown User"
+                    transfer_dict["sender_email"] = ""
+            else:
+                transfer_dict["sender_name"] = "Unknown"
+                transfer_dict["sender_email"] = ""
+            
+            # Get sender account information (IBAN)
+            from_account_id = doc.get("from_account_id")
+            if from_account_id:
+                account = await self.db.bank_accounts.find_one({"_id": from_account_id})
+                if account:
+                    transfer_dict["sender_iban"] = account.get("iban", "N/A")
+                else:
+                    transfer_dict["sender_iban"] = "N/A"
+            else:
+                transfer_dict["sender_iban"] = "N/A"
+            
+            transfers.append(transfer_dict)
         return transfers
     
     async def approve_transfer(
