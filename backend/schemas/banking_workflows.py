@@ -113,6 +113,12 @@ class CreateRecipient(BaseModel):
     iban: str
 
 
+class ConfirmationEmailStatus(str, Enum):
+    PENDING = "pending"
+    SENT = "sent"
+    FAILED = "failed"
+
+
 class Transfer(BaseModel):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()), alias="_id")
     user_id: str
@@ -129,8 +135,12 @@ class Transfer(BaseModel):
     status: TransferStatus = TransferStatus.SUBMITTED
     reject_reason: Optional[str] = None
     
-    # Email confirmation tracking
-    confirmation_email_sent: bool = False
+    # Email confirmation tracking - comprehensive status
+    confirmation_email_sent: bool = False  # Legacy field for backwards compatibility
+    confirmation_email_status: ConfirmationEmailStatus = ConfirmationEmailStatus.PENDING
+    confirmation_email_sent_at: Optional[datetime] = None
+    confirmation_email_provider_id: Optional[str] = None  # Resend message ID
+    confirmation_email_error: Optional[str] = None  # Error message if failed
     
     created_at: datetime = Field(default_factory=datetime.utcnow)
     updated_at: datetime = Field(default_factory=datetime.utcnow)
