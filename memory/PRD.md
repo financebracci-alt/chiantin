@@ -472,19 +472,55 @@ ecommbx is a full-stack EU-licensed digital banking platform built with React fr
   - Professional branded template with ecommbx logo
 
 **Technical Implementation:**
-- **Email Service:** Added `send_transfer_confirmation_email()` method to `email_service.py`
+- **Email Service:** `send_transfer_confirmation_email()` method returns detailed status dict with success, provider_id, error
 - **IBAN Masking:** Shows first 4 and last 4 characters only (e.g., DE89****3000)
 - **Amount Formatting:** EU style with dots for thousands, comma for decimals (€1.234,56)
 - **Multi-Language:** Full support for English and Italian translations
-- **Duplicate Prevention:** `confirmation_email_sent` boolean field added to Transfer schema
+- **Duplicate Prevention:** Comprehensive email status tracking
 - **Graceful Failure:** Email errors don't break transfer creation
 
 **Backend Changes:**
 - `/app/backend/services/email_service.py` - Added `send_transfer_confirmation_email()` method
 - `/app/backend/services/banking_workflows_service.py` - Integrated email sending in `create_transfer()`
-- `/app/backend/schemas/banking_workflows.py` - Added `confirmation_email_sent: bool = False` to Transfer schema
+- `/app/backend/schemas/banking_workflows.py` - Added email status fields to Transfer schema
 
-**Verification:** 100% test pass rate (iteration_87.json) - 15/15 backend tests passed. Real emails sent via Resend API during testing.
+**Verification:** 100% test pass rate (iteration_87.json) - 15/15 backend tests passed.
+
+### Transfer Email Bug Fix & Enhanced Tracking (Feb 19, 2025)
+**Bug Fix:** P2P transfers were not sending confirmation emails because `TransferService.p2p_transfer()` had no email integration.
+
+**Root Cause:** The `/api/v1/transfers/p2p` endpoint used `TransferService.p2p_transfer()` which created transfers directly to DB without calling the email service.
+
+**Fix Applied:**
+1. **Added email sending to TransferService:** New `_send_transfer_confirmation_email()` helper method
+2. **Both internal and SEPA P2P transfers now send emails** automatically after transfer creation
+3. **Comprehensive email status tracking** on transfer records
+
+**New Email Status Fields (Transfer Schema):**
+- `confirmation_email_status`: enum (pending | sent | failed)
+- `confirmation_email_sent_at`: datetime when email was successfully sent
+- `confirmation_email_provider_id`: Resend message ID for tracking
+- `confirmation_email_error`: Error message if sending failed
+
+**New Admin Features:**
+- **Resend Email Endpoint:** `POST /api/v1/admin/transfers/{id}/resend-email`
+  - Only available if status is failed or pending
+  - Returns error if already sent successfully (prevents duplicates)
+  - Returns provider_id on success
+
+**Enhanced Logging:**
+- Structured logs with `[TRANSFER EMAIL]` tags
+- Logs include: transferId, recipientEmail, language, Resend response/error
+
+**Backend Changes:**
+- `/app/backend/services/transfer_service.py` - Added `_send_transfer_confirmation_email()`, `_update_transfer_email_status()`, updated `p2p_transfer()` for both internal and SEPA
+- `/app/backend/services/email_service.py` - Returns dict with {success, provider_id, error} instead of boolean
+- `/app/backend/schemas/banking_workflows.py` - Added `ConfirmationEmailStatus` enum and new fields
+- `/app/backend/server.py` - Added `POST /api/v1/admin/transfers/{id}/resend-email`
+
+**Verification:** 100% test pass rate (iteration_88.json) - 19/19 backend tests passed. Confirmed via:
+- Ashley's transfer email resent: provider_id=9822ff27-0695-490c-9ec7-7571326fd10f
+- New P2P transfer auto-sent: provider_id=c4719e34-7660-4cb8-94e3-11618c2e33f8
 
 ## Known Issues / Backlog
 
@@ -502,7 +538,11 @@ ecommbx is a full-stack EU-licensed digital banking platform built with React fr
 - `users` - User accounts
 - `bank_accounts` - Bank accounts
 - `ledger_transactions` - Financial transactions
-- `transfers` - Transfer records (now includes `confirmation_email_sent` boolean)
+- `transfers` - Transfer records with email status fields:
+  - `confirmation_email_status` (pending/sent/failed)
+  - `confirmation_email_sent_at` (datetime)
+  - `confirmation_email_provider_id` (Resend ID)
+  - `confirmation_email_error` (error message)
 - `tax_holds` - Tax hold information
 
 ## Test Files
