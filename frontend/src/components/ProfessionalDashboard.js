@@ -643,7 +643,7 @@ export function ProfessionalDashboard({ user, logout }) {
                         <p className={`text-sm font-medium mb-1 ${isDark ? 'text-white' : 'text-gray-900'}`}>{t('eurEAccount')}</p>
                         <div className="flex items-start gap-1">
                           <span className={`text-xs font-medium flex-shrink-0 ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>IBAN:</span>
-                          <span className={`text-xs font-mono break-all ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
+                          <span className={`text-xs font-mono ${isDark ? 'text-gray-300' : 'text-gray-700'}`} style={{ wordBreak: 'break-word' }}>
                             {account.iban ? account.iban.match(/.{1,4}/g)?.join(' ') : 'N/A'}
                             {account.iban && (
                               <button
@@ -673,11 +673,12 @@ export function ProfessionalDashboard({ user, logout }) {
                                     }
                                   }
                                 }}
-                                className="inline-flex items-center ml-1 p-1 text-gray-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-md transition touch-manipulation align-middle"
+                                className="text-gray-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded transition touch-manipulation"
+                                style={{ display: 'inline', verticalAlign: 'middle', padding: '2px', marginLeft: '4px' }}
                                 title="Copy IBAN"
                                 data-testid="copy-iban-btn"
                               >
-                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <svg className="w-4 h-4" style={{ display: 'inline', verticalAlign: 'middle' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
                                 </svg>
                               </button>
