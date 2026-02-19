@@ -140,13 +140,15 @@ body {
 .account-item {
   display: flex;
   justify-content: space-between;
-  align-items: center;
+  align-items: flex-start;
   padding: 16px;
   border: 1px solid #EAEAEA;
   border-radius: 8px;
   margin-bottom: 12px;
   transition: all 0.15s;
   background-color: white;
+  flex-wrap: nowrap;
+  gap: 12px;
 }
 
 .dark .account-item {
