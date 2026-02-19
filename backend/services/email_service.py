@@ -466,3 +466,165 @@ class EmailService:
     def generate_verification_token() -> str:
         """Generate a secure email verification token."""
         return secrets.token_urlsafe(32)
+    
+    def send_transfer_confirmation_email(
+        self,
+        to_email: str,
+        first_name: str,
+        reference_number: str,
+        amount_cents: int,
+        beneficiary_name: str,
+        beneficiary_iban: str,
+        sender_iban: str,
+        transfer_type: str = "SEPA Transfer",
+        transfer_date: datetime = None,
+        language: str = 'en'
+    ) -> bool:
+        """Send transfer confirmation email via Resend with localization support."""
+        # Ensure API key is set from environment
+        api_key = get_resend_api_key()
+        if not api_key:
+            logger.warning(f"RESEND_API_KEY not configured - skipping transfer confirmation email to {to_email}")
+            return False
+            
+        resend.api_key = api_key
+        
+        sender_email = get_sender_email()
+        frontend_url = get_frontend_url()
+        
+        t = lambda key: get_translation(key, language)
+        
+        # Subject line with reference number
+        subject = f"{t('transfer_subject')} #{reference_number}"
+        
+        # Format amount in EU style (€1.234,56)
+        amount_euros = amount_cents / 100
+        amount_formatted = f"€{amount_euros:,.2f}".replace(",", "X").replace(".", ",").replace("X", ".")
+        
+        # Mask IBAN for security (show first 4 and last 4 characters)
+        def mask_iban(iban: str) -> str:
+            if not iban or len(iban) < 8:
+                return iban or "N/A"
+            return f"{iban[:4]}{'*' * (len(iban) - 8)}{iban[-4:]}"
+        
+        masked_beneficiary_iban = mask_iban(beneficiary_iban)
+        masked_sender_iban = mask_iban(sender_iban)
+        
+        # Format date
+        if transfer_date:
+            date_formatted = transfer_date.strftime("%d/%m/%Y %H:%M")
+        else:
+            date_formatted = datetime.utcnow().strftime("%d/%m/%Y %H:%M")
+        
+        # Transaction history URL
+        transactions_url = f"{frontend_url}/transactions"
+        
+        html_body = f"""
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <meta charset="utf-8">
+        </head>
+        <body style="font-family: 'Segoe UI', Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #f4f4f4;">
+            <div style="background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%); color: white; padding: 30px; text-align: center; border-radius: 10px 10px 0 0;">
+                <h1 style="margin: 0;">💸 <span style="color: white;">ecomm</span><span style="color: #dc3545;">bx</span></h1>
+                <p style="margin: 10px 0 0 0; font-size: 18px;">{t('transfer_title')}</p>
+            </div>
+            <div style="background: #ffffff; padding: 30px; border-radius: 0 0 10px 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+                <p style="font-size: 16px;">{t('transfer_greeting')} {first_name},</p>
+                <p>{t('transfer_body')}</p>
+                
+                <!-- Transfer Summary Box -->
+                <div style="background: #f8f9fa; border: 1px solid #e9ecef; border-radius: 8px; padding: 20px; margin: 20px 0;">
+                    <h3 style="margin: 0 0 15px 0; color: #1a1a2e; font-size: 16px; border-bottom: 2px solid #dc3545; padding-bottom: 10px;">{t('transfer_summary')}</h3>
+                    
+                    <table style="width: 100%; border-collapse: collapse;">
+                        <tr>
+                            <td style="padding: 8px 0; color: #666; font-size: 14px;">{t('transfer_reference')}</td>
+                            <td style="padding: 8px 0; text-align: right; font-weight: bold; color: #1a1a2e; font-family: monospace;">#{reference_number}</td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 8px 0; color: #666; font-size: 14px;">{t('transfer_amount')}</td>
+                            <td style="padding: 8px 0; text-align: right; font-weight: bold; color: #dc3545; font-size: 18px;">{amount_formatted}</td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 8px 0; color: #666; font-size: 14px;">{t('transfer_recipient')}</td>
+                            <td style="padding: 8px 0; text-align: right; font-weight: 600; color: #1a1a2e;">{beneficiary_name}</td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 8px 0; color: #666; font-size: 14px;">{t('transfer_recipient_iban')}</td>
+                            <td style="padding: 8px 0; text-align: right; font-family: monospace; color: #1a1a2e;">{masked_beneficiary_iban}</td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 8px 0; color: #666; font-size: 14px;">{t('transfer_from_account')}</td>
+                            <td style="padding: 8px 0; text-align: right; font-family: monospace; color: #1a1a2e;">{masked_sender_iban}</td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 8px 0; color: #666; font-size: 14px;">{t('transfer_date')}</td>
+                            <td style="padding: 8px 0; text-align: right; color: #1a1a2e;">{date_formatted} UTC</td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 8px 0; color: #666; font-size: 14px;">{t('transfer_type')}</td>
+                            <td style="padding: 8px 0; text-align: right; color: #1a1a2e;">{transfer_type}</td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 8px 0; color: #666; font-size: 14px;">{t('transfer_status')}</td>
+                            <td style="padding: 8px 0; text-align: right;">
+                                <span style="background: #ffc107; color: #212529; padding: 4px 12px; border-radius: 12px; font-size: 12px; font-weight: 600;">{t('transfer_status_processing')}</span>
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+                
+                <!-- Processing Notes -->
+                <div style="background: #e7f3ff; border-left: 4px solid #007bff; padding: 15px; margin: 20px 0; border-radius: 0 8px 8px 0;">
+                    <p style="margin: 0 0 8px 0; font-size: 14px; color: #004085;">📋 {t('transfer_note_1')}</p>
+                    <p style="margin: 0; font-size: 14px; color: #004085;">📊 {t('transfer_note_2')}</p>
+                </div>
+                
+                <!-- View Details Button -->
+                <p style="text-align: center;">
+                    <a href="{transactions_url}" style="display: inline-block; background: #dc3545; color: #ffffff; padding: 15px 40px; text-decoration: none; border-radius: 8px; font-weight: bold; margin: 15px 0;">{t('transfer_button')}</a>
+                </p>
+                
+                <!-- Security Warning -->
+                <div style="background: #fff3cd; border: 1px solid #ffc107; padding: 15px; border-radius: 8px; margin: 20px 0;">
+                    <p style="margin: 0; color: #856404; font-size: 13px;">⚠️ <strong>{t('transfer_security_warning')}</strong></p>
+                </div>
+                
+                <!-- Disclaimer -->
+                <p style="color: #999; font-size: 12px; text-align: center; margin-top: 20px; padding-top: 15px; border-top: 1px solid #eee;">{t('transfer_disclaimer')}</p>
+            </div>
+            <div style="text-align: center; margin-top: 20px; font-size: 12px; color: #666;">
+                <p>{t('password_reset_footer')}</p>
+            </div>
+        </body>
+        </html>
+        """
+        
+        try:
+            params = {
+                "from": f"{APP_NAME} <{sender_email}>",
+                "to": [to_email],
+                "subject": subject,
+                "html": html_body,
+            }
+            
+            response = resend.Emails.send(params)
+            logger.info(f"Transfer confirmation email sent to {to_email} (lang={language}, ref={reference_number}), Resend ID: {response.get('id', 'unknown')}")
+            
+            self.sent_emails.append({
+                'to': to_email,
+                'subject': subject,
+                'sent_at': datetime.utcnow(),
+                'resend_id': response.get('id'),
+                'language': language,
+                'type': 'transfer_confirmation',
+                'reference': reference_number
+            })
+            
+            return True
+        except Exception as e:
+            logger.error(f"Failed to send transfer confirmation email to {to_email}: {str(e)}")
+            print(f"[EMAIL ERROR] Failed to send transfer confirmation to {to_email}: {str(e)}")
+            return False
