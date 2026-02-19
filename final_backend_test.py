@@ -10,7 +10,7 @@ from datetime import datetime
 import time
 
 class FinalTaxHoldTester:
-    def __init__(self, base_url="https://banking-support-v2.preview.emergentagent.com"):
+    def __init__(self, base_url="https://transfer-confirm-1.preview.emergentagent.com"):
         self.base_url = base_url
         self.admin_token = None
         self.tests_run = 0
