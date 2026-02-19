@@ -641,9 +641,9 @@ export function ProfessionalDashboard({ user, logout }) {
                       {/* Left block: Account info */}
                       <div className="flex-1 min-w-0">
                         <p className={`text-sm font-medium mb-1 ${isDark ? 'text-white' : 'text-gray-900'}`}>{t('eurEAccount')}</p>
-                        <div className="flex items-center gap-1 sm:gap-2">
-                          <span className={`text-xs font-medium ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>IBAN:</span>
-                          <span className={`text-xs font-mono ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>{account.iban ? account.iban.match(/.{1,4}/g)?.join(' ') : 'N/A'}</span>
+                        <div className="flex items-center gap-2 flex-nowrap">
+                          <span className={`text-xs font-medium flex-shrink-0 ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>IBAN:</span>
+                          <span className={`text-xs font-mono truncate ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>{account.iban ? account.iban.match(/.{1,4}/g)?.join(' ') : 'N/A'}</span>
                           {account.iban && (
                             <button
                               onClick={async (e) => {
