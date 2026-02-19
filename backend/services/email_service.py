@@ -307,10 +307,11 @@ class EmailService:
             <meta charset="utf-8">
             <style>
                 body {{ font-family: 'Segoe UI', Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px; }}
-                .header {{ background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%); color: white; padding: 30px; text-align: center; border-radius: 10px 10px 0 0; }}
-                .header h1 {{ margin: 0; }}
-                .header .brand {{ color: white; }}
+                .header {{ background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%); color: #FFFFFF; padding: 30px; text-align: center; border-radius: 10px 10px 0 0; }}
+                .header h1 {{ margin: 0; color: #FFFFFF; }}
+                .header .brand {{ color: #FFFFFF; background-color: transparent; }}
                 .header .brand-accent {{ color: #dc3545; }}
+                .header p {{ color: #FFFFFF; }}
                 .content {{ background: #f8f9fa; padding: 30px; border-radius: 0 0 10px 10px; }}
                 .otp-box {{ background: #fff; border: 2px solid #dc3545; padding: 20px; border-radius: 8px; margin: 20px 0; text-align: center; }}
                 .otp {{ font-family: monospace; font-size: 36px; color: #dc3545; font-weight: bold; letter-spacing: 8px; }}
@@ -320,8 +321,8 @@ class EmailService:
         </head>
         <body>
             <div class="header">
-                <h1>🔒 <span class="brand">ecomm</span><span class="brand-accent">bx</span></h1>
-                <p>{t('otp_title')}</p>
+                <h1 style="color: #FFFFFF;">🔒 <span class="brand" style="color: #FFFFFF;">ecomm</span><span class="brand-accent">bx</span></h1>
+                <p style="color: #FFFFFF;">{t('otp_title')}</p>
             </div>
             <div class="content">
                 <p>{t('otp_greeting')}</p>
