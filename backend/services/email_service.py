@@ -602,6 +602,9 @@ class EmailService:
         </html>
         """
         
+        # Structured logging for debugging
+        logger.info(f"[TRANSFER EMAIL] Attempting to send confirmation email: transferRef={reference_number}, recipient={to_email}, lang={language}")
+        
         try:
             params = {
                 "from": f"{APP_NAME} <{sender_email}>",
@@ -611,20 +614,34 @@ class EmailService:
             }
             
             response = resend.Emails.send(params)
-            logger.info(f"Transfer confirmation email sent to {to_email} (lang={language}, ref={reference_number}), Resend ID: {response.get('id', 'unknown')}")
+            provider_id = response.get('id', '')
+            
+            logger.info(f"[TRANSFER EMAIL] SUCCESS: transferRef={reference_number}, recipient={to_email}, lang={language}, resendId={provider_id}")
             
             self.sent_emails.append({
                 'to': to_email,
                 'subject': subject,
                 'sent_at': datetime.utcnow(),
-                'resend_id': response.get('id'),
+                'resend_id': provider_id,
                 'language': language,
                 'type': 'transfer_confirmation',
                 'reference': reference_number
             })
             
-            return True
+            # Return detailed success result
+            return {
+                'success': True,
+                'provider_id': provider_id,
+                'error': None
+            }
         except Exception as e:
-            logger.error(f"Failed to send transfer confirmation email to {to_email}: {str(e)}")
-            print(f"[EMAIL ERROR] Failed to send transfer confirmation to {to_email}: {str(e)}")
-            return False
+            error_msg = str(e)[:200]  # Truncate long errors
+            logger.error(f"[TRANSFER EMAIL] FAILED: transferRef={reference_number}, recipient={to_email}, error={error_msg}")
+            print(f"[EMAIL ERROR] Failed to send transfer confirmation to {to_email}: {error_msg}")
+            
+            # Return detailed failure result
+            return {
+                'success': False,
+                'provider_id': None,
+                'error': error_msg
+            }
