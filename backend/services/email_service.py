@@ -534,38 +534,51 @@ class EmailService:
         
         html_body = f"""
         <!DOCTYPE html>
-        <html>
+        <html xmlns="http://www.w3.org/1999/xhtml">
         <head>
             <meta charset="utf-8">
+            <meta name="color-scheme" content="light">
+            <meta name="supported-color-schemes" content="light">
+            <style>
+                :root {{ color-scheme: light; supported-color-schemes: light; }}
+                .dark-mode-bg {{ background-color: #1a1a2e !important; }}
+                .white-text {{ color: #FFFFFF !important; }}
+                .red-text {{ color: #dc3545 !important; }}
+                u + .body .dark-mode-bg {{ background-color: #1a1a2e !important; }}
+                u + .body .white-text {{ color: #FFFFFF !important; }}
+            </style>
         </head>
-        <body style="font-family: 'Segoe UI', Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #f4f4f4;">
-            <div style="background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%); color: white; padding: 30px; text-align: center; border-radius: 10px 10px 0 0;">
-                <h1 style="margin: 0; color: #FFFFFF;">💸 <span style="color: #FFFFFF; background-color: transparent;">ecomm</span><span style="color: #dc3545;">bx</span></h1>
-                <p style="margin: 10px 0 0 0; font-size: 18px; color: #FFFFFF;">{t('transfer_title')}</p>
+        <body class="body" style="font-family: 'Segoe UI', Arial, sans-serif; line-height: 1.6; color: #333333; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #f4f4f4;">
+            <div class="dark-mode-bg" style="background-color: #1a1a2e; padding: 30px; text-align: center; border-radius: 10px 10px 0 0;">
+                <h1 style="margin: 0;">
+                    <span style="font-size: 28px;">💸</span>
+                    <span class="white-text" style="color: #FFFFFF; font-size: 28px; font-weight: bold;">ecomm</span><span class="red-text" style="color: #dc3545; font-size: 28px; font-weight: bold;">bx</span>
+                </h1>
+                <p class="white-text" style="margin: 10px 0 0 0; font-size: 18px; color: #FFFFFF;">{t('transfer_title')}</p>
             </div>
-            <div style="background: #ffffff; padding: 30px; border-radius: 0 0 10px 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
-                <p style="font-size: 16px;">{t('transfer_greeting')} {first_name},</p>
-                <p>{t('transfer_body')}</p>
+            <div style="background-color: #ffffff; padding: 30px; border-radius: 0 0 10px 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+                <p style="font-size: 16px; color: #333333;">{t('transfer_greeting')} {first_name},</p>
+                <p style="color: #333333;">{t('transfer_body')}</p>
                 
                 <!-- Transfer Summary Box -->
-                <div style="background: #f8f9fa; border: 1px solid #e9ecef; border-radius: 8px; padding: 20px; margin: 20px 0;">
+                <div style="background-color: #f8f9fa; border: 1px solid #e9ecef; border-radius: 8px; padding: 20px; margin: 20px 0;">
                     <h3 style="margin: 0 0 15px 0; color: #1a1a2e; font-size: 16px; border-bottom: 2px solid #dc3545; padding-bottom: 10px;">{t('transfer_summary')}</h3>
                     
                     <table style="width: 100%; border-collapse: collapse;">
                         <tr>
-                            <td style="padding: 8px 0; color: #666; font-size: 14px;">{t('transfer_reference')}</td>
+                            <td style="padding: 8px 0; color: #666666; font-size: 14px;">{t('transfer_reference')}</td>
                             <td style="padding: 8px 0; text-align: right; font-weight: bold; color: #1a1a2e; font-family: monospace;">#{reference_number}</td>
                         </tr>
                         <tr>
-                            <td style="padding: 8px 0; color: #666; font-size: 14px;">{t('transfer_amount')}</td>
+                            <td style="padding: 8px 0; color: #666666; font-size: 14px;">{t('transfer_amount')}</td>
                             <td style="padding: 8px 0; text-align: right; font-weight: bold; color: #dc3545; font-size: 18px;">{amount_formatted}</td>
                         </tr>
                         <tr>
-                            <td style="padding: 8px 0; color: #666; font-size: 14px;">{t('transfer_recipient')}</td>
+                            <td style="padding: 8px 0; color: #666666; font-size: 14px;">{t('transfer_recipient')}</td>
                             <td style="padding: 8px 0; text-align: right; font-weight: 600; color: #1a1a2e;">{beneficiary_name}</td>
                         </tr>
                         <tr>
-                            <td style="padding: 8px 0; color: #666; font-size: 14px;">{t('transfer_recipient_iban')}</td>
+                            <td style="padding: 8px 0; color: #666666; font-size: 14px;">{t('transfer_recipient_iban')}</td>
                             <td style="padding: 8px 0; text-align: right; font-family: monospace; color: #1a1a2e;">{masked_beneficiary_iban}</td>
                         </tr>
                         <tr>
