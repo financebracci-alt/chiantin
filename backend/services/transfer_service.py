@@ -5,9 +5,12 @@ from fastapi import HTTPException
 import uuid
 from datetime import datetime, timezone, timedelta
 from bson import ObjectId
+import logging
 
 from services.ledger_service import LedgerEngine
 from core.ledger import EntryDirection
+
+logger = logging.getLogger(__name__)
 
 
 class TransferService:
