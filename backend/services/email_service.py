@@ -236,7 +236,7 @@ class EmailService:
             </head>
             <body style="font-family: 'Segoe UI', Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
                 <div style="background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%); color: white; padding: 30px; text-align: center; border-radius: 10px 10px 0 0;">
-                    <h1 style="margin: 0;">🔐 <span style="color: white;">ecomm</span><span style="color: #dc3545;">bx</span></h1>
+                    <h1 style="margin: 0;">🔐 <span style="color: #FFFFFF !important;">ecomm</span><span style="color: #dc3545;">bx</span></h1>
                     <p style="margin: 10px 0 0 0;">{t('password_reset_title')}</p>
                 </div>
                 <div style="background: #f8f9fa; padding: 30px; border-radius: 0 0 10px 10px;">
