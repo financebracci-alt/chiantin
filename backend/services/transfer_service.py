@@ -185,9 +185,13 @@ class TransferService:
         to_iban: str,
         amount: int,
         reason: str = "SEPA Transfer",
-        recipient_name: str = None
+        recipient_name: str = None,
+        instant_requested: bool = False  # For future instant transfer support
     ):
         """Transfer money to any IBAN - internal or SEPA."""
+        
+        # Note: instant_requested is stored for future use but currently
+        # all transfers are processed as standard SEPA transfers
         
         # Normalize IBAN (remove spaces)
         normalized_iban = to_iban.replace(" ", "").upper()
