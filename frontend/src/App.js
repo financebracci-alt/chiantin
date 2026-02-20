@@ -1709,7 +1709,46 @@ function AdminUsersTable({ users, loading, onSelectUser, selectedUser }) {
 function AdminDashboard() {
   const { user, logout } = useAuth();
   const toast = useToast();
-  const [activeSection, setActiveSection] = useState('overview');
+  const [searchParams, setSearchParams] = useSearchParams();
+  
+  // Get initial section from URL or default to 'overview'
+  const getInitialSection = () => {
+    const urlSection = searchParams.get('section');
+    const validSections = ['overview', 'users', 'kyc', 'accounts', 'card-requests', 'transfers', 'tickets', 'audit', 'settings'];
+    return validSections.includes(urlSection) ? urlSection : 'overview';
+  };
+  
+  const [activeSection, setActiveSectionInternal] = useState(getInitialSection);
+  
+  // Wrapper function to update both state and URL
+  const setActiveSection = useCallback((section) => {
+    setActiveSectionInternal(section);
+    // Update URL without losing other params
+    const newParams = new URLSearchParams(searchParams);
+    if (section === 'overview') {
+      newParams.delete('section');
+    } else {
+      newParams.set('section', section);
+    }
+    // Clear section-specific params when changing sections
+    if (section !== searchParams.get('section')) {
+      newParams.delete('tab');
+      newParams.delete('page');
+      newParams.delete('search');
+      newParams.delete('userId');
+    }
+    setSearchParams(newParams, { replace: true });
+  }, [searchParams, setSearchParams]);
+  
+  // Sync with URL on browser back/forward
+  useEffect(() => {
+    const urlSection = searchParams.get('section') || 'overview';
+    const validSections = ['overview', 'users', 'kyc', 'accounts', 'card-requests', 'transfers', 'tickets', 'audit', 'settings'];
+    if (validSections.includes(urlSection) && urlSection !== activeSection) {
+      setActiveSectionInternal(urlSection);
+    }
+  }, [searchParams]);
+  
   const [users, setUsers] = useState([]);
   const [filteredUsers, setFilteredUsers] = useState([]);
   const [selectedUser, setSelectedUser] = useState(null);
