@@ -2162,6 +2162,7 @@ async def get_user_auth_history(
     # Include all auth-related actions with the new naming convention
     auth_actions = [
         "USER_LOGIN_SUCCESS", "USER_LOGIN_FAILED", "USER_LOGOUT", "USER_LOGIN_BLOCKED", "USER_MFA_FAILED",
+        "ADMIN_LOGIN_SUCCESS", "ADMIN_LOGOUT",  # Admin-specific actions
         "LOGIN_SUCCESS", "LOGIN_FAILED", "LOGIN_BLOCKED", "MFA_FAILED",  # Legacy names for backwards compatibility
         "PASSWORD_CHANGED", "EMAIL_VERIFIED"
     ]
