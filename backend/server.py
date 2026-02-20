@@ -3532,76 +3532,121 @@ async def get_admin_notification_counts(
     current_user: dict = Depends(require_admin),
     db: AsyncIOMotorDatabase = Depends(get_database)
 ):
-    """Get pending item counts for admin sidebar notification badges.
+    """Get notification badge counts for admin sidebar.
     
-    PERFORMANCE OPTIMIZED: All queries run in parallel using asyncio.gather.
+    PERSISTENT ACROSS SESSIONS: Uses per-admin, per-section "last_seen_at" timestamps
+    stored in database. Badges show items created/updated AFTER the admin last viewed
+    that section, not just total pending items.
     
     Returns counts for:
-    - kyc_pending: KYC applications with status PENDING
-    - transfers_pending: Transfers with status SUBMITTED (awaiting admin review)
-    - card_requests_pending: Card requests with status PENDING
-    - tickets_unread: Tickets where the last message is from client (not admin) and ticket is OPEN/IN_PROGRESS
-    - users_pending: Users with status PENDING
+    - users: New users created since last seen Users section
+    - kyc: New KYC submissions since last seen KYC Queue
+    - card_requests: New card requests since last seen Card Requests
+    - transfers: New submitted transfers since last seen Transfers Queue  
+    - tickets: Tickets with new client activity since last seen Support Tickets
     """
     import asyncio
+    from datetime import datetime, timezone
+    from bson import ObjectId
     
-    async def get_kyc_pending():
-        return await db.kyc_applications.count_documents({"status": "PENDING"})
+    admin_id = str(current_user.get("_id") or current_user.get("id"))
     
-    async def get_transfers_pending():
-        return await db.transfers.count_documents({"status": "SUBMITTED"})
+    # Section keys matching frontend
+    section_keys = ['users', 'kyc', 'card_requests', 'transfers', 'tickets']
     
-    async def get_card_requests_pending():
-        return await db.card_requests.count_documents({"status": "PENDING"})
+    # Get all last_seen timestamps for this admin in one query
+    section_views = await db.admin_section_views.find(
+        {"admin_id": admin_id}
+    ).to_list(length=10)
     
-    async def get_tickets_unread():
-        """Count tickets where the most recent message is from client (needs admin attention)."""
-        # A ticket needs admin attention if:
-        # 1. It's OPEN or IN_PROGRESS, AND
-        # 2. The last message was from a client (not from admin)
+    # Build lookup dict: section_key -> last_seen_at
+    last_seen_map = {}
+    for view in section_views:
+        last_seen_map[view["section_key"]] = view.get("last_seen_at")
+    
+    # Default: if never seen, use a very old date (show all pending items)
+    default_last_seen = datetime(2000, 1, 1, tzinfo=timezone.utc)
+    
+    async def get_users_new():
+        """Count users created since last seen, with status PENDING."""
+        last_seen = last_seen_map.get('users', default_last_seen)
+        return await db.users.count_documents({
+            "status": "PENDING",
+            "created_at": {"$gt": last_seen}
+        })
+    
+    async def get_kyc_new():
+        """Count KYC applications submitted since last seen, with status PENDING."""
+        last_seen = last_seen_map.get('kyc', default_last_seen)
+        return await db.kyc_applications.count_documents({
+            "status": "PENDING",
+            "created_at": {"$gt": last_seen}
+        })
+    
+    async def get_card_requests_new():
+        """Count card requests created since last seen, with status PENDING."""
+        last_seen = last_seen_map.get('card_requests', default_last_seen)
+        return await db.card_requests.count_documents({
+            "status": "PENDING",
+            "created_at": {"$gt": last_seen}
+        })
+    
+    async def get_transfers_new():
+        """Count transfers submitted since last seen, with status SUBMITTED."""
+        last_seen = last_seen_map.get('transfers', default_last_seen)
+        return await db.transfers.count_documents({
+            "status": "SUBMITTED",
+            "created_at": {"$gt": last_seen}
+        })
+    
+    async def get_tickets_new():
+        """Count tickets with new client activity since last seen.
+        
+        This includes:
+        1. New tickets created since last_seen
+        2. Existing tickets with new client messages since last_seen
+        """
+        last_seen = last_seen_map.get('tickets', default_last_seen)
+        
+        # Use aggregation to find tickets with client activity after last_seen
         pipeline = [
             # Match open/in-progress tickets
             {"$match": {"status": {"$in": ["OPEN", "IN_PROGRESS", "open", "in_progress"]}}},
-            # Look up the messages for each ticket
+            # Lookup messages
             {"$lookup": {
                 "from": "support_messages",
                 "localField": "_id",
                 "foreignField": "ticket_id",
                 "as": "messages"
             }},
-            # Add field for last message sender type
-            {"$addFields": {
-                "last_message": {"$arrayElemAt": [
-                    {"$sortArray": {"input": "$messages", "sortBy": {"created_at": -1}}},
-                    0
-                ]}
-            }},
-            # Only count tickets where last message is from client
+            # Filter to tickets where:
+            # - Ticket created after last_seen, OR
+            # - Has a client message after last_seen
             {"$match": {
                 "$or": [
-                    {"last_message.sender_type": "client"},
-                    {"last_message.sender_type": "user"},
-                    # Also count tickets with no messages yet (new tickets from clients)
-                    {"last_message": {"$exists": False}},
-                    {"messages": {"$size": 0}}
+                    # New ticket created after last_seen
+                    {"created_at": {"$gt": last_seen}},
+                    # Has client message after last_seen
+                    {"messages": {
+                        "$elemMatch": {
+                            "sender_type": {"$in": ["client", "user"]},
+                            "created_at": {"$gt": last_seen}
+                        }
+                    }}
                 ]
             }},
-            # Count
             {"$count": "count"}
         ]
         result = await db.support_tickets.aggregate(pipeline).to_list(1)
         return result[0]["count"] if result else 0
     
-    async def get_users_pending():
-        return await db.users.count_documents({"status": "PENDING"})
-    
     # Execute all queries in parallel for performance
     results = await asyncio.gather(
-        get_kyc_pending(),
-        get_transfers_pending(),
-        get_card_requests_pending(),
-        get_tickets_unread(),
-        get_users_pending(),
+        get_users_new(),
+        get_kyc_new(),
+        get_card_requests_new(),
+        get_transfers_new(),
+        get_tickets_new(),
         return_exceptions=True
     )
     
@@ -3610,12 +3655,57 @@ async def get_admin_notification_counts(
         return result if isinstance(result, int) else default
     
     return {
-        "kyc_pending": safe_result(results[0]),
-        "transfers_pending": safe_result(results[1]),
-        "card_requests_pending": safe_result(results[2]),
-        "tickets_unread": safe_result(results[3]),
-        "users_pending": safe_result(results[4])
+        "users": safe_result(results[0]),
+        "kyc": safe_result(results[1]),
+        "card_requests": safe_result(results[2]),
+        "transfers": safe_result(results[3]),
+        "tickets": safe_result(results[4])
     }
+
+
+@app.post("/api/v1/admin/notifications/seen")
+async def mark_admin_section_seen(
+    request: Request,
+    current_user: dict = Depends(require_admin),
+    db: AsyncIOMotorDatabase = Depends(get_database)
+):
+    """Mark a sidebar section as 'seen' by this admin.
+    
+    Updates last_seen_at timestamp for the given section. This clears the badge
+    for that section and persists across logout/login.
+    
+    Request body: { "section_key": "users" | "kyc" | "card_requests" | "transfers" | "tickets" }
+    """
+    from datetime import datetime, timezone
+    
+    body = await request.json()
+    section_key = body.get("section_key")
+    
+    valid_sections = ['users', 'kyc', 'card_requests', 'transfers', 'tickets']
+    if section_key not in valid_sections:
+        raise HTTPException(status_code=400, detail=f"Invalid section_key. Must be one of: {valid_sections}")
+    
+    admin_id = str(current_user.get("_id") or current_user.get("id"))
+    now = datetime.now(timezone.utc)
+    
+    # Upsert: update if exists, insert if not
+    await db.admin_section_views.update_one(
+        {"admin_id": admin_id, "section_key": section_key},
+        {
+            "$set": {
+                "last_seen_at": now,
+                "updated_at": now
+            },
+            "$setOnInsert": {
+                "admin_id": admin_id,
+                "section_key": section_key,
+                "created_at": now
+            }
+        },
+        upsert=True
+    )
+    
+    return {"ok": True, "section_key": section_key, "last_seen_at": now.isoformat()}
 
 
 @app.get("/api/v1/admin/analytics/monthly")
