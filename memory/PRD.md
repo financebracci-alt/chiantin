@@ -93,6 +93,37 @@ ecommbx is a full-stack EU-licensed digital banking platform built with React fr
 - Mobile (375px): Line breaks preserved ✓
 - Both client and admin/support messages display correctly
 
+### Instant Transfer Toggle UX Refinement (Feb 20, 2025)
+**Refinement:** Made the Instant Transfer modal more bank-professional.
+
+**Changes from previous implementation:**
+1. **Removed Cancel button** - Now only has single "Understood" / "Ho capito" button
+2. **Toggle behavior**: When tapped, toggle visually turns ON (green) immediately, then modal opens. After clicking "Understood", toggle returns to OFF (grey)
+3. **Removed inline note** - No more "Instant transfer is currently unavailable" text under the toggle. Only the modal shows the unavailable info.
+4. **Button styling**: Full-width red primary CTA, consistent with ecommbx brand
+
+**New UX Flow:**
+1. User taps toggle → Toggle turns green, modal appears
+2. User reads info and clicks "Understood" / "Ho capito"
+3. Modal closes, toggle automatically returns to OFF (grey)
+4. Page returns to clean state with no extra helper text
+
+**Technical Changes:**
+- Toggle now sets `instantTransferEnabled=true` when clicked, then shows modal
+- Modal's "Understood" button sets `instantTransferEnabled=false` and closes modal
+- Removed inline info line element entirely
+- Background overlay no longer dismisses modal (must use button)
+
+**Files Changed:**
+- `/app/frontend/src/components/P2PTransfer.js` - Simplified modal with single button
+- `/app/frontend/src/translations.js` - Added `instantTransferUnderstood` translation
+
+**Verification:** Tested on:
+- Desktop (1920px) light mode ✓
+- Desktop (1920px) dark mode ✓
+- Mobile (375px) ✓
+- Italian language ✓
+
 ### Instant Transfer Toggle UX Improvement (Feb 20, 2025)
 **Feature:** Improved the Instant Transfer toggle with a professional confirmation popup instead of inline warning panel.
 
