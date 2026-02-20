@@ -160,11 +160,18 @@ async def create_indexes():
         
         # Idempotency
         ("idempotency_keys", "key", {"unique": True, "expireAfterSeconds": 86400}),
+        
+        # Transfers (PERFORMANCE: for admin panel queries)
+        ("transfers", "status", {}),
+        ("transfers", "created_at", {}),
+        ("transfers", "user_id", {}),
     ]
     
     # Also create compound indexes
     compound_indexes = [
         ("ledger_entries", [('account_id', 1), ('created_at', 1)], {}),
+        # PERFORMANCE: Compound index for transfers admin queries
+        ("transfers", [('status', 1), ('created_at', -1)], {}),
     ]
     
     created = 0
