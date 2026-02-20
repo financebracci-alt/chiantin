@@ -122,12 +122,9 @@ export function AdminTransfersQueue() {
       setTransfers(prev => prev.filter(t => t.id !== id));
       setSelectedTransfer(null);
       
-      // Optionally refresh in background without showing loading state
-      // This ensures data consistency without visual reload
+      // Background refresh for data consistency
       setTimeout(() => {
-        api.get(`/admin/transfers?status=${activeTab}`)
-          .then(res => setTransfers(res.data.data))
-          .catch(() => {}); // Silently fail background refresh
+        fetchTransfers();
       }, 1000);
     } catch (err) {
       toast.error('Failed to delete transfer: ' + (err.response?.data?.detail || err.message));
