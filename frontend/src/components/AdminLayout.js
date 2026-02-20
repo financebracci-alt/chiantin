@@ -242,37 +242,47 @@ export function AdminSidebar({ activeSection, onSectionChange, user, logout }) {
   return (
     <div className="admin-sidebar">
       {/* Sidebar Header */}
-      <div className="p-6 border-b border-gray-200">
-        <h1 className="text-lg font-semibold text-gray-900">ecommbx</h1>
-        <p className="text-xs text-gray-500 mt-1">Admin Portal</p>
+      <div className="p-6 border-b border-gray-200 dark:border-gray-700">
+        <h1 className="text-lg font-semibold text-gray-900 dark:text-white">ecommbx</h1>
+        <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Admin Portal</p>
       </div>
 
       {/* Navigation */}
       <nav className="py-4">
-        {menuItems.map((item) => (
-          <button
-            key={item.id}
-            onClick={() => onSectionChange(item.id)}
-            className={`sidebar-nav-item w-full ${
-              activeSection === item.id ? 'sidebar-nav-item-active' : ''
-            }`}
-            data-testid={`admin-nav-${item.id}`}
-          >
-            {getIcon(item.icon)}
-            <span>{item.label}</span>
-          </button>
-        ))}
+        {menuItems.map((item) => {
+          const badgeCount = badgeSections.includes(item.id) ? getBadgeCount(item.id) : 0;
+          
+          return (
+            <button
+              key={item.id}
+              onClick={() => handleSectionChange(item.id)}
+              className={`sidebar-nav-item w-full relative ${
+                activeSection === item.id ? 'sidebar-nav-item-active' : ''
+              }`}
+              data-testid={`admin-nav-${item.id}`}
+            >
+              {getIcon(item.icon)}
+              <span>{item.label}</span>
+              {isInitialized && <NotificationBadge count={badgeCount} />}
+            </button>
+          );
+        })}
       </nav>
 
       {/* User Info at Bottom */}
-      <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-gray-200 bg-gray-50">
-        <div className="text-xs text-gray-600 mb-2">
-          <p className="font-medium text-gray-900">{user?.email}</p>
-          <p className="text-gray-500 mt-1">ECOMMBX</p>
+      <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800">
+        <div className="text-xs text-gray-600 dark:text-gray-300 mb-2">
+          <p className="font-medium text-gray-900 dark:text-white">{user?.email}</p>
+          <p className="text-gray-500 dark:text-gray-400 mt-1">ECOMMBX</p>
         </div>
         <button
-          onClick={logout}
-          className="text-xs text-red-600 hover:text-red-700 font-medium"
+          onClick={() => {
+            // Clear badge baselines on logout
+            sessionStorage.removeItem(BADGE_BASELINE_KEY);
+            sessionStorage.removeItem(BADGE_SESSION_KEY);
+            logout();
+          }}
+          className="text-xs text-red-600 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 font-medium"
           data-testid="admin-logout"
         >
           Logout
