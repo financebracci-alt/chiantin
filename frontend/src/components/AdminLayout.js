@@ -1,167 +1,170 @@
 // Professional Admin Layout with Sidebar
+// PERSISTENT NOTIFICATION BADGES - stored in database, survive logout/login
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 
-// Session-based notification badge manager
-// Baselines are stored in sessionStorage and reset on login/logout
-const BADGE_BASELINE_KEY = 'admin_badge_baselines';
-const BADGE_SESSION_KEY = 'admin_badge_session_id';
-
+/**
+ * Database-backed badge manager for admin sidebar notifications.
+ * 
+ * Key behaviors:
+ * - Badges persist across logout/login (stored in database per admin)
+ * - Badge = items created AFTER admin last viewed that section
+ * - Clicking a section calls API to mark it as "seen", clearing the badge
+ * - Polls every 25 seconds for real-time updates
+ */
 function useBadgeManager(apiUrl, token) {
   const [counts, setCounts] = useState({
-    kyc_pending: 0,
-    transfers_pending: 0,
-    card_requests_pending: 0,
-    tickets_unread: 0,
-    users_pending: 0
+    users: 0,
+    kyc: 0,
+    card_requests: 0,
+    transfers: 0,
+    tickets: 0
   });
-  const [baselines, setBaselines] = useState(null);
   const [isInitialized, setIsInitialized] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const fetchIntervalRef = useRef(null);
+  const isMountedRef = useRef(true);
 
-  // Generate a unique session ID on login
-  const getSessionId = useCallback(() => {
-    let sessionId = sessionStorage.getItem(BADGE_SESSION_KEY);
-    if (!sessionId) {
-      sessionId = `admin_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-      sessionStorage.setItem(BADGE_SESSION_KEY, sessionId);
-    }
-    return sessionId;
-  }, []);
-
-  // Load baselines from sessionStorage
-  const loadBaselines = useCallback(() => {
-    const stored = sessionStorage.getItem(BADGE_BASELINE_KEY);
-    if (stored) {
-      try {
-        return JSON.parse(stored);
-      } catch (e) {
-        return null;
-      }
-    }
-    return null;
-  }, []);
-
-  // Save baselines to sessionStorage
-  const saveBaselines = useCallback((newBaselines) => {
-    sessionStorage.setItem(BADGE_BASELINE_KEY, JSON.stringify(newBaselines));
-    setBaselines(newBaselines);
-  }, []);
-
-  // Fetch current counts from API
+  // Fetch counts from API (uses database-stored last_seen_at per section)
   const fetchCounts = useCallback(async () => {
     if (!apiUrl || !token) return null;
+    
     try {
       const response = await fetch(`${apiUrl}/api/v1/admin/notification-counts`, {
-        headers: { 'Authorization': `Bearer ${token}` }
+        headers: { 
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
       });
+      
       if (response.ok) {
-        return await response.json();
+        const data = await response.json();
+        return data;
+      } else if (response.status === 401) {
+        // Token expired - don't retry
+        console.warn('[BadgeManager] Token expired');
+        return null;
       }
     } catch (error) {
-      console.error('[BadgeManager] Error fetching counts:', error);
+      // Network error - silent fail, will retry on next poll
+      console.warn('[BadgeManager] Network error:', error.message);
     }
     return null;
   }, [apiUrl, token]);
 
-  // Initialize baselines on first load (session start)
-  const initializeBaselines = useCallback(async () => {
-    const sessionId = getSessionId();
-    const storedBaselines = loadBaselines();
+  // Mark a section as seen via API (persists to database)
+  const markSectionSeen = useCallback(async (sectionId) => {
+    if (!apiUrl || !token) return;
     
-    // Check if we already have baselines for this session
-    if (storedBaselines && storedBaselines._sessionId === sessionId) {
-      setBaselines(storedBaselines);
-      // IMPORTANT: Also fetch current counts to calculate badges
-      const currentCounts = await fetchCounts();
-      if (currentCounts) {
-        setCounts(currentCounts);
+    // Map sidebar IDs to API section keys
+    const sectionKeyMap = {
+      'users': 'users',
+      'kyc': 'kyc',
+      'card_requests': 'card_requests',
+      'ledger': 'transfers',  // Frontend uses 'ledger', API uses 'transfers'
+      'support': 'tickets'    // Frontend uses 'support', API uses 'tickets'
+    };
+    
+    const sectionKey = sectionKeyMap[sectionId];
+    if (!sectionKey) return;
+    
+    try {
+      const response = await fetch(`${apiUrl}/api/v1/admin/notifications/seen`, {
+        method: 'POST',
+        headers: { 
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ section_key: sectionKey })
+      });
+      
+      if (response.ok) {
+        // Immediately clear the badge locally for instant UI feedback
+        setCounts(prev => ({
+          ...prev,
+          [sectionKey]: 0
+        }));
       }
-      setIsInitialized(true);
-      return;
+    } catch (error) {
+      console.warn('[BadgeManager] Error marking section seen:', error.message);
     }
-    
-    // New session - fetch current counts and use as baselines
-    const currentCounts = await fetchCounts();
-    if (currentCounts) {
-      const newBaselines = {
-        ...currentCounts,
-        _sessionId: sessionId,
-        _timestamp: Date.now()
-      };
-      saveBaselines(newBaselines);
-      setCounts(currentCounts);
-      setIsInitialized(true);
-    }
-  }, [getSessionId, loadBaselines, saveBaselines, fetchCounts]);
+  }, [apiUrl, token]);
 
-  // Poll for new counts periodically
+  // Initialize counts on mount
+  const initialize = useCallback(async () => {
+    if (!apiUrl || !token || isLoading) return;
+    
+    setIsLoading(true);
+    const newCounts = await fetchCounts();
+    
+    if (isMountedRef.current && newCounts) {
+      setCounts(newCounts);
+      setIsInitialized(true);
+    }
+    setIsLoading(false);
+  }, [apiUrl, token, fetchCounts, isLoading]);
+
+  // Start polling for real-time updates
   const startPolling = useCallback(() => {
     if (fetchIntervalRef.current) {
       clearInterval(fetchIntervalRef.current);
     }
     
+    // Poll every 25 seconds
     fetchIntervalRef.current = setInterval(async () => {
+      if (!isMountedRef.current) return;
+      
       const newCounts = await fetchCounts();
-      if (newCounts) {
+      if (isMountedRef.current && newCounts) {
         setCounts(newCounts);
       }
-    }, 30000); // Poll every 30 seconds
+    }, 25000);
   }, [fetchCounts]);
 
-  // Mark a section as "seen" - update baseline to current count
-  const markSectionSeen = useCallback((sectionKey) => {
-    if (!baselines || !counts) return;
+  // Get badge count for a section
+  const getBadgeCount = useCallback((sectionId) => {
+    if (!isInitialized) return 0;
     
-    const countKey = {
-      'kyc': 'kyc_pending',
-      'ledger': 'transfers_pending',
-      'card_requests': 'card_requests_pending',
-      'support': 'tickets_unread',
-      'users': 'users_pending'
-    }[sectionKey];
+    // Map sidebar IDs to count keys
+    const countKeyMap = {
+      'users': 'users',
+      'kyc': 'kyc',
+      'card_requests': 'card_requests',
+      'ledger': 'transfers',
+      'support': 'tickets'
+    };
     
-    if (countKey && counts[countKey] !== undefined) {
-      const newBaselines = {
-        ...baselines,
-        [countKey]: counts[countKey]
-      };
-      saveBaselines(newBaselines);
-    }
-  }, [baselines, counts, saveBaselines]);
+    const countKey = countKeyMap[sectionId];
+    return countKey ? (counts[countKey] || 0) : 0;
+  }, [counts, isInitialized]);
 
-  // Calculate badge number for a section
-  const getBadgeCount = useCallback((sectionKey) => {
-    if (!baselines || !isInitialized) return 0;
-    
-    const countKey = {
-      'kyc': 'kyc_pending',
-      'ledger': 'transfers_pending',
-      'card_requests': 'card_requests_pending',
-      'support': 'tickets_unread',
-      'users': 'users_pending'
-    }[sectionKey];
-    
-    if (!countKey) return 0;
-    
-    const current = counts[countKey] || 0;
-    const baseline = baselines[countKey] || 0;
-    
-    return Math.max(0, current - baseline);
-  }, [baselines, counts, isInitialized]);
+  // Refresh counts immediately (call after modal actions, etc.)
+  const refresh = useCallback(async () => {
+    const newCounts = await fetchCounts();
+    if (isMountedRef.current && newCounts) {
+      setCounts(newCounts);
+    }
+  }, [fetchCounts]);
 
   // Initialize on mount
   useEffect(() => {
+    isMountedRef.current = true;
+    
     if (apiUrl && token) {
-      initializeBaselines();
+      initialize();
     }
-  }, [apiUrl, token, initializeBaselines]);
+    
+    return () => {
+      isMountedRef.current = false;
+    };
+  }, [apiUrl, token, initialize]);
 
   // Start polling after initialization
   useEffect(() => {
     if (isInitialized) {
       startPolling();
     }
+    
     return () => {
       if (fetchIntervalRef.current) {
         clearInterval(fetchIntervalRef.current);
@@ -169,23 +172,16 @@ function useBadgeManager(apiUrl, token) {
     };
   }, [isInitialized, startPolling]);
 
-  // Refresh counts immediately
-  const refresh = useCallback(async () => {
-    const newCounts = await fetchCounts();
-    if (newCounts) {
-      setCounts(newCounts);
-    }
-  }, [fetchCounts]);
-
   return {
     getBadgeCount,
     markSectionSeen,
     refresh,
-    isInitialized
+    isInitialized,
+    counts
   };
 }
 
-// Badge component
+// Badge component - red circle with white text
 function NotificationBadge({ count }) {
   if (count <= 0) return null;
   
@@ -193,7 +189,7 @@ function NotificationBadge({ count }) {
   
   return (
     <span 
-      className="absolute right-2 top-1/2 -translate-y-1/2 min-w-[20px] h-5 px-1.5 flex items-center justify-center bg-red-500 text-white text-xs font-semibold rounded-full"
+      className="absolute right-2 top-1/2 -translate-y-1/2 min-w-[20px] h-5 px-1.5 flex items-center justify-center bg-red-500 text-white text-xs font-semibold rounded-full shadow-sm"
       data-testid="notification-badge"
     >
       {displayCount}
@@ -206,11 +202,13 @@ export function AdminSidebar({ activeSection, onSectionChange, user, logout }) {
   const apiUrl = process.env.REACT_APP_BACKEND_URL;
   const token = localStorage.getItem('access_token');
   
-  const { getBadgeCount, markSectionSeen, isInitialized } = useBadgeManager(apiUrl, token);
+  const { getBadgeCount, markSectionSeen, refresh, isInitialized } = useBadgeManager(apiUrl, token);
   
-  // Handle section change - mark as seen and then change section
-  const handleSectionChange = useCallback((sectionId) => {
-    markSectionSeen(sectionId);
+  // Handle section change - mark as seen via API and change section
+  const handleSectionChange = useCallback(async (sectionId) => {
+    // Mark section as seen (API call to database)
+    await markSectionSeen(sectionId);
+    // Change the active section
     onSectionChange(sectionId);
   }, [markSectionSeen, onSectionChange]);
   
@@ -281,12 +279,7 @@ export function AdminSidebar({ activeSection, onSectionChange, user, logout }) {
           <p className="text-gray-500 dark:text-gray-400 mt-1">ECOMMBX</p>
         </div>
         <button
-          onClick={() => {
-            // Clear badge baselines on logout
-            sessionStorage.removeItem(BADGE_BASELINE_KEY);
-            sessionStorage.removeItem(BADGE_SESSION_KEY);
-            logout();
-          }}
+          onClick={logout}
           className="text-xs text-red-600 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 font-medium"
           data-testid="admin-logout"
         >
