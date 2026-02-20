@@ -172,7 +172,13 @@ class TicketService:
         return tickets
     
     async def get_all_tickets(self, status_filter: Optional[str] = None, search_query: Optional[str] = None) -> List[dict]:
-        """Get all tickets (admin) with user information and unread counts."""
+        """Get all tickets (admin) with user information and unread counts.
+        
+        PERFORMANCE OPTIMIZED: 
+        - Returns only preview data for list view (not full message content)
+        - Uses bulk user lookup instead of N+1 queries
+        - Limits to 100 most recent tickets
+        """
         from bson import ObjectId
         from bson.errors import InvalidId
         
@@ -180,33 +186,45 @@ class TicketService:
         if status_filter and status_filter != 'all':
             query["status"] = status_filter
         
-        cursor = self.db.tickets.find(query).sort("updated_at", -1).limit(100)
-        tickets = []
+        # Only fetch fields needed for list view
+        cursor = self.db.tickets.find(
+            query,
+            {
+                "_id": 1,
+                "user_id": 1,
+                "subject": 1,
+                "description": 1,
+                "status": 1,
+                "priority": 1,
+                "assigned_to": 1,
+                "created_at": 1,
+                "updated_at": 1,
+                "created_by_admin": 1,
+                "created_by_admin_id": 1,
+                "admin_last_read_at": 1,
+                "messages": 1  # Need for unread count calculation
+            }
+        ).sort("updated_at", -1).limit(100)
         
-        # Get all user IDs from tickets first
-        ticket_docs = []
-        async for doc in cursor:
-            ticket_docs.append(doc)
+        ticket_docs = await cursor.to_list(100)
         
-        # Fetch all users - handle both ObjectId and string IDs
+        # Bulk fetch all users
         user_ids_str = list(set(doc.get("user_id") for doc in ticket_docs if doc.get("user_id")))
-        
-        # Convert string IDs to ObjectId for query (MongoDB stores _id as ObjectId)
         user_ids_query = []
         for uid in user_ids_str:
-            user_ids_query.append(uid)  # Keep string version
+            user_ids_query.append(uid)
             try:
-                user_ids_query.append(ObjectId(uid))  # Also try ObjectId version
+                user_ids_query.append(ObjectId(uid))
             except (InvalidId, TypeError):
                 pass
         
         users_map = {}
-        
         if user_ids_query:
-            # Query with both string and ObjectId versions
-            users_cursor = self.db.users.find({"_id": {"$in": user_ids_query}})
+            users_cursor = self.db.users.find(
+                {"_id": {"$in": user_ids_query}},
+                {"email": 1, "first_name": 1, "last_name": 1}
+            )
             async for user_doc in users_cursor:
-                # Map by string version of ID
                 user_id = str(user_doc["_id"])
                 users_map[user_id] = {
                     "email": user_doc.get("email", ""),
@@ -214,10 +232,11 @@ class TicketService:
                     "last_name": user_doc.get("last_name", "")
                 }
         
-        # Build enriched ticket list
+        # Build optimized ticket list
+        tickets = []
         for doc in ticket_docs:
-            ticket = Ticket(**serialize_doc(doc))
-            ticket_dict = ticket.model_dump()
+            messages = doc.get("messages", [])
+            last_message = messages[-1] if messages else None
             
             # Add user info
             user_id = doc.get("user_id")
@@ -229,30 +248,44 @@ class TicketService:
                 user_email = user_info["email"]
                 user_name = f"{user_info['first_name']} {user_info['last_name']}".strip() or user_info["email"]
             
-            ticket_dict["user_email"] = user_email
-            ticket_dict["user_name"] = user_name
-            
-            # Calculate unread messages from client (messages after admin_last_read_at that are not from staff)
+            # Calculate unread (from client, not staff)
             admin_last_read = doc.get("admin_last_read_at")
             unread_count = 0
-            messages = doc.get("messages", [])
-            
             for msg in messages:
-                # Count messages from clients (not staff) that were created after admin last read
                 if not msg.get("is_staff", False):
                     msg_created = msg.get("created_at")
                     if msg_created:
                         if admin_last_read is None or msg_created > admin_last_read:
                             unread_count += 1
             
-            ticket_dict["unread_count"] = unread_count
-            
-            # Apply search filter if provided (filter by user email - case insensitive partial match)
+            # Apply search filter
             if search_query:
                 search_lower = search_query.lower()
                 if search_lower not in user_email.lower() and search_lower not in user_name.lower():
-                    continue  # Skip this ticket if doesn't match search
+                    continue
             
+            ticket_dict = {
+                "id": doc["_id"],
+                "user_id": user_id,
+                "subject": doc.get("subject", ""),
+                "description": doc.get("description", "")[:200],  # Truncate for list view
+                "status": doc.get("status", "open"),
+                "priority": doc.get("priority", "medium"),
+                "assigned_to": doc.get("assigned_to"),
+                "created_at": doc.get("created_at"),
+                "updated_at": doc.get("updated_at"),
+                "created_by_admin": doc.get("created_by_admin", False),
+                "created_by_admin_id": doc.get("created_by_admin_id"),
+                "user_email": user_email,
+                "user_name": user_name,
+                "unread_count": unread_count,
+                "message_count": len(messages),
+                "last_message_preview": last_message.get("content", "")[:100] if last_message else "",
+                "last_message_at": last_message.get("created_at") if last_message else None,
+                "last_message_is_staff": last_message.get("is_staff", False) if last_message else False,
+                # Empty messages array for list view - full messages loaded on select
+                "messages": []
+            }
             tickets.append(ticket_dict)
         
         return tickets
