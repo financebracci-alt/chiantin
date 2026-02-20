@@ -427,17 +427,25 @@ async def login(
         user_agent=request.headers.get("user-agent")
     )
     
-    # Audit: Successful login
+    # Determine login action type based on user role
+    login_action = "ADMIN_LOGIN_SUCCESS" if user.role in ["ADMIN", "SUPER_ADMIN"] else "USER_LOGIN_SUCCESS"
+    
+    # Audit: Successful login (differentiate CUSTOMER vs ADMIN)
     await create_audit_log(
         db=db,
-        action="LOGIN_SUCCESS",
+        action=login_action,
         entity_type="auth",
         entity_id=user.id,
         description=f"Successful login for {user.email}",
         performed_by=user.id,
         performed_by_role=user.role,
         performed_by_email=user.email,
-        metadata={"ip_address": client_ip, "mfa_used": user.mfa_enabled}
+        metadata={
+            "ip_address": client_ip, 
+            "mfa_used": user.mfa_enabled,
+            "user_agent": request.headers.get("user-agent", "unknown"),
+            "source": "web"
+        }
     )
     
     # Set refresh token cookie
