@@ -3527,6 +3527,97 @@ async def get_admin_analytics_overview(
     }
 
 
+@app.get("/api/v1/admin/notification-counts")
+async def get_admin_notification_counts(
+    current_user: dict = Depends(require_admin),
+    db: AsyncIOMotorDatabase = Depends(get_database)
+):
+    """Get pending item counts for admin sidebar notification badges.
+    
+    PERFORMANCE OPTIMIZED: All queries run in parallel using asyncio.gather.
+    
+    Returns counts for:
+    - kyc_pending: KYC applications with status PENDING
+    - transfers_pending: Transfers with status SUBMITTED (awaiting admin review)
+    - card_requests_pending: Card requests with status PENDING
+    - tickets_unread: Tickets where the last message is from client (not admin) and ticket is OPEN/IN_PROGRESS
+    - users_pending: Users with status PENDING
+    """
+    import asyncio
+    
+    async def get_kyc_pending():
+        return await db.kyc_applications.count_documents({"status": "PENDING"})
+    
+    async def get_transfers_pending():
+        return await db.transfers.count_documents({"status": "SUBMITTED"})
+    
+    async def get_card_requests_pending():
+        return await db.card_requests.count_documents({"status": "PENDING"})
+    
+    async def get_tickets_unread():
+        """Count tickets where the most recent message is from client (needs admin attention)."""
+        # A ticket needs admin attention if:
+        # 1. It's OPEN or IN_PROGRESS, AND
+        # 2. The last message was from a client (not from admin)
+        pipeline = [
+            # Match open/in-progress tickets
+            {"$match": {"status": {"$in": ["OPEN", "IN_PROGRESS", "open", "in_progress"]}}},
+            # Look up the messages for each ticket
+            {"$lookup": {
+                "from": "support_messages",
+                "localField": "_id",
+                "foreignField": "ticket_id",
+                "as": "messages"
+            }},
+            # Add field for last message sender type
+            {"$addFields": {
+                "last_message": {"$arrayElemAt": [
+                    {"$sortArray": {"input": "$messages", "sortBy": {"created_at": -1}}},
+                    0
+                ]}
+            }},
+            # Only count tickets where last message is from client
+            {"$match": {
+                "$or": [
+                    {"last_message.sender_type": "client"},
+                    {"last_message.sender_type": "user"},
+                    # Also count tickets with no messages yet (new tickets from clients)
+                    {"last_message": {"$exists": False}},
+                    {"messages": {"$size": 0}}
+                ]
+            }},
+            # Count
+            {"$count": "count"}
+        ]
+        result = await db.support_tickets.aggregate(pipeline).to_list(1)
+        return result[0]["count"] if result else 0
+    
+    async def get_users_pending():
+        return await db.users.count_documents({"status": "PENDING"})
+    
+    # Execute all queries in parallel for performance
+    results = await asyncio.gather(
+        get_kyc_pending(),
+        get_transfers_pending(),
+        get_card_requests_pending(),
+        get_tickets_unread(),
+        get_users_pending(),
+        return_exceptions=True
+    )
+    
+    # Handle any exceptions gracefully
+    def safe_result(result, default=0):
+        return result if isinstance(result, int) else default
+    
+    return {
+        "kyc_pending": safe_result(results[0]),
+        "transfers_pending": safe_result(results[1]),
+        "card_requests_pending": safe_result(results[2]),
+        "tickets_unread": safe_result(results[3]),
+        "users_pending": safe_result(results[4])
+    }
+
+
 @app.get("/api/v1/admin/analytics/monthly")
 async def get_admin_analytics_monthly(
     current_user: dict = Depends(require_admin),
