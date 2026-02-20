@@ -2990,11 +2990,62 @@ async def get_all_tickets(
     current_user: dict = Depends(require_admin),
     db: AsyncIOMotorDatabase = Depends(get_database)
 ):
-    """Get all tickets (admin) with user information and unread counts."""
+    """Get all tickets (admin) with user information and unread counts.
+    
+    PERFORMANCE OPTIMIZED: Returns list view data only.
+    Use GET /api/v1/admin/tickets/{ticket_id} for full ticket details.
+    """
     ticket_service = TicketService(db)
     tickets = await ticket_service.get_all_tickets(status_filter=status, search_query=search)
-    # tickets is already a list of dicts with user info included
     return tickets
+
+
+@app.get("/api/v1/admin/tickets/{ticket_id}")
+async def get_single_ticket_admin(
+    ticket_id: str,
+    current_user: dict = Depends(require_admin),
+    db: AsyncIOMotorDatabase = Depends(get_database)
+):
+    """Get a single ticket with full messages (admin)."""
+    from bson import ObjectId
+    
+    ticket_doc = await db.tickets.find_one({"_id": ticket_id})
+    if not ticket_doc:
+        raise HTTPException(status_code=404, detail="Ticket not found")
+    
+    ticket = Ticket(**serialize_doc(ticket_doc))
+    ticket_dict = ticket.model_dump()
+    
+    # Add user info
+    user_id = ticket_doc.get("user_id")
+    if user_id:
+        try:
+            user = await db.users.find_one({"_id": ObjectId(user_id)})
+            if user:
+                ticket_dict["user_email"] = user.get("email", "")
+                ticket_dict["user_name"] = f"{user.get('first_name', '')} {user.get('last_name', '')}".strip()
+        except:
+            pass
+    
+    return ticket_dict
+
+
+@app.get("/api/v1/tickets/{ticket_id}")
+async def get_single_ticket_user(
+    ticket_id: str,
+    current_user: dict = Depends(get_current_user),
+    db: AsyncIOMotorDatabase = Depends(get_database)
+):
+    """Get a single ticket with full messages (user)."""
+    ticket_doc = await db.tickets.find_one({
+        "_id": ticket_id,
+        "user_id": current_user["id"]
+    })
+    if not ticket_doc:
+        raise HTTPException(status_code=404, detail="Ticket not found")
+    
+    ticket = Ticket(**serialize_doc(ticket_doc))
+    return ticket.model_dump()
 
 
 class UpdateTicketStatus(BaseModel):
