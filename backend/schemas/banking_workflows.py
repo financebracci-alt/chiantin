@@ -142,6 +142,12 @@ class Transfer(BaseModel):
     confirmation_email_provider_id: Optional[str] = None  # Resend message ID
     confirmation_email_error: Optional[str] = None  # Error message if failed
     
+    # Rejection email tracking - for idempotency
+    rejection_email_sent: bool = False
+    rejection_email_sent_at: Optional[datetime] = None
+    rejection_email_provider_id: Optional[str] = None
+    rejection_email_error: Optional[str] = None
+    
     created_at: datetime = Field(default_factory=datetime.utcnow)
     updated_at: datetime = Field(default_factory=datetime.utcnow)
     admin_action_by: Optional[str] = None
