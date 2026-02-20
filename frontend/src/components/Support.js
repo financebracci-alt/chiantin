@@ -93,24 +93,40 @@ export function SupportTickets({ isAdmin = false }) {
 
   // Mark ticket as read when user/admin selects it
   const handleSelectTicket = async (ticket) => {
-    setSelectedTicket(ticket);
-    
-    // Mark as read if there are unread messages
-    if (ticket.unread_count > 0) {
-      try {
-        if (isAdmin) {
-          await api.post(`/admin/tickets/${ticket.id}/mark-read`);
-        } else {
-          // Client marks ticket as read
-          await api.post(`/tickets/${ticket.id}/mark-read`);
+    // First, fetch full ticket details with all messages
+    try {
+      const endpoint = isAdmin ? `/admin/tickets/${ticket.id}` : `/tickets/${ticket.id}`;
+      const response = await api.get(endpoint);
+      const fullTicket = response.data;
+      
+      // Merge list view data with full ticket data (keep user info for admin)
+      const mergedTicket = {
+        ...ticket,  // Keep user_email, user_name from list view
+        ...fullTicket  // Override with full messages
+      };
+      
+      setSelectedTicket(mergedTicket);
+      
+      // Mark as read if there are unread messages
+      if (ticket.unread_count > 0) {
+        try {
+          if (isAdmin) {
+            await api.post(`/admin/tickets/${ticket.id}/mark-read`);
+          } else {
+            await api.post(`/tickets/${ticket.id}/mark-read`);
+          }
+          // Update local state to reflect read status
+          setTickets(prev => prev.map(t => 
+            t.id === ticket.id ? { ...t, unread_count: 0 } : t
+          ));
+        } catch (err) {
+          console.error('Failed to mark ticket as read:', err);
         }
-        // Update local state to reflect read status
-        setTickets(prev => prev.map(t => 
-          t.id === ticket.id ? { ...t, unread_count: 0 } : t
-        ));
-      } catch (err) {
-        console.error('Failed to mark ticket as read:', err);
       }
+    } catch (err) {
+      console.error('Failed to fetch ticket details:', err);
+      // Fallback to the list view data
+      setSelectedTicket(ticket);
     }
   };
 
