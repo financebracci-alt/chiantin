@@ -165,6 +165,11 @@ async def create_indexes():
         ("transfers", "status", {}),
         ("transfers", "created_at", {}),
         ("transfers", "user_id", {}),
+        
+        # Card Requests (PERFORMANCE: for admin panel queries)
+        ("card_requests", "status", {}),
+        ("card_requests", "user_id", {}),
+        ("card_requests", "created_at", {}),
     ]
     
     # Also create compound indexes
@@ -172,6 +177,8 @@ async def create_indexes():
         ("ledger_entries", [('account_id', 1), ('created_at', 1)], {}),
         # PERFORMANCE: Compound index for transfers admin queries
         ("transfers", [('status', 1), ('created_at', -1)], {}),
+        # PERFORMANCE: Compound index for card requests admin queries
+        ("card_requests", [('status', 1), ('created_at', -1)], {}),
     ]
     
     created = 0
