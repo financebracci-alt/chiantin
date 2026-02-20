@@ -1102,7 +1102,7 @@ function TicketDetails({ ticket, onUpdate, onDelete, isAdmin = false, onRefreshT
               </div>
             ) : (
               <>
-                <p className={`text-sm ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>{msg.content}</p>
+                <p className={`text-sm whitespace-pre-wrap ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>{msg.content}</p>
                 
                 {/* Display attachments */}
                 {msg.attachments && msg.attachments.length > 0 && (
