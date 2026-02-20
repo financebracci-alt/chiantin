@@ -757,6 +757,39 @@ ecommbx is a full-stack EU-licensed digital banking platform built with React fr
 
 **Verification:** 100% test pass rate (iteration_89.json) - 15/15 backend tests passed. All endpoints under 2-second target.
 
+### Transfers Queue Search & Card Requests Fix (Feb 20, 2025)
+
+**Enhancements:**
+
+1. **Transfers Queue - Full Database Search**
+   - Added search bar that searches the ENTIRE database (not just current tab's 50 items)
+   - Searches by: beneficiary name, sender name, sender email, IBAN, reference number
+   - Returns results from ALL statuses (SUBMITTED, COMPLETED, REJECTED)
+   - Shows "Showing X results across all statuses" message when searching
+   - Clear button (X) returns to tab view
+
+2. **Card Requests - N+1 Query Fix**
+   - **Root Cause:** Frontend was making individual `/admin/users/{id}` API calls for EACH card request (lines 38-48)
+   - **Fix:** Backend now includes `user_name` and `user_email` in the card requests response via bulk user lookup
+   - **Result:** Page loads in **0.44 seconds** (was several seconds due to N+1)
+
+**Performance Results:**
+| Feature | Before | After |
+|---------|--------|-------|
+| Card Requests (9 items) | ~3-5s (N+1 frontend) | **0.44s** |
+| Transfer Search | Not available | **0.87s** (searches 100+ transfers) |
+
+**Files Changed:**
+- `/app/backend/services/banking_workflows_service.py`:
+  - Added `_search_transfers()` method (line 541)
+  - Refactored `get_pending_card_requests()` with bulk user lookup (line 53)
+- `/app/backend/server.py` - Added `search` parameter to transfers endpoint (line 3846)
+- `/app/frontend/src/components/AdminTransfersQueue.js` - Added search bar UI
+- `/app/frontend/src/components/AdminCardRequestsQueue.js` - Removed N+1 queries, uses user_name/user_email from response
+- `/app/backend/database.py` - Added indexes for card_requests collection
+
+**Verification:** 100% test pass rate (iteration_90.json) - 13/13 backend tests passed. UI verified via Playwright.
+
 ## Known Issues / Backlog
 
 ### P0 - Critical
