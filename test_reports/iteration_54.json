@@ -125,7 +125,7 @@
   },
   
   "test_environment": {
-    "backend_url": "https://query-optimize-1.preview.emergentagent.com",
+    "backend_url": "https://reject-email.preview.emergentagent.com",
     "test_date": "2026-02-03",
     "admin_credentials": "admin@ecommbx.io",
     "test_user": "ashleyalt003@gmail.com",

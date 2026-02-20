@@ -9,8 +9,8 @@ import io
 from datetime import datetime
 
 # Backend URL from environment
-BASE_URL = "https://query-optimize-1.preview.emergentagent.com/api/v1"
-HEALTH_URL = "https://query-optimize-1.preview.emergentagent.com/api/health"
+BASE_URL = "https://reject-email.preview.emergentagent.com/api/v1"
+HEALTH_URL = "https://reject-email.preview.emergentagent.com/api/health"
 
 # Credentials
 ADMIN_EMAIL = "admin@ecommbx.io"

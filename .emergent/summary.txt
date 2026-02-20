@@ -1,159 +1,156 @@
 <analysis>**original_problem_statement:**
-The user's high-level goal is to maintain and enhance a live banking application. The project involves fixing bugs and implementing new features with a strong emphasis on stability and correctness due to the application's live, client-facing nature.
+The user's high-level goal is to maintain and enhance a live banking application. The project involves fixing bugs, implementing new features, and improving performance, with a strong emphasis on stability and correctness due to the application's live, client-facing nature.
 
-**PRODUCT REQUIREMENTS (Recent Tasks):**
-1.  **Robust Transfer Emails:** Fix a bug where P2P transfers didn't send confirmation emails. This evolved into a major feature enhancement:
-    *   Add detailed email status tracking to the database (, , , , ).
-    *   Add structured logging for all email attempts.
-    *   Implement an admin resend confirmation feature for failed emails.
-2.  **Branding & UI Fixes:**
-    *   Update the application's domain from  to  in all email templates and configurations.
-    *   Fix email template rendering issues in dark mode, specifically making the logo text visible.
-    *   Update the sender email to  after guiding the user through domain verification on Resend.
-3.  **Accounts Card Layout (Mobile):** Iteratively fix the layout of the main Accounts card on the user dashboard to match the desktop design. This involved multiple rounds of adjustments to address balance alignment, overlapping elements, and IBAN text wrapping. The final requirement is to ensure the copy IBAN icon stays inline with the IBAN text.
+The current active request is to implement a professional transactional email that is sent to the customer only when a transfer is REJECTED by an admin.
+
+**PRODUCT REQUIREMENTS:**
+-   **Trigger**: Email sent immediately and only when a transfer status changes to REJECTED.
+-   **Idempotency**: Guarantee one email per rejection, using a flag like .
+-   **Content**:
+    -   Subject: Transfer rejected – action may be required
+    -   Body: Professional message stating no funds were sent.
+    -   Details: Rejection timestamp, amount, beneficiary name, masked recipient IBAN (first 4 + last 4), and transfer reference.
+    -   **No rejection reason** should be included.
+    -   CTA: A Contact Support button linking to the in-app support page.
+    -   Security Note: If you did not authorize this request, please contact support.
+-   **Localization**: Support both English and Italian, based on the user's preferred language.
+-   **Error Handling**: Email sending failures must not block the transfer rejection flow and should be logged.
+-   **Verification**: Test by rejecting a transfer and ensuring a single email is sent, the CTA link works, and no emails are sent for other status changes.
 
 **User's preferred language**: English
 
 **what currently exists?**
-A full-stack banking application built with React, FastAPI, and MongoDB. The application features user/admin authentication, account management, transfers, and a support ticket system. The email notification system for transfers is now highly robust, with detailed status tracking, error logging, and an admin resend capability. Email templates have been updated to use the new  domain and are hardened against dark mode rendering issues. The UI for the main accounts card on the dashboard has undergone several revisions to improve its responsive layout.
+A full-stack banking application (React, FastAPI, MongoDB) with user/admin roles, account management, transfers, and a support system. The previous agent successfully resolved multiple severe performance bottlenecks across the admin and client-facing dashboards, fixed data inconsistencies, and added search functionality to the admin transfers queue. The application is now significantly more performant. The email sending service () is already integrated.
 
 **Last working item**:
--   Last item agent was working: Applying a final polish to the Accounts card in . The specific task is to fix the layout on mobile where the copy IBAN icon drops to a new line instead of remaining inline with the IBAN text.
--   Status: **IN PROGRESS**
+-   Last item agent was working: The agent had just started to investigate the codebase to implement a new feature: sending a transactional email when a transfer is rejected. The agent has reviewed the relevant backend files (, , ) to understand the rejection flow and where to inject the email-sending logic.
+-   Status: **NOT STARTED**
 -   Agent Testing Done: N
--   Which testing method agent to use? screenshot tool
+-   Which testing method agent to use? Manual testing by the main agent. Create a test transfer, log in as an admin, reject it, and verify that the email is sent correctly and only once. Check email content and links. After successful implementation, run a full regression test using the .
 -   User Testing Done: N
 
 **All Pending/In progress Issue list**:
--   **Issue 1:** (P0) The IBAN copy icon is not inline with the IBAN text on mobile devices.
-    -   **Attempted fixes:** The agent has tried several CSS and JSX structure changes in , including using , , , and . The latest approach involves wrapping the IBAN and copy icon in an  span.
+-   **Issue 1:** (P0) Implement Transfer Rejected Transactional Email.
+    -   **Description:** The application needs to send a professional email notification to a customer when their fund transfer is rejected by an admin.
     -   **Next debug checklist:**
-        1.  Review the latest changes in  to ensure the correct Tailwind CSS classes are applied to keep the icon inline with the text flow, even during wrapping. The goal is for the icon to behave like the last character of the IBAN string.
-        2.  A significant blocker has been the inability to reliably test frontend changes. The provided user credentials () failed, and creating new test users is hampered by a mandatory KYC wall and a suspected database cleanup process. The next agent must devise a stable strategy to view the user dashboard, either by successfully creating a fully provisioned test user or by finding a way to bypass the KYC check for testing purposes.
-        3.  Take a screenshot using the screenshot tool on the user dashboard to verify the fix.
-    -   **Why fix this issue and what will be achieved with the fix?** To achieve a polished, professional UI where the copy icon is visually and functionally attached to the IBAN it corresponds to.
-    -   **Status:** IN PROGRESS
-    -   **Is recurring issue?** Y
-    -   **Should Test frontend/backend/both after fix?** Frontend
-    -   **Blocked on other issue:** Blocked by the difficulty of accessing the user dashboard for testing.
+        1.  Modify the  MongoDB collection schema to include a boolean flag like  to ensure idempotency.
+        2.  In , within the  function, add the logic to check if the idempotency flag is false.
+        3.  Call the  to send the email using a new template.
+        4.  Create new email templates (HTML/text for EN and IT) with the required content (masked IBAN, amount, CTA to support).
+        5.  Update the transfer document to set  to  after the email is successfully sent.
+        6.  Wrap the email sending logic in a  block to log errors without failing the rejection process.
+    -   **Why fix this issue and what will be achieved with the fix?** To improve customer communication by promptly and professionally informing them of a rejected transaction, reducing confusion and support load.
+    -   **Status:** NOT STARTED
+    -   **Is recurring issue?** N
+    -   **Should Test frontend/backend/both after fix?** Backend.
+    -   **Blocked on other issue:** None.
 
 **In progress Task List**:
-- None
+-   None.
 
 **Upcoming and Future Tasks**
 -   **Future Tasks:**
-    -   (P1) **Fix Dangerous Admin Endpoint:** Refactor the hard-delete endpoint  to use a soft-delete or a reversing transaction. This was deferred by the user but remains a critical risk.
+    -   (P1) **Fix Dangerous Admin Endpoint:** Refactor the hard-delete endpoint  in  to use a soft-delete mechanism (e.g., set  to ). This was deferred by the user but remains a critical risk for data integrity.
 
 **Completed work in this session**
--   **Robust Transfer Confirmation Emails:**
-    -   Implemented a comprehensive email status tracking system (, , , provider ID, error) in the  model.
-    -   Fixed a critical bug where P2P transfers did not send confirmation emails by integrating the email service into .
-    -   Added an admin endpoint () to retry sending failed emails.
--   **Email Branding & Domain Update:**
-    -   Updated the application-wide domain from  to .
-    -   Guided the user through verifying the new domain on Resend (DNS records for SPF, DKIM, MX).
-    -   Updated the  to  after verification.
-    -   Fixed email template dark mode issues, ensuring text is visible on dark backgrounds.
--   **Accounts Card UI/UX Fixes (Iterative):**
-    -   Addressed and fixed multiple layout issues on the Accounts card for mobile, including balance alignment, overlapping elements, and improper IBAN text wrapping.
+-   **Performance Optimization:**
+    -   Fixed severe N+1 query and payload issues in the Admin Panel's Accounts and Transfers Queue pages, reducing load times from ~23s to under 1s.
+    -   Fixed a frontend-based N+1 query issue on the Admin Card Requests page, making it load instantly.
+    -   Optimized the Customer Dashboard (Overview) by fixing slow queries for widgets like Monthly Spending.
+    -   Optimized the Admin and Customer Support Tickets list by removing full message payloads from the list view API.
+    -   Optimized the Admin Overview page by parallelizing multiple database count queries, reducing load time from 1.7s to ~1s.
+-   **Feature Enhancement:**
+    -   Added a robust search functionality to the Admin Transfers Queue that queries the entire database across all transfer statuses.
+-   **Bug Fixes:**
+    -   Resolved a critical data inconsistency where the Total Spending amount differed between the Customer Overview page (THIS MONTH) and the Spending Insights page (Last 30 days). The logic is now unified.
 
 **Earlier issues found/mentioned but not fixed**
 -   **Issue 1:** The  endpoint in  performs a hard delete.
-    -   **Debug checklist:** Investigate  and refactor the logic to a soft delete (e.g., updating a  field to ).
-    -   **Why to solve this issue and what will be achieved with this?** Prevents irreversible data loss from the ledger, which is critical for a banking application.
+    -   **Debug checklist:** Investigate  and refactor the logic to a soft delete (e.g., updating a  field to  or ).
+    -   **Why to solve this issue and what will be achieved with this?** Prevents irreversible data loss from the ledger, which is critical for a banking application and auditing.
     -   **Should Test frontend/backend/both after fix:** Backend
     -   **Is recurring issue?** N
 
 **Known issue recurrence from previous fork**
 -   **Issue recurrence in previous fork:** Balance desynchronization.
 -   **Recurrence count:** 1
--   **Status:** **NOT STARTED** (The likely root cause, the hard-delete endpoint, still exists but its fix has been deferred by the user).
+-   **Status:** **NOT STARTED** (The likely root cause, the hard-delete endpoint, still exists as its fix was deferred by the user).
 
 **Code Architecture**
 
 
 **Key Technical Concepts**
--   **Backend:** FastAPI
+-   **Backend:** FastAPI, Pydantic
 -   **Frontend:** React.js, Tailwind CSS
--   **Database:** MongoDB
--   **Email:** Resend
--   **Email Templating:** Advanced techniques for dark mode compatibility (meta tags, CSS , Gmail-specific selectors).
--   **DNS Management:** Guided user through adding TXT (SPF, DKIM, DMARC) and MX records for domain verification.
+-   **Database:** MongoDB,  async driver
+-   **Performance Optimization:** N+1 query elimination, MongoDB aggregation pipelines,  for parallel queries, server-side pagination, payload reduction.
+-   **Email:** Resend API for transactional emails.
 
 **key DB schema**
--   **ledger_transactions:**
-    -    (Enum: pending, sent, failed)
-    -   
-    -   
-    -   
+-   **p2p_transfers:** Contains all transfer data. The plan is to add  to this collection.
+-   **card_requests:** Contains card issuance requests.
+-   **support_tickets:** Contains support ticket metadata.
+-   **support_messages:** Contains individual messages for tickets.
 
 **changes in tech stack**
 -   None.
 
 **All files of reference**
--   **Files for Current Task:**
-    -   
--   **Key Files Modified in this Session:**
-    -   
-    -   
-    -   
-    -   
-    -   
-    -   
-    -   
-    -   
-    -   
+-   : Contains the  method where the new email logic will be added.
+-   : Contains the existing email-sending functionality to be leveraged.
+-   : Contains the API endpoint definitions.
+-   : Where new database indexes were added.
+-   : Modified to add search functionality.
+-   : Modified to unify spending calculation logic.
+-   : Link to Spending Insights was updated.
 
 **Areas that need refactoring**:
--   The backend monolith  is large and could be broken down into smaller, resource-specific router files.
--   The hard-delete transfer endpoint is a critical risk and needs to be changed to a soft-delete.
--   The test user creation process is a major bottleneck for development. A streamlined method (e.g., a seed script or a dedicated admin function) to create a fully provisioned test user with an active account and approved KYC is needed.
+-   The hard-delete transfer endpoint () remains a critical risk and should be converted to a soft delete.
 
 **key api endpoints**
--    (New)
--    (Modified to send emails)
+-   : The endpoint that will trigger the new rejection email.
+-   (Optimized) , , , 
+-   (Fixed) , 
 
 **Critical Info for New Agent**
--   **This is a live banking application.** All work must be done with extreme care.
--   **Testing is a major challenge.** The agent was repeatedly blocked from verifying frontend changes due to issues with logging in as a test user. The provided credentials didn't work, and new user creation is blocked by a KYC wall and a suspected database cleanup job. You must solve this testing problem to verify your work.
--   The user is highly detail-oriented about UI. Ensure all frontend changes are pixel-perfect and match the user's screenshots and descriptions.
--   The application's official domain is now . Ensure all new configurations and templates use this domain.
+-   **This is a live banking application with real clients.** All work must be performed with extreme care. Do not change any business logic unless explicitly requested.
+-   The immediate task is to implement the transfer rejected email notification. Follow the requirements precisely, especially regarding idempotency and content.
+-   **Full regression testing is mandatory after every feature or major bug fix.** Use the  for this purpose.
+-   Always use the provided test user credentials. **Never test with real client data.**
 
 **documents and test reports created in this job**
--    (Updated)
--   Test reports from the testing agent are available in .
+-    (Continuously updated with completed tasks and backlog)
+-   Multiple test reports in  from  runs.
 
 **Last 10 User Messages and any pending HUMAN messages**
-1.  **LATEST/PENDING:** Requested a final polish on the Accounts card to move the IBAN copy icon to be inline with the IBAN text on mobile.
-2.  Requested to show the full IBAN without truncation, allowing for clean wrapping.
-3.  Reported that the Accounts card layout was broken, with the balance and View transactions link overlapping.
-4.  Reported that the Accounts card balance was misaligned on mobile.
-5.  Reported issues with email branding (wrong domain, invisible text in dark mode).
-6.  Requested robust email status tracking and a resend feature for failed transfer confirmations.
-7.  Confirmed the new domain was verified in Resend and asked to update the backend.
-8.  Asked for the correct TTL value for DNS records in Hostinger.
-9.  Asked what to do after adding the DNS records.
-10. Shared a screenshot of the required DNS records from Resend.
+1.  **LATEST/PENDING**: User requested the implementation of a professional transactional email for rejected transfers, providing detailed requirements. (Not Started)
+2.  User asked if the Admin Overview page was optimized as requested. (Completed)
+3.  User reported an inconsistency in Total Spending between the Overview and Spending Insights pages. (Completed)
+4.  User requested performance optimization for the client Overview/Dashboard and Support Tickets pages. (Completed)
+5.  User requested performance optimization for the admin Card Requests page and search functionality for the Transfers Queue. (Completed)
+6.  User initiated the entire performance optimization task, starting with the slow Accounts and Transfers Queue pages in the admin panel. (Completed)
+7.  User provided general instructions about the critical nature of the application and provided test credentials. (Acknowledged)
+8.  (Older messages relate to successfully completed UI/UX fixes and bug resolutions).
 
 **Project Health Check:**
 -   **Broken:**
-    -   A high-risk hard-delete endpoint for transfers () still exists. **(Fix is deferred by the user).**
-    -   The test environment is unstable, making frontend verification extremely difficult due to a KYC wall and a suspected automated database cleanup job.
+    -   A high-risk hard-delete endpoint for transfers () still exists. (Fix is deferred by the user).
 -   **Mocked:** None.
 
 **3rd Party Integrations**
--   **Cloudinary:** Used for KYC documents and support ticket attachments.
--   **Resend:** Used for all transactional emails. The domain  is verified and active.
+-   **Cloudinary:** For KYC documents and support ticket attachments.
+-   **Resend:** For all transactional emails.
 
 **Testing status**
--   Testing agent used after significant changes: YES
+-   Testing agent used after significant changes: **YES**. The testing agent was used successfully after each major performance fix and bug resolution.
 -   Troubleshoot agent used after agent stuck in loop: NO
--   Test files created: Dynamically created by the testing agent.
--   Known regressions: The layout of the Accounts card on mobile has been a recurring problem, requiring several iterative fixes.
+-   Test files created: None.
+-   Known regressions: None from the work in this session. All optimizations were confirmed via regression testing.
 
 **Credentials to test flow:**
--   The user provided  with password . **Warning: These credentials failed during the last session.**
--   Creating new test users is highly problematic and a major blocker for frontend testing.
+-   User: 
+-   Password: 
+-   Role: Customer & Admin access.
 
 **What agent forgot to execute**
--   The agent did not forget any tasks but was repeatedly blocked from fully testing and verifying frontend changes due to the inability to create a stable test user and access the main user dashboard. This process issue needs to be resolved.</analysis>
+-   The previous agent had correctly identified the next task (implementing the rejection email) and was in the initial exploration phase. No steps were forgotten.</analysis>

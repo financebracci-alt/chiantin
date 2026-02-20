@@ -65,7 +65,7 @@
   ],
   "test_limitations": "Did NOT actually delete any real users during testing (LIVE banking system). All tests were endpoint structure tests with non-existent user IDs.",
   "admin_credentials_used": "admin@ecommbx.io / Admin@123456",
-  "test_environment": "https://query-optimize-1.preview.emergentagent.com",
+  "test_environment": "https://reject-email.preview.emergentagent.com",
   "test_date": "2026-02-18",
   "bug_fix_verification": {
     "original_issue": "User deletion shows success toast but user remains in table",

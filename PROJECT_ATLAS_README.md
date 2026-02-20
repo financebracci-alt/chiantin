@@ -76,7 +76,7 @@ A production-grade banking platform with double-entry ledger, KYC workflows, and
 - Role: SUPER_ADMIN
 
 ### Access
-- Frontend: https://query-optimize-1.preview.emergentagent.com
+- Frontend: https://reject-email.preview.emergentagent.com
 - Backend API: Port 8001
 - API Docs: http://localhost:8001/docs
 

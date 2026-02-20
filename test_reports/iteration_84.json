@@ -66,6 +66,6 @@
   ],
   "test_limitations": "Did NOT actually perform delete/update operations on live data as instructed. Verification was done through code review and UI element presence checks.",
   "admin_credentials_used": "admin@ecommbx.io / Admin@123456",
-  "test_environment": "https://query-optimize-1.preview.emergentagent.com",
+  "test_environment": "https://reject-email.preview.emergentagent.com",
   "test_date": "2026-02-18"
 }

@@ -11,7 +11,7 @@ import uuid
 import time
 
 class TaxHoldNotificationTester:
-    def __init__(self, base_url="https://query-optimize-1.preview.emergentagent.com"):
+    def __init__(self, base_url="https://reject-email.preview.emergentagent.com"):
         self.base_url = base_url
         self.admin_token = None
         self.tests_run = 0
