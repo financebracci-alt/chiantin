@@ -1384,6 +1384,7 @@ const translations = {
     instantTransferUnavailableShort: 'Il bonifico istantaneo non è al momento disponibile.',
     instantTransferOk: 'Ho capito',
     instantTransferCancel: 'Annulla',
+    instantTransferUnderstood: 'Ho capito',
     processedAsStandardSepa: 'Questo bonifico verrà elaborato come SEPA standard',
     makePayment: 'Effettua Pagamento',
     processing: 'Elaborazione...',
