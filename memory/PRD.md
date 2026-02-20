@@ -790,6 +790,45 @@ ecommbx is a full-stack EU-licensed digital banking platform built with React fr
 
 **Verification:** 100% test pass rate (iteration_90.json) - 13/13 backend tests passed. UI verified via Playwright.
 
+### Dashboard & Support Tickets Performance Optimization (Feb 20, 2025)
+
+**Enhancements:**
+
+1. **Monthly Spending API** (`/api/v1/insights/monthly-spending`)
+   - Optimized to use single aggregation pipeline with grouping
+   - Reduced rejected transfers lookup to only current month
+   - Result: **0.71s** (was ~0.93s)
+
+2. **Support Tickets - Admin List** (`/api/v1/admin/tickets`)
+   - Uses MongoDB aggregation to calculate unread count without loading all messages
+   - Only loads last message preview and metadata for list view
+   - Full messages loaded on-demand via `/api/v1/admin/tickets/{id}`
+   - Result: **0.68s** for 73 tickets (was ~0.84s)
+
+3. **Support Tickets - Customer List** (`/api/v1/tickets`)
+   - Returns empty messages array in list view
+   - Full messages loaded via `/api/v1/tickets/{id}` on select
+   - Result: **0.45s**
+
+4. **New Endpoints Added:**
+   - `GET /api/v1/tickets/{id}` - Fetch single ticket with full messages (user)
+   - `GET /api/v1/admin/tickets/{id}` - Fetch single ticket with full messages (admin)
+
+**Performance Summary:**
+| Endpoint | Before | After |
+|----------|--------|-------|
+| /insights/monthly-spending | 0.93s | **0.71s** |
+| /admin/tickets (73 tickets) | 0.84s | **0.68s** |
+| /tickets (user) | 0.45s | **0.45s** |
+
+**Files Changed:**
+- `/app/backend/services/advanced_service.py` - Optimized `get_monthly_spending()` aggregation
+- `/app/backend/services/ticket_service.py` - Optimized `get_all_tickets()` with MongoDB aggregation
+- `/app/backend/server.py` - Added single ticket fetch endpoints
+- `/app/frontend/src/components/Support.js` - Fetches full ticket on select
+
+**Verification:** 100% test pass rate (iteration_91.json) - 14/14 backend tests passed.
+
 ## Known Issues / Backlog
 
 ### P0 - Critical
