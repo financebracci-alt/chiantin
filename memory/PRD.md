@@ -1057,6 +1057,47 @@ Unique index: (admin_id, section_key)
 
 **Verification:** 100% test pass rate (iteration_97.json) - 16/16 backend tests passed. Badge persistence across logout/login cycles verified.
 
+### Admin Card Requests Enhancement (Feb 20, 2025)
+
+**Features Added:**
+
+**1. Pagination:**
+- Page size dropdown: 20 / 50 / 100 (default 50)
+- Controls: First / Prev / Next / Last
+- Shows: "Showing X of Y results", "Page N of M"
+- Server-side pagination for performance
+
+**2. Global Search:**
+- Search input at top of page
+- Searches by: user name, email, card type, request ID
+- Scope toggle: "This tab" / "All tabs"
+- Debounced input (300ms)
+- Resets to page 1 when searching
+
+**3. Delete Card Request:**
+- Delete button per row (all tabs)
+- Confirmation modal with request details
+- **CRITICAL:** For FULFILLED requests, also deletes associated card
+- Smooth UI update (no page reload)
+- Success toast notification
+
+**4. Audit Logging:**
+- All deletes logged to `audit_logs` collection
+- Logs: action, admin_id, admin_email, request details, timestamp
+- Logs whether associated card was also deleted
+
+**API Endpoints:**
+- `GET /api/v1/admin/card-requests` - Pagination & search params
+  - Query params: `status`, `page`, `page_size`, `search`, `scope`
+- `DELETE /api/v1/admin/card-requests/{request_id}` - Delete with safety logic
+
+**Files Changed:**
+- `/app/backend/server.py` - Updated GET endpoint, added DELETE endpoint
+- `/app/frontend/src/components/AdminCardRequestsQueue.js` - Full rewrite with pagination/search/delete
+- `/app/backend/tests/test_admin_card_requests.py` - Comprehensive test suite
+
+**Verification:** 100% test pass rate (iteration_98.json) - 21/21 backend tests passed. All UI elements verified working.
+
 ## Known Issues / Backlog
 
 ### P0 - Critical
