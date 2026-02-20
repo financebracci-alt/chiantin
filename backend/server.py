@@ -3809,10 +3809,13 @@ async def admin_get_card_requests(
     current_user: dict = Depends(require_admin),
     db: AsyncIOMotorDatabase = Depends(get_database)
 ):
-    """Admin: Get card requests filtered by status."""
+    """Admin: Get card requests filtered by status with user information.
+    
+    PERFORMANCE OPTIMIZED: Returns user info with each request to avoid N+1 frontend queries.
+    """
     workflows = BankingWorkflowsService(db)
-    requests = await workflows.get_pending_card_requests(status)
-    return {"ok": True, "data": [r.model_dump() for r in requests]}
+    result = await workflows.get_pending_card_requests(status)
+    return {"ok": True, "data": result["requests"], "pagination": result["pagination"]}
 
 
 @app.post("/api/v1/admin/card-requests/{request_id}/fulfill")
