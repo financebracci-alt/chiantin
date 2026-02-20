@@ -1098,6 +1098,59 @@ Unique index: (admin_id, section_key)
 
 **Verification:** 100% test pass rate (iteration_98.json) - 21/21 backend tests passed. All UI elements verified working.
 
+### Admin Transfers Queue Pagination (Feb 20, 2025)
+
+**Feature:** Server-side pagination for Admin Transfers Queue page to improve performance with large datasets.
+
+**Implementation:**
+
+**1. Pagination Controls:**
+- Page size dropdown: 20 / 50 / 100 (default 20)
+- Navigation buttons: First / Prev / Next / Last
+- Displays: "Showing X-Y of Z results", "Page N of M"
+- Server-side pagination for performance
+
+**2. Status Tab Integration:**
+- Works with all status tabs: SUBMITTED, COMPLETED, REJECTED
+- Tab change resets to page 1
+- Pagination info reflects per-tab counts
+
+**3. Search Integration:**
+- Search bar searches across ALL statuses (ignores current tab)
+- Searches: beneficiary name, sender name/email, IBAN, reference number
+- Returns `search_mode: true` flag in pagination response
+- Message shows "Searching across ALL transfers (ignoring tab filter)"
+- Search results are also paginated
+
+**4. UI Behavior:**
+- Debounced search input (300ms)
+- Page size change resets to page 1
+- Disabled navigation buttons when at boundaries
+
+**API Endpoint:**
+- `GET /api/v1/admin/transfers`
+  - Query params: `status`, `page`, `page_size`, `search`
+  - Returns: `{ ok, data, pagination }`
+  - Pagination: `{ page, page_size, total, total_pages, has_next, has_prev, search_mode }`
+
+**Backend Implementation:**
+- `get_admin_transfers()` in `banking_workflows_service.py` (line 420-543)
+  - Handles pagination, status filtering, bulk user/account lookups
+- `_search_transfers()` in `banking_workflows_service.py` (line 545-680)
+  - Full-text search across transfers and users with pagination
+
+**Files Changed:**
+- `/app/backend/services/banking_workflows_service.py` - get_admin_transfers and _search_transfers with pagination
+- `/app/backend/server.py` - Updated admin_get_transfers endpoint (line 4452-4479)
+- `/app/frontend/src/components/AdminTransfersQueue.js` - Full rewrite with pagination UI
+
+**Verification:** 100% test pass rate (iteration_99.json) - 28/28 backend tests passed. All UI elements verified working:
+- Pagination controls visible and functional
+- Page navigation (First/Prev/Next/Last) working
+- Page size selector working (20/50/100)
+- Search with pagination working
+- Status tab switching with pagination working
+
 ## Known Issues / Backlog
 
 ### P0 - Critical
