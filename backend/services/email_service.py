@@ -89,6 +89,17 @@ EMAIL_TRANSLATIONS = {
         'transfer_button': 'View Transfer Details',
         'transfer_security_warning': 'If you did not authorize this transfer, please contact our support team immediately.',
         'transfer_disclaimer': 'Please do not reply to this email. For assistance, contact support@ecommbx.io',
+        
+        # Transfer Rejected Email
+        'transfer_rejected_subject': 'Transfer rejected – action may be required',
+        'transfer_rejected_title': 'Transfer Rejected',
+        'transfer_rejected_greeting': 'Dear',
+        'transfer_rejected_body': 'We are writing to inform you that your recent transfer request could not be completed. No funds have been sent from your account.',
+        'transfer_rejected_summary': 'Transfer Details',
+        'transfer_rejected_timestamp': 'Rejection Date & Time',
+        'transfer_rejected_note': 'If you believe this rejection was made in error or if you have any questions, please contact our support team.',
+        'transfer_rejected_button': 'Contact Support',
+        'transfer_rejected_security_warning': 'If you did not authorize this transfer request, please contact our support team immediately.',
     },
     'it': {
         # Password Reset Email
