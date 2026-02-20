@@ -360,11 +360,16 @@ async def login(
         # Audit: Failed login attempt
         await create_audit_log(
             db=db,
-            action="LOGIN_FAILED",
+            action="USER_LOGIN_FAILED",
             entity_type="auth",
             entity_id=credentials.email,
             description=f"Failed login attempt for {credentials.email}",
-            metadata={"ip_address": client_ip, "reason": "invalid_credentials"}
+            metadata={
+                "ip_address": client_ip, 
+                "reason": "invalid_credentials",
+                "user_agent": request.headers.get("user-agent", "unknown"),
+                "source": "web"
+            }
         )
         raise HTTPException(status_code=401, detail="Invalid credentials")
     
@@ -373,7 +378,7 @@ async def login(
         # Audit: Disabled account login attempt
         await create_audit_log(
             db=db,
-            action="LOGIN_BLOCKED",
+            action="USER_LOGIN_BLOCKED",
             entity_type="auth",
             entity_id=user.id,
             description=f"Login blocked for disabled account: {user.email}",
