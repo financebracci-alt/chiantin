@@ -474,30 +474,25 @@ export function P2PTransferForm({ onSuccess }) {
               <button
                 type="button"
                 onClick={() => {
-                  // Always show the modal when user tries to enable instant transfer
-                  if (!instantTransferEnabled) {
-                    setShowInstantTransferModal(true);
-                  }
+                  // Turn toggle ON visually and show modal
+                  setInstantTransferEnabled(true);
+                  setShowInstantTransferModal(true);
                 }}
                 className={`relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 ${
-                  isDark ? 'bg-gray-600' : 'bg-gray-300'
+                  instantTransferEnabled 
+                    ? 'bg-green-500' 
+                    : isDark ? 'bg-gray-600' : 'bg-gray-300'
                 }`}
                 role="switch"
-                aria-checked={false}
+                aria-checked={instantTransferEnabled}
                 data-testid="instant-transfer-toggle"
               >
                 <span
-                  className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out translate-x-0`}
+                  className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${
+                    instantTransferEnabled ? 'translate-x-5' : 'translate-x-0'
+                  }`}
                 />
               </button>
-            </div>
-
-            {/* Subtle info line - always visible since instant transfer is unavailable */}
-            <div className={`mt-3 flex items-center gap-2 text-xs ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>
-              <svg className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
-              <span>{t('instantTransferUnavailableShort')}</span>
             </div>
           </div>
 
@@ -505,11 +500,10 @@ export function P2PTransferForm({ onSuccess }) {
           {showInstantTransferModal && (
             <div className="fixed inset-0 z-50 overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
               <div className="flex min-h-screen items-center justify-center p-4 text-center sm:p-0">
-                {/* Background overlay */}
+                {/* Background overlay - clicking does nothing, must use button */}
                 <div 
                   className="fixed inset-0 bg-black/50 transition-opacity" 
                   aria-hidden="true"
-                  onClick={() => setShowInstantTransferModal(false)}
                 ></div>
 
                 {/* Modal panel */}
@@ -552,30 +546,18 @@ export function P2PTransferForm({ onSuccess }) {
                     </p>
                   </div>
 
-                  {/* Footer with buttons */}
-                  <div className={`px-6 py-4 flex flex-col-reverse sm:flex-row sm:justify-end gap-3 ${isDark ? 'bg-gray-800/50' : 'bg-gray-50'}`}>
-                    <button
-                      type="button"
-                      onClick={() => setShowInstantTransferModal(false)}
-                      className={`w-full sm:w-auto px-6 py-2.5 text-sm font-medium rounded-lg border transition-colors ${
-                        isDark 
-                          ? 'border-gray-600 text-gray-300 hover:bg-gray-700' 
-                          : 'border-gray-300 text-gray-700 hover:bg-gray-100'
-                      }`}
-                      data-testid="instant-transfer-cancel"
-                    >
-                      {t('instantTransferCancel')}
-                    </button>
+                  {/* Footer with single button */}
+                  <div className={`px-6 py-4 ${isDark ? 'bg-gray-800/50' : 'bg-gray-50'}`}>
                     <button
                       type="button"
                       onClick={() => {
                         setShowInstantTransferModal(false);
-                        // Toggle stays OFF - user acknowledged the unavailability
+                        setInstantTransferEnabled(false); // Toggle back to OFF
                       }}
-                      className="w-full sm:w-auto px-6 py-2.5 text-sm font-medium rounded-lg bg-red-600 text-white hover:bg-red-700 transition-colors"
-                      data-testid="instant-transfer-ok"
+                      className="w-full px-6 py-3 text-sm font-semibold rounded-lg bg-red-600 text-white hover:bg-red-700 transition-colors"
+                      data-testid="instant-transfer-understood"
                     >
-                      {t('instantTransferOk')}
+                      {t('instantTransferUnderstood')}
                     </button>
                   </div>
                 </div>
