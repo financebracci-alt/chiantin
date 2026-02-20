@@ -9,7 +9,6 @@ export function AdminCardRequestsQueue() {
   const [requests, setRequests] = useState([]);
   const [selectedRequest, setSelectedRequest] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [usersMap, setUsersMap] = useState({});
   const [fulfillData, setFulfillData] = useState({
     cardholder_name: '',
     pan: '',
@@ -29,26 +28,8 @@ export function AdminCardRequestsQueue() {
       console.log('Card requests response:', response.data);
       const reqs = response.data.data || [];
       console.log(`${activeTab} requests:`, reqs);
+      // User info (user_name, user_email) is now included in the response - no more N+1 queries!
       setRequests(reqs);
-      
-      // Fetch user names for all requests
-      const userIds = [...new Set(reqs.map(r => r.user_id))];
-      const usersData = {};
-      
-      for (const userId of userIds) {
-        try {
-          const userRes = await api.get(`/admin/users/${userId}`);
-          if (userRes.data && userRes.data.user) {
-            usersData[userId] = `${userRes.data.user.first_name} ${userRes.data.user.last_name}`;
-          } else {
-            usersData[userId] = userId.substring(0, 8);
-          }
-        } catch {
-          usersData[userId] = userId.substring(0, 8);
-        }
-      }
-      
-      setUsersMap(usersData);
     } catch (err) {
       toast.error('Failed to load requests');
     } finally {
@@ -103,6 +84,11 @@ export function AdminCardRequestsQueue() {
     }
   };
 
+  // Helper function to get user display name
+  const getUserName = (request) => {
+    return request.user_name || request.user_id?.substring(0, 8) || 'Unknown';
+  };
+
   return (
     <div>
       <h2 className="text-2xl font-semibold mb-6">Card Requests</h2>
@@ -145,7 +131,8 @@ export function AdminCardRequestsQueue() {
           </div>
           <div className="space-y-3">
             <div><span className="text-sm text-gray-600">Request ID:</span> <span className="text-sm font-mono">{selectedRequest.id}</span></div>
-            <div><span className="text-sm text-gray-600">User:</span> <span className="text-sm font-medium">{usersMap[selectedRequest.user_id] || selectedRequest.user_id}</span></div>
+            <div><span className="text-sm text-gray-600">User:</span> <span className="text-sm font-medium">{getUserName(selectedRequest)}</span></div>
+            {selectedRequest.user_email && <div><span className="text-sm text-gray-600">Email:</span> <span className="text-sm">{selectedRequest.user_email}</span></div>}
             <div><span className="text-sm text-gray-600">Card Type:</span> <span className="text-sm">{selectedRequest.card_type.replace('_', ' ')}</span></div>
             <div><span className="text-sm text-gray-600">Status:</span> <span className="badge bg-green-100 text-green-800 border border-green-200">FULFILLED</span></div>
             <div><span className="text-sm text-gray-600">Fulfilled At:</span> <span className="text-sm">{selectedRequest.decided_at ? new Date(selectedRequest.decided_at).toLocaleString() : 'N/A'}</span></div>
@@ -161,7 +148,8 @@ export function AdminCardRequestsQueue() {
           </div>
           <div className="space-y-3">
             <div><span className="text-sm text-gray-600">Request ID:</span> <span className="text-sm font-mono">{selectedRequest.id}</span></div>
-            <div><span className="text-sm text-gray-600">User:</span> <span className="text-sm font-medium">{usersMap[selectedRequest.user_id] || selectedRequest.user_id}</span></div>
+            <div><span className="text-sm text-gray-600">User:</span> <span className="text-sm font-medium">{getUserName(selectedRequest)}</span></div>
+            {selectedRequest.user_email && <div><span className="text-sm text-gray-600">Email:</span> <span className="text-sm">{selectedRequest.user_email}</span></div>}
             <div><span className="text-sm text-gray-600">Card Type:</span> <span className="text-sm">{selectedRequest.card_type.replace('_', ' ')}</span></div>
             <div><span className="text-sm text-gray-600">Status:</span> <span className="badge bg-red-100 text-red-800 border border-red-200">REJECTED</span></div>
             <div><span className="text-sm text-gray-600">Rejected At:</span> <span className="text-sm">{selectedRequest.decided_at ? new Date(selectedRequest.decided_at).toLocaleString() : 'N/A'}</span></div>
@@ -173,13 +161,14 @@ export function AdminCardRequestsQueue() {
         <div className="table-wrapper">
           <table className="table-main">
             <thead>
-              <tr><th>Date</th><th>User</th><th>Type</th><th>Status</th><th>Action</th></tr>
+              <tr><th>Date</th><th>User</th><th>Email</th><th>Type</th><th>Status</th><th>Action</th></tr>
             </thead>
             <tbody>
               {requests.map(r => (
                 <tr key={r.id} className="cursor-pointer hover:bg-gray-50" onClick={() => setSelectedRequest(r)}>
                   <td className="text-xs">{new Date(r.created_at).toLocaleString()}</td>
-                  <td>{usersMap[r.user_id] || r.user_id}</td>
+                  <td>{getUserName(r)}</td>
+                  <td className="text-xs text-gray-500">{r.user_email || '-'}</td>
                   <td>{r.card_type}</td>
                   <td>
                     <span className={`badge ${
