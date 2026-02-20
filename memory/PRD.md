@@ -1015,6 +1015,48 @@ ecommbx is a full-stack EU-licensed digital banking platform built with React fr
 
 **Verification:** 100% test pass rate (iteration_96.json) - 14/14 backend tests passed. Frontend badge manager verified working correctly.
 
+### Admin Badge Persistence Update (Feb 20, 2025)
+
+**Change:** Updated badge system to persist across logout/login using database storage instead of sessionStorage.
+
+**New Behavior:**
+1. **Badges persist across sessions** - Stored in `admin_section_views` MongoDB collection
+2. **Badge = new items since last viewed** - Using `last_seen_at` timestamp per admin per section
+3. **Clear only when viewed** - Clicking a section updates `last_seen_at` to now
+4. **Real-time polling** - Every 25 seconds
+
+**Database Schema:**
+```
+admin_section_views collection:
+{
+  admin_id: string,        // Admin user ID
+  section_key: string,     // 'users', 'kyc', 'card_requests', 'transfers', 'tickets'
+  last_seen_at: datetime,  // When admin last viewed this section
+  created_at: datetime,
+  updated_at: datetime
+}
+Unique index: (admin_id, section_key)
+```
+
+**API Endpoints:**
+- `GET /api/v1/admin/notification-counts` - Returns counts per section (new since last_seen_at)
+- `POST /api/v1/admin/notifications/seen` - Marks a section as seen (updates last_seen_at)
+
+**Counting Rules:**
+- Users: PENDING users created after last_seen_at
+- KYC Queue: PENDING KYC applications created after last_seen_at
+- Card Requests: PENDING card requests created after last_seen_at
+- Transfers Queue: SUBMITTED transfers created after last_seen_at
+- Support Tickets: OPEN/IN_PROGRESS tickets with client activity after last_seen_at
+
+**Files Changed:**
+- `/app/backend/server.py` - Updated endpoints to use database-backed last_seen_at
+- `/app/backend/database.py` - Added indexes for admin_section_views collection
+- `/app/frontend/src/components/AdminLayout.js` - Removed sessionStorage, added API-based badge management
+- `/app/backend/tests/test_admin_badge_persistence.py` - Comprehensive test suite
+
+**Verification:** 100% test pass rate (iteration_97.json) - 16/16 backend tests passed. Badge persistence across logout/login cycles verified.
+
 ## Known Issues / Backlog
 
 ### P0 - Critical
