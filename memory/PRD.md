@@ -1176,6 +1176,49 @@ Unique index: (admin_id, section_key)
 - No pagination at bottom (single instance only)
 - All functionality preserved: search, tabs, page navigation, page size selector, delete action
 
+### Admin Password Change & Login Audit Trail (Feb 20, 2025)
+
+**Features Implemented:**
+
+**A) Admin Password Change:**
+- Added "Change" button in Admin → Users → User Details password section
+- Modal with new password + confirm password fields with validation
+- Min 8 characters, passwords must match
+- Stores password as plaintext (same as existing system)
+- Creates `PASSWORD_CHANGED` audit log with actor, target, IP, source (no password stored)
+
+**B) Login/Logout Audit Trail:**
+- New logout endpoint: `POST /api/v1/auth/logout`
+- Login audit now distinguishes: `USER_LOGIN_SUCCESS` vs `ADMIN_LOGIN_SUCCESS`
+- Logout audit now distinguishes: `USER_LOGOUT` vs `ADMIN_LOGOUT`
+- Failed login attempts logged as `USER_LOGIN_FAILED` with IP and user-agent
+
+**C) Auth History in User Details:**
+- "View Login Activity" button in User Details page
+- Displays auth events: LOGIN_SUCCESS, LOGIN_FAILED, LOGOUT, PASSWORD_CHANGED
+- Shows IP address, timestamp, actor (for admin actions), source
+
+**API Endpoints:**
+- `POST /api/v1/admin/users/{user_id}/change-password` - Admin changes customer password
+- `GET /api/v1/admin/users/{user_id}/auth-history` - Get auth history for a user
+- `POST /api/v1/auth/logout` - Logout with audit log creation
+
+**Audit Log Actions:**
+- `PASSWORD_CHANGED`: Admin changed customer password (entity_type: user)
+- `ADMIN_LOGIN_SUCCESS`: Admin logged in (entity_type: auth)
+- `ADMIN_LOGOUT`: Admin logged out (entity_type: auth)
+- `USER_LOGIN_SUCCESS`: Customer logged in (entity_type: auth)
+- `USER_LOGOUT`: Customer logged out (entity_type: auth)
+- `USER_LOGIN_FAILED`: Failed login attempt (entity_type: auth)
+- `USER_LOGIN_BLOCKED`: Login blocked (disabled account, unverified email)
+- `USER_MFA_FAILED`: Failed MFA verification
+
+**Files Changed:**
+- `/app/backend/server.py` - Password change endpoint, logout endpoint, enhanced login audit
+- `/app/frontend/src/App.js` - Password change modal, auth history UI, logout API call
+
+**Verification:** 100% test pass rate (iteration_102.json) - 10/10 backend tests, all frontend UI verified
+
 ### Admin Pagination Layout Refinement (Feb 20, 2025)
 
 **Change:** Moved pagination row ABOVE the tabs row for both Admin Transfers Queue and Admin Card Requests pages.
