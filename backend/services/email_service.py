@@ -693,3 +693,190 @@ class EmailService:
                 'provider_id': None,
                 'error': error_msg
             }
+    
+    def send_transfer_rejected_email(
+        self,
+        to_email: str,
+        first_name: str,
+        reference_number: str,
+        amount_cents: int,
+        beneficiary_name: str,
+        beneficiary_iban: str,
+        rejection_timestamp: datetime = None,
+        language: str = 'en'
+    ) -> dict:
+        """
+        Send transfer rejection notification email via Resend with localization support.
+        
+        IMPORTANT: This email does NOT include the rejection reason as per product requirements.
+        
+        Returns:
+            dict with keys: success (bool), provider_id (str or None), error (str or None)
+        """
+        # Ensure API key is set from environment
+        api_key = get_resend_api_key()
+        if not api_key:
+            error_msg = "RESEND_API_KEY not configured"
+            logger.warning(f"[REJECTION EMAIL] {error_msg} - skipping email to {to_email}")
+            return {'success': False, 'provider_id': None, 'error': error_msg}
+            
+        resend.api_key = api_key
+        
+        sender_email = get_sender_email()
+        if not sender_email:
+            error_msg = "SENDER_EMAIL not configured"
+            logger.warning(f"[REJECTION EMAIL] {error_msg} - skipping email to {to_email}")
+            return {'success': False, 'provider_id': None, 'error': error_msg}
+        
+        frontend_url = get_frontend_url()
+        
+        t = lambda key: get_translation(key, language)
+        
+        # Subject line
+        subject = t('transfer_rejected_subject')
+        
+        # Format amount in EU style (€1.234,56)
+        amount_euros = amount_cents / 100
+        amount_formatted = f"€{amount_euros:,.2f}".replace(",", "X").replace(".", ",").replace("X", ".")
+        
+        # Mask IBAN for security (show first 4 and last 4 characters)
+        def mask_iban(iban: str) -> str:
+            if not iban or len(iban) < 8:
+                return iban or "N/A"
+            return f"{iban[:4]}{'*' * (len(iban) - 8)}{iban[-4:]}"
+        
+        masked_beneficiary_iban = mask_iban(beneficiary_iban)
+        
+        # Format rejection timestamp
+        if rejection_timestamp:
+            timestamp_formatted = rejection_timestamp.strftime("%d/%m/%Y %H:%M")
+        else:
+            timestamp_formatted = datetime.utcnow().strftime("%d/%m/%Y %H:%M")
+        
+        # Support page URL for CTA button
+        support_url = f"{frontend_url}/support"
+        
+        html_body = f"""
+        <!DOCTYPE html>
+        <html xmlns="http://www.w3.org/1999/xhtml">
+        <head>
+            <meta charset="utf-8">
+            <meta name="color-scheme" content="light">
+            <meta name="supported-color-schemes" content="light">
+            <style>
+                :root {{ color-scheme: light; supported-color-schemes: light; }}
+                .dark-mode-bg {{ background-color: #1a1a2e !important; }}
+                .white-text {{ color: #FFFFFF !important; }}
+                .red-text {{ color: #dc3545 !important; }}
+                u + .body .dark-mode-bg {{ background-color: #1a1a2e !important; }}
+                u + .body .white-text {{ color: #FFFFFF !important; }}
+            </style>
+        </head>
+        <body class="body" style="font-family: 'Segoe UI', Arial, sans-serif; line-height: 1.6; color: #333333; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #f4f4f4;">
+            <div class="dark-mode-bg" style="background-color: #1a1a2e; padding: 30px; text-align: center; border-radius: 10px 10px 0 0;">
+                <h1 style="margin: 0;">
+                    <span style="font-size: 28px;">⚠️</span>
+                    <span class="white-text" style="color: #FFFFFF; font-size: 28px; font-weight: bold;">ecomm</span><span class="red-text" style="color: #dc3545; font-size: 28px; font-weight: bold;">bx</span>
+                </h1>
+                <p class="white-text" style="margin: 10px 0 0 0; font-size: 18px; color: #FFFFFF;">{t('transfer_rejected_title')}</p>
+            </div>
+            <div style="background-color: #ffffff; padding: 30px; border-radius: 0 0 10px 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+                <p style="font-size: 16px; color: #333333;">{t('transfer_rejected_greeting')} {first_name},</p>
+                <p style="color: #333333;">{t('transfer_rejected_body')}</p>
+                
+                <!-- Transfer Details Box -->
+                <div style="background-color: #f8f9fa; border: 1px solid #e9ecef; border-radius: 8px; padding: 20px; margin: 20px 0;">
+                    <h3 style="margin: 0 0 15px 0; color: #1a1a2e; font-size: 16px; border-bottom: 2px solid #dc3545; padding-bottom: 10px;">{t('transfer_rejected_summary')}</h3>
+                    
+                    <table style="width: 100%; border-collapse: collapse;">
+                        <tr>
+                            <td style="padding: 8px 0; color: #666666; font-size: 14px;">{t('transfer_rejected_timestamp')}</td>
+                            <td style="padding: 8px 0; text-align: right; color: #1a1a2e;">{timestamp_formatted} UTC</td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 8px 0; color: #666666; font-size: 14px;">{t('transfer_amount')}</td>
+                            <td style="padding: 8px 0; text-align: right; font-weight: bold; color: #dc3545; font-size: 18px;">{amount_formatted}</td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 8px 0; color: #666666; font-size: 14px;">{t('transfer_recipient')}</td>
+                            <td style="padding: 8px 0; text-align: right; font-weight: 600; color: #1a1a2e;">{beneficiary_name}</td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 8px 0; color: #666666; font-size: 14px;">{t('transfer_recipient_iban')}</td>
+                            <td style="padding: 8px 0; text-align: right; font-family: monospace; color: #1a1a2e;">{masked_beneficiary_iban}</td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 8px 0; color: #666666; font-size: 14px;">{t('transfer_reference')}</td>
+                            <td style="padding: 8px 0; text-align: right; font-weight: bold; color: #1a1a2e; font-family: monospace;">#{reference_number}</td>
+                        </tr>
+                    </table>
+                </div>
+                
+                <!-- Information Note -->
+                <div style="background-color: #e7f3ff; border-left: 4px solid #007bff; padding: 15px; margin: 20px 0; border-radius: 0 8px 8px 0;">
+                    <p style="margin: 0; font-size: 14px; color: #004085;">ℹ️ {t('transfer_rejected_note')}</p>
+                </div>
+                
+                <!-- Contact Support Button -->
+                <p style="text-align: center;">
+                    <a href="{support_url}" style="display: inline-block; background-color: #dc3545; color: #ffffff; padding: 15px 40px; text-decoration: none; border-radius: 8px; font-weight: bold; margin: 15px 0;">{t('transfer_rejected_button')}</a>
+                </p>
+                
+                <!-- Security Warning -->
+                <div style="background-color: #fff3cd; border: 1px solid #ffc107; padding: 15px; border-radius: 8px; margin: 20px 0;">
+                    <p style="margin: 0; color: #856404; font-size: 13px;">⚠️ <strong>{t('transfer_rejected_security_warning')}</strong></p>
+                </div>
+                
+                <!-- Disclaimer -->
+                <p style="color: #999999; font-size: 12px; text-align: center; margin-top: 20px; padding-top: 15px; border-top: 1px solid #eeeeee;">{t('transfer_disclaimer')}</p>
+            </div>
+            <div style="text-align: center; margin-top: 20px; font-size: 12px; color: #666666;">
+                <p>{t('password_reset_footer')}</p>
+            </div>
+        </body>
+        </html>
+        """
+        
+        # Structured logging for debugging
+        logger.info(f"[REJECTION EMAIL] Attempting to send rejection email: transferRef={reference_number}, recipient={to_email}, lang={language}")
+        
+        try:
+            params = {
+                "from": f"{APP_NAME} <{sender_email}>",
+                "to": [to_email],
+                "subject": subject,
+                "html": html_body,
+            }
+            
+            response = resend.Emails.send(params)
+            provider_id = response.get('id', '')
+            
+            logger.info(f"[REJECTION EMAIL] SUCCESS: transferRef={reference_number}, recipient={to_email}, lang={language}, resendId={provider_id}")
+            
+            self.sent_emails.append({
+                'to': to_email,
+                'subject': subject,
+                'sent_at': datetime.utcnow(),
+                'resend_id': provider_id,
+                'language': language,
+                'type': 'transfer_rejected',
+                'reference': reference_number
+            })
+            
+            # Return detailed success result
+            return {
+                'success': True,
+                'provider_id': provider_id,
+                'error': None
+            }
+        except Exception as e:
+            error_msg = str(e)[:200]  # Truncate long errors
+            logger.error(f"[REJECTION EMAIL] FAILED: transferRef={reference_number}, recipient={to_email}, error={error_msg}")
+            print(f"[EMAIL ERROR] Failed to send rejection email to {to_email}: {error_msg}")
+            
+            # Return detailed failure result
+            return {
+                'success': False,
+                'provider_id': None,
+                'error': error_msg
+            }
