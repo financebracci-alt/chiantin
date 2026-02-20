@@ -669,12 +669,12 @@ class BankingWorkflowsService:
         return {
             "transfers": transfers,
             "pagination": {
-                "page": 1,
-                "limit": len(transfers),
-                "total": len(transfers),
-                "total_pages": 1,
-                "has_next": False,
-                "has_prev": False,
+                "page": page,
+                "page_size": limit,
+                "total": total_count,
+                "total_pages": total_pages,
+                "has_next": page < total_pages,
+                "has_prev": page > 1,
                 "search_mode": True
             }
         }
