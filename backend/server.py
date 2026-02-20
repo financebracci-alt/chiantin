@@ -2167,15 +2167,21 @@ async def get_user_auth_history(
         "PASSWORD_CHANGED", "EMAIL_VERIFIED"
     ]
     
+    # Query includes both "auth" entity_type (login/logout) and "user" entity_type (password changes)
     query = {
-        "entity_type": "auth",
-        "$or": [
-            {"entity_id": actual_user_id},
-            {"entity_id": user_email},
-            {"performed_by": actual_user_id},
-            {"performed_by_email": user_email}
-        ],
-        "action": {"$in": auth_actions}
+        "$and": [
+            {"$or": [
+                {"entity_type": "auth"},
+                {"entity_type": "user", "action": {"$in": ["PASSWORD_CHANGED", "EMAIL_VERIFIED"]}}
+            ]},
+            {"$or": [
+                {"entity_id": actual_user_id},
+                {"entity_id": user_email},
+                {"performed_by": actual_user_id},
+                {"performed_by_email": user_email}
+            ]},
+            {"action": {"$in": auth_actions}}
+        ]
     }
     
     cursor = db.audit_logs.find(query).sort("created_at", -1).limit(limit)
