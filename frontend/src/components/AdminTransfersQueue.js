@@ -16,22 +16,47 @@ export function AdminTransfersQueue() {
   const [editedRejectReason, setEditedRejectReason] = useState('');
   const [savingRejectReason, setSavingRejectReason] = useState(false);
   const [deletingTransfer, setDeletingTransfer] = useState(false);
+  
+  // Search state
+  const [searchQuery, setSearchQuery] = useState('');
+  const [isSearchMode, setIsSearchMode] = useState(false);
+  const [pagination, setPagination] = useState({ total: 0, page: 1, total_pages: 1 });
 
   const fetchTransfers = useCallback(async () => {
     setLoading(true);
     try {
-      const response = await api.get(`/admin/transfers?status=${activeTab}`);
+      // If searching, search across ALL statuses
+      const params = new URLSearchParams();
+      if (searchQuery.trim()) {
+        params.append('search', searchQuery.trim());
+        setIsSearchMode(true);
+      } else {
+        params.append('status', activeTab);
+        setIsSearchMode(false);
+      }
+      
+      const response = await api.get(`/admin/transfers?${params.toString()}`);
       setTransfers(response.data.data);
+      if (response.data.pagination) {
+        setPagination(response.data.pagination);
+      }
     } catch (err) {
       toast.error('Failed to load transfers');
     } finally {
       setLoading(false);
     }
-  }, [activeTab, toast]);
+  }, [activeTab, searchQuery, toast]);
 
   useEffect(() => {
     fetchTransfers();
   }, [fetchTransfers]);
+
+  // Clear search when switching tabs
+  const handleTabClick = (tab) => {
+    setSearchQuery('');
+    setIsSearchMode(false);
+    setActiveTab(tab);
+  };
 
   const handleApprove = async (id) => {
     try {
@@ -44,9 +69,7 @@ export function AdminTransfersQueue() {
       
       // Background refresh for data consistency
       setTimeout(() => {
-        api.get(`/admin/transfers?status=${activeTab}`)
-          .then(res => setTransfers(res.data.data))
-          .catch(() => {});
+        fetchTransfers();
       }, 500);
     } catch (err) {
       toast.error('Failed to approve');
@@ -69,9 +92,7 @@ export function AdminTransfersQueue() {
       
       // Background refresh for data consistency
       setTimeout(() => {
-        api.get(`/admin/transfers?status=${activeTab}`)
-          .then(res => setTransfers(res.data.data))
-          .catch(() => {});
+        fetchTransfers();
       }, 500);
     } catch (err) {
       toast.error('Failed to reject');
