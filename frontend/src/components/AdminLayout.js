@@ -199,7 +199,7 @@ function NotificationBadge({ count }) {
 export function AdminSidebar({ activeSection, onSectionChange, user, logout }) {
   const navigate = useNavigate();
   const apiUrl = process.env.REACT_APP_BACKEND_URL;
-  const token = localStorage.getItem('token');
+  const token = localStorage.getItem('access_token');
   
   const { getBadgeCount, markSectionSeen, isInitialized } = useBadgeManager(apiUrl, token);
   
