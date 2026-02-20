@@ -36,12 +36,11 @@ export function TransfersPage({ user, logout }) {
             {/* Language Toggle */}
             <button
               onClick={() => setLanguage(language === 'en' ? 'it' : 'en')}
-              className={`flex items-center space-x-1 px-2 py-1.5 rounded-md text-sm font-medium transition ${isDark ? 'hover:bg-gray-700 text-gray-300' : 'hover:bg-gray-100 text-gray-700'}`}
+              className={`flex items-center px-3 py-1.5 rounded-md text-sm font-medium transition ${isDark ? 'hover:bg-gray-700 text-gray-300' : 'hover:bg-gray-100 text-gray-700'}`}
               title={language === 'en' ? 'Switch to Italian' : 'Passa a Inglese'}
               data-testid="transfers-language-toggle"
             >
-              <span className="text-base">{language === 'en' ? '🇬🇧' : '🇮🇹'}</span>
-              <span className="hidden sm:inline">{language === 'en' ? 'EN' : 'IT'}</span>
+              {language === 'en' ? 'EN' : 'IT'}
             </button>
             {/* Theme Toggle */}
             <button
