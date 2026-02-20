@@ -4453,7 +4453,7 @@ async def admin_reject_card_request(
 async def admin_get_transfers(
     status: str = None,
     page: int = 1,
-    limit: int = 50,
+    page_size: int = 20,
     search: str = None,
     current_user: dict = Depends(require_admin),
     db: AsyncIOMotorDatabase = Depends(get_database)
@@ -4465,11 +4465,16 @@ async def admin_get_transfers(
     Query params:
     - status: Filter by status (SUBMITTED, COMPLETED, REJECTED)
     - page: Page number (1-indexed, default 1)
-    - limit: Items per page (default 50, max 100)
+    - page_size: Items per page (20, 50, or 100, default 20)
     - search: Search term (searches beneficiary name, sender name/email, IBAN, reference across ALL statuses)
     """
+    # Validate page_size
+    valid_page_sizes = [20, 50, 100]
+    if page_size not in valid_page_sizes:
+        page_size = 20
+    
     workflows = BankingWorkflowsService(db)
-    result = await workflows.get_admin_transfers(status, page, limit, search)
+    result = await workflows.get_admin_transfers(status, page, page_size, search)
     # Result now includes 'transfers' list and 'pagination' info
     return {"ok": True, "data": result["transfers"], "pagination": result["pagination"]}
 
