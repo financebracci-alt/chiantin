@@ -219,17 +219,17 @@ export function AdminTransfersQueue() {
   };
 
   const handleDelete = async (transfer) => {
-    if (!window.confirm(`Are you sure you want to permanently delete this transfer?\n\nBeneficiary: ${transfer.beneficiary_name}\nAmount: €${(transfer.amount / 100).toFixed(2)}`)) {
+    if (!window.confirm(`Are you sure you want to delete this transfer?\n\nBeneficiary: ${transfer.beneficiary_name}\nAmount: €${(transfer.amount / 100).toFixed(2)}\n\nThe transfer will be marked as deleted and removed from the queue.`)) {
       return;
     }
     setDeletingTransfer(true);
     try {
       await api.delete(`/admin/transfers/${transfer.id}`);
-      toast.success('Transfer deleted');
+      toastRef.current.success('Transfer deleted');
       setSelectedTransfer(null);
       fetchTransfers();
     } catch (err) {
-      toast.error('Failed to delete: ' + (err.response?.data?.detail || err.message));
+      toastRef.current.error('Failed to delete: ' + (err.response?.data?.detail || err.message));
     } finally {
       setDeletingTransfer(false);
     }
