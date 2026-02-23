@@ -2647,8 +2647,15 @@ function AdminDashboard() {
                     <div><dt className="text-sm text-gray-700 font-medium">Email</dt><dd className="font-semibold mt-1">{selectedUser.user.email}</dd></div>
                     <div>
                       <dt className="text-sm text-gray-700 font-medium">Phone</dt>
-                      <dd className="font-semibold mt-1" data-testid="user-detail-phone">
-                        {selectedUser.user.phone || <span className="text-gray-400 italic">Not provided</span>}
+                      <dd className="font-semibold mt-1 flex items-center gap-1" data-testid="user-detail-phone">
+                        {selectedUser.user.phone ? (
+                          <>
+                            <span>{selectedUser.user.phone}</span>
+                            <CopyPhoneButton phone={selectedUser.user.phone} toast={toast} size="md" />
+                          </>
+                        ) : (
+                          <span className="text-gray-400 italic">Not provided</span>
+                        )}
                       </dd>
                     </div>
                     <div>
