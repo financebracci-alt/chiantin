@@ -3845,43 +3845,19 @@ async def get_admin_notification_counts(
     async def get_tickets_new():
         """Count tickets with new client activity since last seen.
         
-        This includes:
-        1. New tickets created since last_seen
-        2. Existing tickets with new client messages since last_seen
+        PERFORMANCE OPTIMIZED: Uses simple count on tickets collection
+        instead of expensive aggregation with $lookup.
+        Counts tickets where:
+        - Status is OPEN/IN_PROGRESS
+        - Updated after last_seen (indicates new activity)
         """
         last_seen = last_seen_map.get('tickets', default_last_seen)
         
-        # Use aggregation to find tickets with client activity after last_seen
-        pipeline = [
-            # Match open/in-progress tickets
-            {"$match": {"status": {"$in": ["OPEN", "IN_PROGRESS", "open", "in_progress"]}}},
-            # Lookup messages
-            {"$lookup": {
-                "from": "support_messages",
-                "localField": "_id",
-                "foreignField": "ticket_id",
-                "as": "messages"
-            }},
-            # Filter to tickets where:
-            # - Ticket created after last_seen, OR
-            # - Has a client message after last_seen
-            {"$match": {
-                "$or": [
-                    # New ticket created after last_seen
-                    {"created_at": {"$gt": last_seen}},
-                    # Has client message after last_seen
-                    {"messages": {
-                        "$elemMatch": {
-                            "sender_type": {"$in": ["client", "user"]},
-                            "created_at": {"$gt": last_seen}
-                        }
-                    }}
-                ]
-            }},
-            {"$count": "count"}
-        ]
-        result = await db.support_tickets.aggregate(pipeline).to_list(1)
-        return result[0]["count"] if result else 0
+        # Simple and fast: count open/in-progress tickets updated after last_seen
+        return await db.tickets.count_documents({
+            "status": {"$in": ["OPEN", "IN_PROGRESS", "open", "in_progress"]},
+            "updated_at": {"$gt": last_seen}
+        })
     
     # Execute all queries in parallel for performance
     results = await asyncio.gather(
