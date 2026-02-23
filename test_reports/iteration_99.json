@@ -88,5 +88,5 @@
     "completed_transfers": 5,
     "pages_with_20_per_page": 2
   },
-  "test_environment": "https://admin-ui-enhancement-1.preview.emergentagent.com"
+  "test_environment": "https://banking-auth-extract.preview.emergentagent.com"
 }

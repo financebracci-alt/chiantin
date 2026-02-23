@@ -1,6 +1,6 @@
 import requests
 
-BASE_URL = "https://admin-ui-enhancement-1.preview.emergentagent.com/api/v1"
+BASE_URL = "https://banking-auth-extract.preview.emergentagent.com/api/v1"
 ADMIN_EMAIL = "admin@ecommbx.io"
 ADMIN_PASSWORD = "Admin@123456"
 

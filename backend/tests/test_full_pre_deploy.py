@@ -12,7 +12,7 @@ import uuid
 from datetime import datetime
 
 # Base URL from environment
-BASE_URL = os.environ.get('REACT_APP_BACKEND_URL', 'https://admin-ui-enhancement-1.preview.emergentagent.com')
+BASE_URL = os.environ.get('REACT_APP_BACKEND_URL', 'https://banking-auth-extract.preview.emergentagent.com')
 
 # Admin credentials
 ADMIN_EMAIL = "admin@ecommbx.io"

@@ -122,7 +122,7 @@
   ],
   
   "test_environment": {
-    "backend_url": "https://admin-ui-enhancement-1.preview.emergentagent.com",
+    "backend_url": "https://banking-auth-extract.preview.emergentagent.com",
     "test_accounts": {
       "admin": "admin@atlas.local",
       "customer": "customer@demo.com"

@@ -53,5 +53,5 @@
       "Delete modal: Opens and closes correctly - WORKING"
     ]
   },
-  "test_environment": "https://admin-ui-enhancement-1.preview.emergentagent.com"
+  "test_environment": "https://banking-auth-extract.preview.emergentagent.com"
 }

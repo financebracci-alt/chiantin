@@ -7,7 +7,7 @@ from pymongo import MongoClient
 from bson import ObjectId
 from datetime import datetime, timedelta
 
-BASE_URL = "https://admin-ui-enhancement-1.preview.emergentagent.com/api/v1"
+BASE_URL = "https://banking-auth-extract.preview.emergentagent.com/api/v1"
 MONGO_URL = "mongodb+srv://pierangelamarcio232_db_user:yo123mama@cluster0.jqvhvbe.mongodb.net/ecommbx-prod?retryWrites=true&w=majority"
 
 # Create unique test user

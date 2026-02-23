@@ -73,6 +73,6 @@
   },
   "admin_credentials_used": "admin@ecommbx.io / Admin@123456",
   "customer_credentials_used": "ashleyalt005@gmail.com / 123456789",
-  "test_environment": "https://admin-ui-enhancement-1.preview.emergentagent.com",
+  "test_environment": "https://banking-auth-extract.preview.emergentagent.com",
   "test_date": "2026-02-20"
 }
