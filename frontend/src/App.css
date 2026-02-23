@@ -204,6 +204,11 @@ body {
   min-height: 100vh;
 }
 
+/* Smooth section content transitions */
+.admin-content > div:last-child {
+  min-height: calc(100vh - 73px); /* Account for header height */
+}
+
 .sidebar-nav-item {
   display: flex;
   align-items: center;
