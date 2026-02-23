@@ -393,7 +393,7 @@ export function AdminTransfersQueue() {
         ))}
       </div>
       
-      {loading ? (
+      {showSkeleton ? (
         <div className="skeleton-card h-64"></div>
       ) : selectedTransfer ? (
         <div className="card p-6">
