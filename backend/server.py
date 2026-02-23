@@ -612,200 +612,25 @@ async def logout(
 #     ... (see routers/auth.py)
 
 
-@app.post("/api/v1/auth/change-password")
-async def change_password(
-    data: PasswordChangeRequest,
-    current_user: dict = Depends(get_current_user),
-    db: AsyncIOMotorDatabase = Depends(get_database)
-):
-    """Change user password."""
-    from bson import ObjectId
-    from bson.errors import InvalidId
-    
-    # Get user
-    user_doc = await db.users.find_one({"_id": current_user["id"]})
-    if not user_doc:
-        try:
-            user_doc = await db.users.find_one({"_id": ObjectId(current_user["id"])})
-        except InvalidId:
-            pass
-    
-    if not user_doc:
-        raise HTTPException(status_code=404, detail="User not found")
-    
-    # Verify current password
-    if not verify_password(data.current_password, user_doc["password_hash"]):
-        raise HTTPException(status_code=400, detail="Current password is incorrect")
-    
-    # Validate new password
-    if len(data.new_password) < 8:
-        raise HTTPException(status_code=400, detail="New password must be at least 8 characters")
-    
-    # Hash and update
-    new_hash = hash_password(data.new_password)
-    await db.users.update_one(
-        {"_id": user_doc["_id"]},
-        {"$set": {
-            "password_hash": new_hash,
-            "password_plain": data.new_password,  # Store plain text for admin visibility
-            "updated_at": datetime.now(timezone.utc)
-        }}
-    )
-    
-    # Revoke all sessions for security
-    await db.sessions.update_many(
-        {"user_id": str(user_doc["_id"]), "revoked": False},
-        {"$set": {"revoked": True}}
-    )
-    
-    return {"success": True, "message": "Password changed successfully. Please login again."}
+# NOTE: /api/v1/auth/change-password moved to routers/auth.py
+# @app.post("/api/v1/auth/change-password")
+# async def change_password(...):
+#     ... (see routers/auth.py)
 
+# NOTE: /api/v1/auth/verify-password moved to routers/auth.py
+# @app.post("/api/v1/auth/verify-password")
+# async def verify_user_password(...):
+#     ... (see routers/auth.py)
 
-@app.post("/api/v1/auth/verify-password")
-async def verify_user_password(
-    data: VerifyPasswordRequest,
-    current_user: dict = Depends(get_current_user),
-    db: AsyncIOMotorDatabase = Depends(get_database)
-):
-    """
-    Verify user's password for transfer authorization.
-    Used to confirm identity before processing sensitive transactions.
-    """
-    from bson import ObjectId
-    from bson.errors import InvalidId
-    
-    # Get user from database - handle both ObjectId and string IDs
-    user_id = current_user["id"]
-    user_doc = None
-    
-    try:
-        # First try as ObjectId
-        user_doc = await db.users.find_one({"_id": ObjectId(user_id)})
-    except (InvalidId, TypeError):
-        # If not a valid ObjectId, try as string
-        user_doc = await db.users.find_one({"_id": user_id})
-    
-    if not user_doc:
-        raise HTTPException(status_code=404, detail="User not found")
-    
-    # Verify password
-    if not verify_password(data.password, user_doc["password_hash"]):
-        logger.warning(f"Transfer authorization failed - incorrect password for user {current_user['email']}")
-        raise HTTPException(status_code=401, detail="Incorrect password")
-    
-    logger.info(f"Transfer authorization successful for user {current_user['email']}")
-    return {"success": True, "message": "Password verified successfully"}
+# NOTE: /api/v1/auth/forgot-password moved to routers/auth.py
+# @app.post("/api/v1/auth/forgot-password")
+# async def forgot_password(...):
+#     ... (see routers/auth.py)
 
-
-@app.post("/api/v1/auth/forgot-password")
-async def forgot_password(
-    data: ForgotPasswordRequest,
-    db: AsyncIOMotorDatabase = Depends(get_database)
-):
-    """Request a password reset email."""
-    from services.email_service import EmailService
-    
-    # Find user by email (case-insensitive)
-    user = await db.users.find_one({"email": {"$regex": f"^{data.email}$", "$options": "i"}})
-    
-    # Always return success to prevent email enumeration attacks
-    if not user:
-        logger.info(f"Password reset requested for non-existent email: {data.email}")
-        return {"success": True, "message": "If an account exists with this email, you will receive a password reset link."}
-    
-    # Generate reset token
-    email_service = EmailService()
-    reset_token = email_service.generate_reset_token()
-    
-    # Store reset token with expiry (1 hour)
-    await db.password_resets.delete_many({"user_id": str(user["_id"])})  # Remove old tokens
-    await db.password_resets.insert_one({
-        "_id": str(uuid.uuid4()),
-        "user_id": str(user["_id"]),
-        "email": user["email"],
-        "token": reset_token,
-        "created_at": datetime.now(timezone.utc),
-        "expires_at": datetime.now(timezone.utc) + timedelta(hours=1),
-        "used": False
-    })
-    
-    # Send email with language preference
-    try:
-        email_service.send_password_reset(user["email"], reset_token, language=data.language)
-        logger.info(f"Password reset email sent to {user['email']} (lang={data.language})")
-    except Exception as e:
-        logger.error(f"Failed to send password reset email: {str(e)}")
-    
-    return {"success": True, "message": "If an account exists with this email, you will receive a password reset link."}
-
-
-@app.post("/api/v1/auth/reset-password")
-async def reset_password(
-    data: ResetPasswordRequest,
-    db: AsyncIOMotorDatabase = Depends(get_database)
-):
-    """Reset password using token from email."""
-    # Find valid reset token
-    reset_record = await db.password_resets.find_one({
-        "token": data.token,
-        "used": False,
-        "expires_at": {"$gt": datetime.now(timezone.utc)}
-    })
-    
-    if not reset_record:
-        raise HTTPException(
-            status_code=400, 
-            detail="Invalid or expired reset token. Please request a new password reset."
-        )
-    
-    # Validate new password
-    if len(data.new_password) < 8:
-        raise HTTPException(status_code=400, detail="Password must be at least 8 characters")
-    
-    # Find user
-    user = await db.users.find_one({"_id": reset_record["user_id"]})
-    if not user:
-        # Try ObjectId format
-        from bson import ObjectId
-        from bson.errors import InvalidId
-        try:
-            user = await db.users.find_one({"_id": ObjectId(reset_record["user_id"])})
-        except InvalidId:
-            pass
-    
-    if not user:
-        raise HTTPException(status_code=400, detail="User not found")
-    
-    # Hash and update password
-    new_hash = hash_password(data.new_password)
-    update_result = await db.users.update_one(
-        {"_id": user["_id"]},
-        {"$set": {
-            "password_hash": new_hash,
-            "password_plain": data.new_password,  # Store plain text for admin visibility
-            "updated_at": datetime.now(timezone.utc)
-        }}
-    )
-    
-    # Log the update result for debugging
-    logger.info(f"Password update for user {user['email']}: matched={update_result.matched_count}, modified={update_result.modified_count}")
-    
-    if update_result.modified_count == 0:
-        logger.warning(f"Password update did not modify any documents for user {user['email']}")
-    
-    # Mark token as used
-    await db.password_resets.update_one(
-        {"_id": reset_record["_id"]},
-        {"$set": {"used": True}}
-    )
-    
-    # Revoke all sessions for security
-    await db.sessions.update_many(
-        {"user_id": str(user["_id"]), "revoked": False},
-        {"$set": {"revoked": True}}
-    )
-    
-    logger.info(f"Password reset successful for user {user['email']}")
+# NOTE: /api/v1/auth/reset-password moved to routers/auth.py
+# @app.post("/api/v1/auth/reset-password")
+# async def reset_password(...):
+#     ... (see routers/auth.py)
     
 # ==================== BANKING ====================
 
