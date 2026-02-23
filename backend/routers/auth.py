@@ -197,4 +197,29 @@ async def resend_verification_email(
     return {"message": "Verification email sent. Please check your inbox.", "success": True}
 
 
+# ==================== MFA ====================
+
+@router.post("/mfa/setup", response_model=MFASetupResponse)
+async def setup_mfa(
+    current_user: dict = Depends(get_current_user),
+    db: AsyncIOMotorDatabase = Depends(get_database)
+):
+    """Setup MFA (get QR code)."""
+    auth_service = AuthService(db)
+    secret, qr_uri = await auth_service.setup_mfa(current_user["id"])
+    return MFASetupResponse(secret=secret, qr_code_uri=qr_uri)
+
+
+@router.post("/mfa/enable")
+async def enable_mfa(
+    data: MFAVerifyRequest,
+    current_user: dict = Depends(get_current_user),
+    db: AsyncIOMotorDatabase = Depends(get_database)
+):
+    """Enable MFA after verifying token."""
+    auth_service = AuthService(db)
+    await auth_service.enable_mfa(current_user["id"], data.token)
+    return {"success": True, "message": "MFA enabled successfully"}
+
+
 # NOTE: More endpoints will be moved here incrementally in subsequent phases
