@@ -294,7 +294,7 @@ async def queue_user_kyc(
 
 
 class ReviewKYC(BaseModel):
-    status: ApplicationStatus
+    status: KYCStatus
     rejection_reason: Optional[str] = None
 
 
