@@ -1406,6 +1406,17 @@ Unique index: (admin_id, section_key)
 **F5 Refresh:** URL state preserved correctly.
 **Stability:** No random reloads detected after 10 second observation.
 
+**Backend Optimizations (Feb 23, 2025):**
+1. `/admin/users` - Only lookup tax_holds for users on current page (not all users)
+2. `/admin/notification-counts` - Simplified ticket count query (removed expensive $lookup aggregation)
+3. Added compound index for `tax_holds(user_id, is_active)`
+
+**Full Regression Test (iteration_108.json) - ALL PASS:**
+- Performance: All 8 sections pass (53-105ms shell visible)
+- Functional: Overview, Users, KYC, Accounts, Card Requests, Transfers, Support, Audit - ALL working
+- Stability: Rapid switching (12 sections in 2008ms), F5 preservation, no random reloads
+- Regression: Delete modal bug fix verified working
+
 ### Admin Pagination Layout Refinement (Feb 20, 2025)
 
 **Change:** Moved pagination row ABOVE the tabs row for both Admin Transfers Queue and Admin Card Requests pages.
