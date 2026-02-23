@@ -521,47 +521,10 @@ async def login(
     )
 
 
-@app.post("/api/v1/auth/logout")
-async def logout(
-    request: Request,
-    response: Response,
-    current_user: dict = Depends(get_current_user),
-    db: AsyncIOMotorDatabase = Depends(get_database)
-):
-    """
-    Logout the current user.
-    - Clears refresh token cookie
-    - Creates audit log entry (USER_LOGOUT or ADMIN_LOGOUT)
-    """
-    client_ip = request.client.host if request.client else "unknown"
-    user_agent = request.headers.get("user-agent", "unknown")
-    
-    # Determine logout action type based on user role
-    logout_action = "ADMIN_LOGOUT" if current_user.get("role") in ["ADMIN", "SUPER_ADMIN"] else "USER_LOGOUT"
-    
-    # Audit: Logout
-    await create_audit_log(
-        db=db,
-        action=logout_action,
-        entity_type="auth",
-        entity_id=current_user["id"],
-        description=f"User logged out: {current_user['email']}",
-        performed_by=current_user["id"],
-        performed_by_role=current_user.get("role", "CUSTOMER"),
-        performed_by_email=current_user["email"],
-        metadata={
-            "ip_address": client_ip,
-            "user_agent": user_agent,
-            "source": "web"
-        }
-    )
-    
-    # Clear refresh token cookie
-    response.delete_cookie(key="refresh_token")
-    
-    logger.info(f"User logged out: {current_user['email']}")
-    
-    return {"success": True, "message": "Logged out successfully"}
+# NOTE: /api/v1/auth/logout moved to routers/auth.py
+# @app.post("/api/v1/auth/logout")
+# async def logout(...):
+#     ... (see routers/auth.py)
 
 
 # NOTE: /api/v1/auth/verify-email moved to routers/auth.py
