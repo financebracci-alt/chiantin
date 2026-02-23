@@ -30,12 +30,8 @@ logger = logging.getLogger(__name__)
 # Storage provider dependency
 def get_storage():
     """Get the configured storage provider."""
-    from config import settings
-    if settings.STORAGE_PROVIDER == "cloudinary":
-        return CloudinaryStorage()
-    else:
-        from providers import LocalS3Storage
-        return LocalS3Storage()
+    # Always use Cloudinary for this application
+    return CloudinaryStorage()
 
 
 # Router definitions
