@@ -20,7 +20,7 @@ import httpx
 from database import get_database
 from services.kyc_service import KYCService
 from services.notification_service import NotificationService
-from schemas.kyc import DocumentType, ApplicationStatus
+from schemas.kyc import DocumentType, KYCStatus
 from providers import CloudinaryStorage
 
 from .dependencies import get_current_user, require_admin, format_timestamp_utc
