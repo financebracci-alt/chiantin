@@ -1778,7 +1778,7 @@ async def get_all_users(
             "last_name": doc["last_name"],
             "role": doc["role"],
             "status": doc["status"],
-            "created_at": doc["created_at"].isoformat(),
+            "created_at": format_timestamp_utc(doc["created_at"]),
             "has_tax_hold": user_id in tax_hold_user_ids,
             "admin_notes": doc.get("admin_notes", "")
         })
