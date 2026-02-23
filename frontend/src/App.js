@@ -311,13 +311,16 @@ function SignupPage() {
             </div>
 
             <div>
-              <label className={`block text-sm font-medium mb-2 ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>{t('phone') || 'Phone'} ({t('optional') || 'Optional'})</label>
+              <label className={`block text-sm font-medium mb-2 ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
+                {t('phone') || 'Phone'} <span className="text-red-500">*</span>
+              </label>
               <input
                 type="tel"
                 value={formData.phone}
                 onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                required
                 className={`w-full px-4 py-3 rounded-lg border focus:ring-2 focus:ring-red-500 focus:border-red-500 transition ${isDark ? 'bg-gray-700 border-gray-600 text-white placeholder-gray-400' : 'bg-white border-gray-300 text-gray-900'}`}
-                placeholder="+49 123 456 7890"
+                placeholder="+39 123 456 7890"
                 data-testid="signup-phone"
               />
             </div>
