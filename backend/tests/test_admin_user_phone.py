@@ -213,7 +213,7 @@ class TestAdminPanelRegressions:
         assert "pagination" in data
         
         pagination = data["pagination"]
-        assert "total" in pagination
+        assert "total_users" in pagination
         assert "page" in pagination
         assert "total_pages" in pagination
         
