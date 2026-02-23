@@ -1719,6 +1719,27 @@ function AdminDashboard() {
   // Sidebar uses: overview, users, kyc, accounts, card_requests, ledger, support, audit, settings
   const validSections = ['overview', 'users', 'kyc', 'accounts', 'card_requests', 'card-requests', 'ledger', 'transfers', 'support', 'tickets', 'audit', 'settings'];
   
+  // Section labels for header display - must match sidebar menuItems
+  const SECTION_LABELS = {
+    'overview': 'Overview',
+    'users': 'Users',
+    'kyc': 'KYC Queue',
+    'accounts': 'Accounts',
+    'card_requests': 'Card Requests',
+    'card-requests': 'Card Requests',
+    'ledger': 'Transfers Queue',
+    'transfers': 'Transfers Queue',
+    'support': 'Support Tickets',
+    'tickets': 'Support Tickets',
+    'audit': 'Audit Logs',
+    'settings': 'Settings'
+  };
+  
+  // Get section label for header display
+  const getSectionLabel = (sectionId) => {
+    return SECTION_LABELS[sectionId] || sectionId.charAt(0).toUpperCase() + sectionId.slice(1).replace(/_/g, ' ');
+  };
+  
   // Get initial section from URL or default to 'overview'
   const getInitialSection = () => {
     const urlSection = searchParams.get('section');
