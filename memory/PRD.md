@@ -1298,6 +1298,39 @@ Unique index: (admin_id, section_key)
 **Test Account:** ashleyalt005@gmail.com (ADMIN only)
 **Customer Flows:** NOT TESTED (no customer test account available)
 
+### Admin Transfers Queue Page Reload Bug Fix (Feb 23, 2025)
+
+**Bug:** When an admin deleted a transfer from the Transfers Queue page, the page would randomly reload after ~3 seconds.
+
+**Root Cause:** The debounce useEffect in AdminTransfersQueue.js had `updateUrlParams` in its dependency array. Since `updateUrlParams` changes whenever `searchParams` changes, and the debounce effect was unconditionally calling `updateUrlParams({ search: null })` even when search was already empty, this created a cascade of URL updates that triggered page reloads.
+
+**Solution:** Added a `prevSearchRef` to track the previous search value and only update the URL when the search value actually changes:
+```javascript
+const prevSearchRef = useRef(getInitialSearch());
+
+useEffect(() => {
+  const timer = setTimeout(() => {
+    if (searchQuery !== prevSearchRef.current) {
+      setDebouncedSearch(searchQuery);
+      prevSearchRef.current = searchQuery;
+      // ... update URL
+    }
+  }, 300);
+  return () => clearTimeout(timer);
+}, [searchQuery, updateUrlParams]);
+```
+
+**Files Changed:**
+- `/app/frontend/src/components/AdminTransfersQueue.js` - Added useRef import, prevSearchRef tracking
+- `/app/frontend/src/components/AdminCardRequestsQueue.js` - Same fix applied for consistency
+
+**Verification:** Testing agent verified (iteration_105.json):
+- Delete action flow: PASSED - No page reload
+- Debounce URL stability: PASSED - No spurious updates during 5+ second idle
+- Tab state preservation: PASSED - COMPLETED tab remained selected
+- URL param preservation: PASSED - section=ledger&tab=COMPLETED preserved
+- 15 second stability: PASSED - No random reloads
+
 ### Admin Pagination Layout Refinement (Feb 20, 2025)
 
 **Change:** Moved pagination row ABOVE the tabs row for both Admin Transfers Queue and Admin Card Requests pages.
