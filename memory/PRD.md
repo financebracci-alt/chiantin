@@ -1567,6 +1567,44 @@ const SECTION_LABELS = {
 - ~~Audit Logs timestamps 1 hour behind (timezone issue)~~ **FIXED Feb 23, 2025**
 - Domain SSL issue: `ecommbx.group` SSL certificate not provisioning
 
+### Phone Number Mandatory for Registration (Feb 23, 2025)
+**Feature:** Made phone number a required field for new user registrations.
+
+**Problem:** Phone was optional during signup, making it harder for admins to contact clients.
+
+**Solution:** Implemented phone validation in both frontend and backend:
+
+**Backend Changes (server.py:259-282):**
+1. Changed `SignupRequest.phone` from `Optional[str] = None` to `str` (required)
+2. Added `@field_validator('phone')` with validation rules:
+   - Rejects empty or whitespace-only phone
+   - Requires at least 6 digits (permissive for international formats)
+   - Returns trimmed value
+
+**Frontend Changes (App.js:140-177, 314-326):**
+1. Added client-side phone validation in `handleSubmit`:
+   - Checks for non-empty trimmed value
+   - Validates at least 6 digits
+   - Shows localized error messages
+2. Updated phone input:
+   - Changed label from "Phone (Optional)" to "Phone *" (with red asterisk)
+   - Added `required` HTML5 attribute
+   - Updated placeholder to `+39 123 456 7890`
+
+**Backward Compatibility:**
+- Existing users without phone can still login ✅
+- Database phone field remains nullable ✅
+- Admin panel shows "—" / "Not provided" for users without phone ✅
+
+**Testing:** All tests passed (iteration_115.json):
+- Backend: 19/19 tests passed (100%)
+- Frontend: All UI tests passed (100%)
+- Test file: `/app/backend/tests/test_phone_registration_validation.py`
+
+**Translation Keys Added:**
+- `phoneRequired`: EN: "Phone number is required" / IT: "Il numero di telefono è obbligatorio"
+- `phoneInvalid`: EN: "Please enter a valid phone number" / IT: "Inserisci un numero di telefono valido"
+
 ### Admin User Phone Number Display (Feb 23, 2025)
 **Feature:** Display client phone numbers in Admin panel (Users section).
 
