@@ -18,6 +18,21 @@ from database import connect_db, disconnect_db, get_database
 from services.auth_service import AuthService
 from services.kyc_service import KYCService
 from services.banking_service import BankingService
+
+
+def format_timestamp_utc(dt: datetime) -> str:
+    """Format a datetime as ISO 8601 with UTC timezone suffix.
+    
+    MongoDB returns naive datetimes (no timezone info) even when stored with timezone.
+    This ensures all API responses include the 'Z' suffix so JavaScript parses them as UTC.
+    """
+    if dt is None:
+        return None
+    # If datetime is naive (no timezone), assume it's UTC (MongoDB returns UTC)
+    if dt.tzinfo is None:
+        dt = dt.replace(tzinfo=timezone.utc)
+    # Convert to UTC and format with Z suffix
+    return dt.astimezone(timezone.utc).strftime('%Y-%m-%dT%H:%M:%S.%f')[:-3] + 'Z'
 from services.ledger_service import LedgerEngine
 from services.statement_service import StatementService
 from services.ticket_service import TicketService
