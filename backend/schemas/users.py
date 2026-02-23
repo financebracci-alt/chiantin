@@ -152,3 +152,54 @@ class ResendVerificationRequest(BaseModel):
 
 class VerifyEmailRequest(BaseModel):
     token: str
+
+
+# ==================== AUTH SCHEMAS (moved from server.py) ====================
+
+class SignupRequest(BaseModel):
+    """Extended signup request with language preference.
+    
+    Phone is REQUIRED for new registrations (enforced Feb 2025).
+    """
+    email: str
+    password: str
+    first_name: str
+    last_name: str
+    phone: str  # REQUIRED for new registrations - must be non-empty
+    language: Optional[str] = 'en'
+    
+    @field_validator('phone')
+    @classmethod
+    def validate_phone(cls, v):
+        """Validate phone is provided and has reasonable format."""
+        if not v or not v.strip():
+            raise ValueError('Phone number is required')
+        # Clean up whitespace
+        cleaned = v.strip()
+        # Basic validation: must have at least 6 digits (very permissive for international numbers)
+        digits_only = ''.join(c for c in cleaned if c.isdigit())
+        if len(digits_only) < 6:
+            raise ValueError('Please enter a valid phone number')
+        return cleaned
+
+
+class PasswordChangeRequest(BaseModel):
+    current_password: str
+    new_password: str
+
+
+class VerifyPasswordRequest(BaseModel):
+    """Transfer Authorization - Verify Password Schema"""
+    password: str
+
+
+class ForgotPasswordRequest(BaseModel):
+    """Password Reset Request Schema"""
+    email: str
+    language: Optional[str] = "en"
+
+
+class ResetPasswordRequest(BaseModel):
+    """Password Reset Schema"""
+    token: str
+    new_password: str
