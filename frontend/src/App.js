@@ -2416,6 +2416,12 @@ function AdminDashboard() {
                   <dl className="grid grid-cols-2 gap-4">
                     <div><dt className="text-sm text-gray-700 font-medium">Name</dt><dd className="font-semibold mt-1">{selectedUser.user.first_name} {selectedUser.user.last_name}</dd></div>
                     <div><dt className="text-sm text-gray-700 font-medium">Email</dt><dd className="font-semibold mt-1">{selectedUser.user.email}</dd></div>
+                    <div>
+                      <dt className="text-sm text-gray-700 font-medium">Phone</dt>
+                      <dd className="font-semibold mt-1" data-testid="user-detail-phone">
+                        {selectedUser.user.phone || <span className="text-gray-400 italic">Not provided</span>}
+                      </dd>
+                    </div>
                     <div><dt className="text-sm text-gray-700 font-medium">Status</dt><dd className="font-semibold mt-1">{selectedUser.user.status}</dd></div>
                     <div>
                       <dt className="text-sm text-gray-700 font-medium">Email Verified</dt>
