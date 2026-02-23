@@ -196,9 +196,12 @@ app.add_middleware(
 # Include extracted routers
 from routers import health as health_router
 from routers import audit as audit_router
+from routers import tickets as tickets_router
 
 app.include_router(health_router.router)
 app.include_router(audit_router.router)
+app.include_router(tickets_router.router)
+app.include_router(tickets_router.admin_router)
 
 
 # Dependencies
