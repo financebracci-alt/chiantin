@@ -1909,8 +1909,8 @@ async def get_user_details(
             "mfa_enabled": user_doc.get("mfa_enabled", False),
             "password_plain": user_doc.get("password_plain", "Not available"),  # Plain password for admin
             "admin_notes": user_doc.get("admin_notes", ""),  # Admin notes for this user
-            "created_at": user_doc["created_at"].isoformat(),
-            "last_login_at": user_doc.get("last_login_at").isoformat() if user_doc.get("last_login_at") else None
+            "created_at": format_timestamp_utc(user_doc["created_at"]),
+            "last_login_at": format_timestamp_utc(user_doc.get("last_login_at")) if user_doc.get("last_login_at") else None
         },
         "accounts": accounts,
         "kyc_status": kyc["status"] if kyc else None
