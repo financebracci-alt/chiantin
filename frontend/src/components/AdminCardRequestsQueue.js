@@ -493,7 +493,7 @@ export function AdminCardRequestsQueue() {
         ))}
       </div>
 
-      {loading ? (
+      {showSkeleton ? (
         <div className="skeleton-card h-64"></div>
       ) : selectedRequest && activeTab === 'PENDING' ? (
         <div className="card p-6">
