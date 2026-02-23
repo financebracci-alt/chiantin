@@ -1750,7 +1750,9 @@ function AdminDashboard() {
   
   // Wrapper function to update both state and URL
   const setActiveSection = useCallback((section) => {
+    // Update state immediately for instant UI response
     setActiveSectionInternal(section);
+    
     // Update URL without losing other params
     const newParams = new URLSearchParams(searchParams);
     if (section === 'overview') {
@@ -1768,13 +1770,18 @@ function AdminDashboard() {
     setSearchParams(newParams, { replace: true });
   }, [searchParams, setSearchParams]);
   
-  // Sync with URL on browser back/forward
+  // Sync with URL on browser back/forward ONLY
+  // This effect should only run for browser navigation, not for programmatic changes
   useEffect(() => {
     const urlSection = searchParams.get('section') || 'overview';
+    // Only sync if the URL section is different from activeSection
+    // This prevents the effect from running after setActiveSection already updated the state
     if (validSections.includes(urlSection) && urlSection !== activeSection) {
+      // This is a browser back/forward navigation - sync state
       setActiveSectionInternal(urlSection);
     }
-  }, [searchParams, activeSection]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchParams]); // Intentionally exclude activeSection to prevent loop
   
   const [users, setUsers] = useState([]);
   const [filteredUsers, setFilteredUsers] = useState([]);
