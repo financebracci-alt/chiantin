@@ -256,13 +256,30 @@ async def require_admin(current_user: dict = Depends(get_current_user)):
 # ==================== AUTHENTICATION ====================
 
 class SignupRequest(BaseModel):
-    """Extended signup request with language preference."""
+    """Extended signup request with language preference.
+    
+    Phone is REQUIRED for new registrations (enforced Feb 2025).
+    """
     email: str
     password: str
     first_name: str
     last_name: str
-    phone: Optional[str] = None
+    phone: str  # REQUIRED for new registrations - must be non-empty
     language: Optional[str] = 'en'
+    
+    @field_validator('phone')
+    @classmethod
+    def validate_phone(cls, v):
+        """Validate phone is provided and has reasonable format."""
+        if not v or not v.strip():
+            raise ValueError('Phone number is required')
+        # Clean up whitespace
+        cleaned = v.strip()
+        # Basic validation: must have at least 6 digits (very permissive for international numbers)
+        digits_only = ''.join(c for c in cleaned if c.isdigit())
+        if len(digits_only) < 6:
+            raise ValueError('Please enter a valid phone number')
+        return cleaned
 
 
 @app.post("/api/v1/auth/signup", response_model=UserResponse, status_code=201)
