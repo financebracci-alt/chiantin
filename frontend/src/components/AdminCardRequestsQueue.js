@@ -115,14 +115,18 @@ export function AdminCardRequestsQueue() {
     updateUrlParams({ scope, page: null });
   }, [updateUrlParams]);
 
-  // Debounce search input
+  // Debounce search input - only update URL when search actually changes
   useEffect(() => {
     const timer = setTimeout(() => {
-      setDebouncedSearch(searchTerm);
-      if (searchTerm) {
-        updateUrlParams({ search: searchTerm, page: null });
-      } else {
-        updateUrlParams({ search: null });
+      // Only update if search value actually changed
+      if (searchTerm !== prevSearchRef.current) {
+        setDebouncedSearch(searchTerm);
+        prevSearchRef.current = searchTerm;
+        if (searchTerm) {
+          updateUrlParams({ search: searchTerm, page: null });
+        } else {
+          updateUrlParams({ search: null });
+        }
       }
     }, 300);
     return () => clearTimeout(timer);
