@@ -42,18 +42,37 @@ async def get_current_user(
     Validates JWT token and returns the current user.
     Used as a dependency for protected routes.
     """
+    from bson import ObjectId
+    from bson.errors import InvalidId
+    
     try:
         token = credentials.credentials
-        payload = jwt.decode(token, settings.SECRET_KEY, algorithms=["HS256"])
+        payload = jwt.decode(token, settings.SECRET_KEY, algorithms=[settings.JWT_ALGORITHM])
         user_id = payload.get("sub")
         if not user_id:
             raise HTTPException(status_code=401, detail="Invalid token")
         
-        user = await db.users.find_one({"id": user_id})
-        if not user:
+        # Try to find user by _id (handle both ObjectId and string)
+        user_doc = None
+        # First try as string (for seed data)
+        user_doc = await db.users.find_one({"_id": user_id})
+        
+        # If not found and it looks like an ObjectId, try as ObjectId
+        if not user_doc:
+            try:
+                user_doc = await db.users.find_one({"_id": ObjectId(user_id)})
+            except InvalidId:
+                pass
+        
+        if not user_doc:
             raise HTTPException(status_code=401, detail="User not found")
         
-        return user
+        return {
+            "id": str(user_doc["_id"]),
+            "email": user_doc["email"],
+            "role": user_doc["role"],
+            "status": user_doc["status"]
+        }
     except jwt.ExpiredSignatureError:
         raise HTTPException(status_code=401, detail="Token expired")
     except jwt.InvalidTokenError:
