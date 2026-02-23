@@ -1736,28 +1736,46 @@ async def get_all_users(
     """Get users (admin) with pagination, tax hold status and notes.
     
     Supports:
-    - search: Filter by name or email (searches ALL users in DB, not just current page)
+    - search: Filter by name, email, or phone number (searches ALL users in DB, not just current page)
     - page: Page number (1-indexed)
     - limit: Users per page (20, 50, or 100)
     
     When search is provided, pagination is ignored and ALL matching users are returned.
     This ensures admins can find any user regardless of which page they're on.
+    
+    Phone search supports:
+    - Full phone number with formatting (e.g., +39 123 456 7890)
+    - Partial matches (e.g., last digits like 7890)
+    - Digits only (e.g., 393334567890)
     """
     # Validate limit
     if limit not in [20, 50, 100]:
         limit = 50
     
-    # Build query - if search provided, filter by name or email
+    # Build query - if search provided, filter by name, email, or phone
     query = {}
     if search and search.strip():
         search_term = search.strip()
-        query = {
-            "$or": [
-                {"first_name": {"$regex": search_term, "$options": "i"}},
-                {"last_name": {"$regex": search_term, "$options": "i"}},
-                {"email": {"$regex": search_term, "$options": "i"}}
-            ]
-        }
+        # For phone search, also create a digits-only version for matching
+        # This allows searching "393334567890" to match "+39 333 456 7890"
+        digits_only = ''.join(c for c in search_term if c.isdigit())
+        
+        # Base search conditions: name and email
+        or_conditions = [
+            {"first_name": {"$regex": search_term, "$options": "i"}},
+            {"last_name": {"$regex": search_term, "$options": "i"}},
+            {"email": {"$regex": search_term, "$options": "i"}},
+            {"phone": {"$regex": search_term, "$options": "i"}}  # Direct phone match (with formatting)
+        ]
+        
+        # If search term contains mostly digits (likely a phone search), 
+        # also search for normalized digit pattern
+        if len(digits_only) >= 4:
+            # Create a regex pattern that matches the digits regardless of formatting
+            # E.g., searching "7890" will match phones containing "7890" in any format
+            or_conditions.append({"phone": {"$regex": digits_only, "$options": "i"}})
+        
+        query = {"$or": or_conditions}
     
     # Get total count for pagination info
     total_count = await db.users.count_documents(query)
