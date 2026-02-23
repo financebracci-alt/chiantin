@@ -401,6 +401,10 @@ const translations = {
     twoFaIsCurrently: '2FA is currently',
     passwordIsSet: 'Password is set',
     
+    // Phone validation (registration)
+    phoneRequired: 'Phone number is required',
+    phoneInvalid: 'Please enter a valid phone number',
+    
     // Profile
     profileSettings: 'Profile Settings',
     edit: 'Edit',
