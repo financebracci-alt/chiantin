@@ -1921,11 +1921,15 @@ function AdminDashboard() {
     }
   }, [fetchUsers, currentPage, usersPerPage]);
 
-  // Fetch users ONLY when the users section becomes active (not on every mount)
+  // Fetch users when the users section becomes active
+  // This ensures users load when navigating to the Users section
   // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
-    if (activeSection === 'users' && users.length === 0 && !loading) {
-      fetchUsers(0, 1, usersPerPage, '');
+    if (activeSection === 'users') {
+      // Always fetch when switching to users section if no users loaded yet
+      if (users.length === 0) {
+        fetchUsers(0, 1, usersPerPage, '');
+      }
     }
   }, [activeSection]);
 
