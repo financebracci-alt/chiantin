@@ -34,7 +34,9 @@ export function AdminCardRequestsQueue() {
   const [activeTab, setActiveTabInternal] = useState(getInitialTab);
   const [requests, setRequests] = useState([]);
   const [selectedRequest, setSelectedRequest] = useState(null);
-  const [loading, setLoading] = useState(true);
+  // Start with loading false to prevent skeleton flash on initial mount
+  const [loading, setLoading] = useState(false);
+  const [showSkeleton, setShowSkeleton] = useState(false);
   
   // Pagination state
   const [pagination, setPagination] = useState({
