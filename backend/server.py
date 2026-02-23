@@ -3007,7 +3007,7 @@ async def get_audit_logs(
             "entity_id": doc["entity_id"],
             "description": doc.get("description", ""),
             "metadata": doc.get("metadata", {}),
-            "created_at": doc["created_at"].isoformat()
+            "created_at": format_timestamp_utc(doc["created_at"])
         })
     
     return logs
