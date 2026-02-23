@@ -171,11 +171,11 @@ export function AdminCardRequestsQueue() {
       });
     } catch (err) {
       console.error('Failed to load requests:', err);
-      toast.error('Failed to load requests');
+      toastRef.current.error('Failed to load requests');
     } finally {
       setLoading(false);
     }
-  }, [activeTab, currentPage, pageSize, debouncedSearch, searchScope, toast]);
+  }, [activeTab, currentPage, pageSize, debouncedSearch, searchScope]);
 
   useEffect(() => {
     setSelectedRequest(null);
