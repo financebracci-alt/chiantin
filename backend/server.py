@@ -41,7 +41,12 @@ from services.transfer_service import TransferService
 from services.advanced_service import AdvancedBankingService
 from services.email_service import EmailService
 from services.banking_workflows_service import BankingWorkflowsService
-from schemas.users import UserCreate, UserLogin, TokenResponse, UserResponse, MFASetupResponse, MFAVerifyRequest, ResendVerificationRequest, VerifyEmailRequest
+from schemas.users import (
+    UserCreate, UserLogin, TokenResponse, UserResponse, MFASetupResponse, 
+    MFAVerifyRequest, ResendVerificationRequest, VerifyEmailRequest,
+    SignupRequest, PasswordChangeRequest, VerifyPasswordRequest,
+    ForgotPasswordRequest, ResetPasswordRequest
+)
 from schemas.kyc import KYCSubmitRequest, KYCReviewRequest, DocumentType
 from schemas.banking import AccountResponse, AdminCreditRequest, AdminDebitRequest, TransactionDisplayType
 from schemas.tickets import TicketCreate, MessageCreate, TicketStatus, Ticket
