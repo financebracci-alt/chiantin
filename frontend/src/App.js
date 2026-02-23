@@ -1655,6 +1655,7 @@ function AdminUsersTable({ users, loading, onSelectUser, selectedUser }) {
           <tr>
             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Name</th>
             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Email</th>
+            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Phone</th>
             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Role</th>
             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Flags</th>
@@ -1675,6 +1676,11 @@ function AdminUsersTable({ users, loading, onSelectUser, selectedUser }) {
               </td>
               <td className="px-6 py-4 whitespace-nowrap">
                 <div className="text-sm text-gray-600">{user.email}</div>
+              </td>
+              <td className="px-6 py-4 whitespace-nowrap">
+                <div className="text-sm text-gray-600" data-testid={`user-phone-${user.id}`}>
+                  {user.phone || <span className="text-gray-400 italic">—</span>}
+                </div>
               </td>
               <td className="px-6 py-4 whitespace-nowrap">
                 <span className="badge badge-info">{user.role}</span>
