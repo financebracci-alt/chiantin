@@ -735,11 +735,6 @@ async def enable_mfa(
     return {"success": True, "message": "MFA enabled successfully"}
 
 
-class PasswordChangeRequest(BaseModel):
-    current_password: str
-    new_password: str
-
-
 @app.post("/api/v1/auth/change-password")
 async def change_password(
     data: PasswordChangeRequest,
