@@ -1567,6 +1567,35 @@ const SECTION_LABELS = {
 - ~~Audit Logs timestamps 1 hour behind (timezone issue)~~ **FIXED Feb 23, 2025**
 - Domain SSL issue: `ecommbx.group` SSL certificate not provisioning
 
+### App.js Refactor Stage 2a+2b Complete (Feb 23, 2025)
+**Status:** ✅ Successfully completed behavior-preserving refactor
+
+**Stage 2a - Import AdminUsersTable:**
+- Imported `AdminUsersTable` from `AdminUsersSection.js`
+- Removed 89-line duplicate from App.js
+
+**Stage 2b - Import Badge/Copy Components:**
+- Imported: `StatusBadge`, `KycBadge`, `CopyPhoneButton`, `CopyEmailButton`
+- Removed ~222 lines of duplicate code from App.js
+
+**App.js Size Reduction:**
+- Before: 4,030 lines
+- After: 3,719 lines
+- **Reduced: 311 lines (~8%)**
+
+**Import Line (App.js:32):**
+```jsx
+import { AdminUsersTable, StatusBadge, KycBadge, CopyPhoneButton, CopyEmailButton } from './components/AdminUsersSection';
+```
+
+**What Stayed in App.js (AdminDashboard):**
+- All state management (users, filters, pagination, selectedUser)
+- All handlers (fetchUsers, viewUserDetails, handleSearch, applyFilters)
+- `renderContent()` switch logic
+- User Details rendering (uses imported components)
+
+**Testing:** All passed (iteration_120.json) - 18/18 features verified
+
 ### Copy Email Button in Admin Panel (Feb 23, 2025)
 **Feature:** Added "Copy email" button next to emails in admin Users UI (matches Copy Phone UX).
 
