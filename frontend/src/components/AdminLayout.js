@@ -248,7 +248,9 @@ export function AdminSidebar({ activeSection, onSectionChange, user, logout }) {
     <div className="admin-sidebar">
       {/* Sidebar Header */}
       <div className="p-6 border-b border-gray-200 dark:border-gray-700">
-        <h1 className="text-lg font-semibold text-gray-900 dark:text-white">ecommbx</h1>
+        <h1 className="text-lg font-semibold text-gray-900 dark:text-white">
+          <span>ecomm</span><span className="text-red-500">bx</span>
+        </h1>
         <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Admin Portal</p>
       </div>
 
