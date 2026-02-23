@@ -1,11 +1,15 @@
 // Admin Components for KYC, Transactions, and Tools
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import api from '../api';
 import { StatusBadge } from './KYC';
 import { useToast } from './Toast';
 
 export function AdminKYCReview() {
   const toast = useToast();
+  // Use ref to keep toast stable and prevent fetchApplications recreation
+  const toastRef = useRef(toast);
+  toastRef.current = toast;
+  
   const [applications, setApplications] = useState([]);
   const [selectedApp, setSelectedApp] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -37,11 +41,11 @@ export function AdminKYCReview() {
       setApplications(response.data);
     } catch (err) {
       console.error('Failed to fetch KYC applications:', err);
-      toast.error('Failed to load applications');
+      toastRef.current.error('Failed to load applications');
     } finally {
       setLoading(false);
     }
-  }, [toast]);
+  }, []);
 
   useEffect(() => {
     fetchApplications();
