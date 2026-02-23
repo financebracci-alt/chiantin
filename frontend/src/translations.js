@@ -1248,6 +1248,10 @@ const translations = {
     twoFaIsCurrently: '2FA è attualmente',
     passwordIsSet: 'Password impostata',
     
+    // Phone validation (registration)
+    phoneRequired: 'Il numero di telefono è obbligatorio',
+    phoneInvalid: 'Inserisci un numero di telefono valido',
+    
     // Profile
     profileSettings: 'Impostazioni Profilo',
     edit: 'Modifica',
