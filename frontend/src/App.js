@@ -2619,7 +2619,12 @@ function AdminDashboard() {
                         )}
                       </dd>
                     </div>
-                    <div><dt className="text-sm text-gray-700 font-medium">KYC</dt><dd className="font-semibold mt-1">{selectedUser.kyc_status || 'Not submitted'}</dd></div>
+                    <div>
+                      <dt className="text-sm text-gray-700 font-medium">KYC</dt>
+                      <dd className="mt-1" data-testid="user-detail-kyc">
+                        <KycBadge status={selectedUser.kyc_status} />
+                      </dd>
+                    </div>
                     <div className="col-span-2 border-t pt-4 mt-2">
                       <dt className="text-sm text-gray-700 font-medium flex items-center justify-between">
                         <span className="flex items-center space-x-2">
