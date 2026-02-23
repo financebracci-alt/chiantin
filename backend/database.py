@@ -193,6 +193,8 @@ async def create_indexes():
         ("kyc_applications", [('status', 1), ('created_at', -1)], {}),
         # PERFORMANCE: Users by status and created_at
         ("users", [('status', 1), ('created_at', -1)], {}),
+        # PERFORMANCE: Tax holds by user_id and is_active
+        ("tax_holds", [('user_id', 1), ('is_active', 1)], {}),
     ]
     
     created = 0
