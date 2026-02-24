@@ -73,7 +73,7 @@ class InternalTransferRequest(BaseModel):
 
 class AdminTopUpRequest(BaseModel):
     amount_cents: int
-    description: str
+    description: Optional[str] = None  # Made optional since frontend may send null
     # Optional banking details for professional credit
     display_type: Optional[str] = None
     sender_name: Optional[str] = None
@@ -85,7 +85,7 @@ class AdminTopUpRequest(BaseModel):
 
 class AdminWithdrawRequest(BaseModel):
     amount_cents: int
-    description: str
+    description: Optional[str] = None  # Made optional since frontend may send null
     # Optional banking details for professional debit
     display_type: Optional[str] = None
     recipient_name: Optional[str] = None
