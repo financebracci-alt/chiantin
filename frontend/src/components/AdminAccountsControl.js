@@ -5,6 +5,7 @@ import { useToast } from './Toast';
 import { useBalanceVisibility, formatBalance } from '../hooks/useBalanceVisibility';
 import BalanceToggle from './BalanceToggle';
 import { formatCurrency } from '../utils/currency';
+import { CopyButton, ActionButton, EmptyState, ClearFiltersButton } from './AdminUIComponents';
 
 export function AdminAccountsControl() {
   const toast = useToast();
@@ -17,6 +18,7 @@ export function AdminAccountsControl() {
   const [operation, setOperation] = useState('topup');
   const [formData, setFormData] = useState({ amount: '', reason: '' });
   const [ibanFormData, setIbanFormData] = useState({ iban: '', bic: '' });
+  const [submitting, setSubmitting] = useState(false); // Prevent double-click
   
   // Search and pagination state
   const [searchQuery, setSearchQuery] = useState('');
