@@ -300,91 +300,10 @@ async def require_admin(current_user: dict = Depends(get_current_user)):
 
 
 # ==================== AUTHENTICATION ====================
-
-# NOTE: /api/v1/auth/signup moved to routers/auth.py
-# @app.post("/api/v1/auth/signup", response_model=UserResponse, status_code=201)
-# async def signup(...):
-#     ... (see routers/auth.py)
-
-# NOTE: /api/v1/auth/login moved to routers/auth.py
-# @app.post("/api/v1/auth/login", response_model=TokenResponse)
-# async def login(...):
-#     ... (see routers/auth.py)
-
-
-# NOTE: /api/v1/auth/logout moved to routers/auth.py
-# @app.post("/api/v1/auth/logout")
-# async def logout(...):
-#     ... (see routers/auth.py)
-
-
-# NOTE: /api/v1/auth/verify-email moved to routers/auth.py
-# @app.post("/api/v1/auth/verify-email")
-# async def verify_email(...):
-#     ... (see routers/auth.py)
-
-# NOTE: /api/v1/auth/resend-verification moved to routers/auth.py  
-# @app.post("/api/v1/auth/resend-verification")
-# async def resend_verification_email(...):
-#     ... (see routers/auth.py)
-
-
-# NOTE: /api/v1/auth/me moved to routers/auth.py
-# @app.get("/api/v1/auth/me", response_model=UserResponse)
-# async def get_me(
-#     current_user: dict = Depends(get_current_user),
-#     db: AsyncIOMotorDatabase = Depends(get_database)
-# ):
-#     """Get current user info."""
-#     auth_service = AuthService(db)
-#     user = await auth_service.get_user(current_user["id"])
-#     if not user:
-#         raise HTTPException(status_code=404, detail="User not found")
-#     
-#     return UserResponse(
-#         id=user.id,
-#         email=user.email,
-#         first_name=user.first_name,
-#         last_name=user.last_name,
-#         role=user.role,
-#         status=user.status,
-#         email_verified=user.email_verified,
-#         mfa_enabled=user.mfa_enabled,
-#         created_at=user.created_at,
-#         last_login_at=user.last_login_at
-#     )
-
-
-# NOTE: /api/v1/auth/mfa/setup moved to routers/auth.py
-# @app.post("/api/v1/auth/mfa/setup", response_model=MFASetupResponse)
-# async def setup_mfa(...):
-#     ... (see routers/auth.py)
-
-# NOTE: /api/v1/auth/mfa/enable moved to routers/auth.py
-# @app.post("/api/v1/auth/mfa/enable")
-# async def enable_mfa(...):
-#     ... (see routers/auth.py)
-
-
-# NOTE: /api/v1/auth/change-password moved to routers/auth.py
-# @app.post("/api/v1/auth/change-password")
-# async def change_password(...):
-#     ... (see routers/auth.py)
-
-# NOTE: /api/v1/auth/verify-password moved to routers/auth.py
-# @app.post("/api/v1/auth/verify-password")
-# async def verify_user_password(...):
-#     ... (see routers/auth.py)
-
-# NOTE: /api/v1/auth/forgot-password moved to routers/auth.py
-# @app.post("/api/v1/auth/forgot-password")
-# async def forgot_password(...):
-#     ... (see routers/auth.py)
-
-# NOTE: /api/v1/auth/reset-password moved to routers/auth.py
-# @app.post("/api/v1/auth/reset-password")
-# async def reset_password(...):
-#     ... (see routers/auth.py)
+# All auth endpoints moved to routers/auth.py
+# See: routers/auth.py for: signup, login, logout, verify-email, resend-verification,
+#      me, mfa/setup, mfa/enable, change-password, verify-password, 
+#      forgot-password, reset-password
     
 # ==================== BANKING ====================
 
