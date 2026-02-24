@@ -29,6 +29,20 @@ ecommbx is a full-stack EU-licensed digital banking platform built with React fr
 
 ## Recent Changes (February 2026)
 
+### P0 EMERGENCY HOTFIX - Client KYC Submission Failing (Feb 24, 2026)
+**Status:** ✅ FIXED AND VERIFIED
+
+**Root Cause:** The router at `/api/v1/kyc/submit` was not accepting the request body. The service method `submit_application(user_id, data)` expects two parameters, but the router only passed `user_id`, ignoring the `KYCSubmitRequest` body sent by frontend.
+
+**Fix Applied:**
+- `backend/routers/kyc.py` line 23: Added `KYCSubmitRequest` import
+- `backend/routers/kyc.py` line 151: Added `data: KYCSubmitRequest` parameter to router function
+- `backend/routers/kyc.py` line 158: Updated service call to pass `data` parameter
+
+**Validation:** 13/13 backend tests PASS, all frontend tests PASS
+
+---
+
 ### P0 EMERGENCY HOTFIX - Tax Hold / Restriction / Notification Regression (Feb 24, 2026)
 **Status:** ✅ FIXED AND VERIFIED
 
