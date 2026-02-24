@@ -375,7 +375,7 @@ async def admin_delete_transfer(
 
 
 class RestoreTransferRequest(BaseModel):
-    reason: str = Field(None, description="Optional reason for restoring the transfer")
+    reason: Optional[str] = Field(None, description="Optional reason for restoring the transfer")
 
 
 @admin_router.post("/transfers/{transfer_id}/restore")
