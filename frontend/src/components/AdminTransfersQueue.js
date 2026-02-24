@@ -311,22 +311,32 @@ export function AdminTransfersQueue() {
             placeholder="Search by beneficiary, sender, email, IBAN, reference... (searches ALL statuses)"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
+            className="w-full px-4 py-2 pr-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
             data-testid="search-input"
           />
           {searchQuery && (
             <button
               onClick={() => setSearchQuery('')}
               className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+              title="Clear search"
             >
-              ×
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
             </button>
           )}
         </div>
         {isSearchMode && (
-          <p className="text-sm text-blue-600 mt-2">
-            Searching across ALL transfers (ignoring tab filter). Found {pagination.total} result(s).
-          </p>
+          <div className="flex items-center gap-2 mt-2">
+            <span className="inline-flex items-center gap-1 px-2 py-1 bg-blue-50 text-blue-700 text-xs rounded-full">
+              <span className="font-medium">Search:</span>
+              <span>"{debouncedSearch}"</span>
+            </span>
+            <span className="text-sm text-blue-600">
+              Found {pagination.total} result(s) across ALL transfers
+            </span>
+            <ClearFiltersButton onClick={() => setSearchQuery('')} hasActiveFilters={true} />
+          </div>
         )}
       </div>
       
