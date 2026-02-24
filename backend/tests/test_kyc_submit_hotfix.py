@@ -266,7 +266,7 @@ class TestAdminSections:
         token = self.get_admin_token()
         self.session.headers["Authorization"] = f"Bearer {token}"
         
-        response = self.session.get(f"{BASE_URL}/api/v1/admin/accounts")
+        response = self.session.get(f"{BASE_URL}/api/v1/admin/accounts-with-users")
         assert response.status_code == 200, f"Accounts list failed: {response.text}"
         
         data = response.json()
@@ -277,7 +277,7 @@ class TestAdminSections:
         token = self.get_admin_token()
         self.session.headers["Authorization"] = f"Bearer {token}"
         
-        response = self.session.get(f"{BASE_URL}/api/v1/admin/transfers/pending")
+        response = self.session.get(f"{BASE_URL}/api/v1/admin/transfers")
         assert response.status_code == 200, f"Transfers queue failed: {response.text}"
         
         data = response.json()
