@@ -34,7 +34,8 @@ def auth_token():
     )
     if response.status_code != 200:
         pytest.skip(f"Login failed: {response.status_code}")
-    return response.json().get("token")
+    # Token comes as 'access_token' in response
+    return response.json().get("access_token")
 
 
 @pytest.fixture(scope="module")
