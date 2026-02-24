@@ -64,21 +64,31 @@ export function SupportTickets({ isAdmin = false }) {
   const refreshSelectedTicket = async (ticketId) => {
     try {
       if (isAdmin) {
-        // For admin, fetch all tickets and find the updated one
-        const response = await api.get('/admin/tickets');
-        const updatedTicket = response.data.find(t => t.id === ticketId);
-        if (updatedTicket) {
-          setSelectedTicket(updatedTicket);
+        // First, fetch the full ticket details to get updated messages
+        const detailResponse = await api.get(`/admin/tickets/${ticketId}`);
+        const fullTicket = detailResponse.data;
+        
+        // Update the selected ticket with full data (including messages)
+        if (fullTicket) {
+          setSelectedTicket(fullTicket);
         }
-        setTickets(response.data);
+        
+        // Background sync the ticket list (doesn't affect selected ticket)
+        const listResponse = await api.get('/admin/tickets');
+        setTickets(listResponse.data);
       } else {
-        // For regular users, fetch their tickets and find the updated one
-        const response = await api.get('/tickets');
-        const updatedTicket = response.data.find(t => t.id === ticketId);
-        if (updatedTicket) {
-          setSelectedTicket(updatedTicket);
+        // For regular users, fetch the full ticket first
+        const detailResponse = await api.get(`/tickets/${ticketId}`);
+        const fullTicket = detailResponse.data;
+        
+        // Update selected ticket with full data
+        if (fullTicket) {
+          setSelectedTicket(fullTicket);
         }
-        setTickets(response.data);
+        
+        // Background sync ticket list
+        const listResponse = await api.get('/tickets');
+        setTickets(listResponse.data);
       }
     } catch (err) {
       console.error('Failed to refresh ticket:', err);
