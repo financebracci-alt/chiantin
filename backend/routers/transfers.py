@@ -189,10 +189,12 @@ async def admin_get_transfers(
     PERFORMANCE OPTIMIZED: Uses bulk lookups and pagination.
     
     Query params:
-    - status: Filter by status (SUBMITTED, COMPLETED, REJECTED)
+    - status: Filter by status (SUBMITTED, COMPLETED, REJECTED, DELETED)
     - page: Page number (1-indexed, default 1)
     - page_size: Items per page (20, 50, or 100, default 20)
     - search: Search term (searches beneficiary name, sender name/email, IBAN, reference across ALL statuses)
+    
+    Note: When status=DELETED, returns soft-deleted transfers only.
     """
     # Validate page_size
     valid_page_sizes = [20, 50, 100]
@@ -200,7 +202,13 @@ async def admin_get_transfers(
         page_size = 20
     
     workflows = BankingWorkflowsService(db)
-    result = await workflows.get_admin_transfers(status, page, page_size, search)
+    
+    # Handle DELETED tab specially - fetch soft-deleted transfers
+    if status == "DELETED":
+        result = await workflows.get_deleted_transfers(page, page_size, search)
+    else:
+        result = await workflows.get_admin_transfers(status, page, page_size, search)
+    
     # Result now includes 'transfers' list and 'pagination' info
     return {"ok": True, "data": result["transfers"], "pagination": result["pagination"]}
 
