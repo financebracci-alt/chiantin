@@ -567,7 +567,7 @@ async def admin_account_topup(
         user_account_id=account["ledger_account_id"],
         amount=data.amount_cents,
         external_id=f"admin_topup_{uuid.uuid4()}",
-        reason=data.description,
+        reason=data.description or "Admin credit",
         performed_by=current_user["id"]
     )
     
