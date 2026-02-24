@@ -496,9 +496,21 @@ export function AdminTransfersQueue() {
             )}
           </div>
           
+          {/* Deletion Info (for deleted transfers) */}
+          {selectedTransfer.is_deleted && (
+            <div className="col-span-2 bg-gray-100 p-3 rounded border border-gray-300 mt-4">
+              <div className="font-medium text-gray-700 mb-2">Deletion Information</div>
+              <div className="grid grid-cols-2 gap-2 text-sm">
+                <div><span className="text-gray-600">Deleted At:</span> {selectedTransfer.deleted_at ? new Date(selectedTransfer.deleted_at).toLocaleString() : 'Unknown'}</div>
+                <div><span className="text-gray-600">Deleted By:</span> {selectedTransfer.deleted_by_email || 'Unknown'}</div>
+                <div><span className="text-gray-600">Previous Status:</span> <span className="font-medium">{selectedTransfer.previous_status || selectedTransfer.status}</span></div>
+              </div>
+            </div>
+          )}
+          
           {/* Action Buttons */}
           <div className="flex flex-wrap gap-3 pt-4 border-t border-gray-200">
-            {selectedTransfer.status === 'SUBMITTED' && (
+            {selectedTransfer.status === 'SUBMITTED' && !selectedTransfer.is_deleted && (
               <>
                 <button onClick={() => handleApprove(selectedTransfer)} className="btn-primary">
                   Approve
@@ -517,17 +529,90 @@ export function AdminTransfersQueue() {
                 </button>
               </>
             )}
-            <button 
-              onClick={() => handleDelete(selectedTransfer)} 
-              disabled={deletingTransfer}
-              className="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700 disabled:opacity-50"
-            >
-              {deletingTransfer ? 'Deleting...' : 'Delete'}
-            </button>
+            
+            {/* Show Restore button for deleted transfers */}
+            {selectedTransfer.is_deleted && (
+              <button 
+                onClick={() => setShowRestoreModal(true)} 
+                disabled={restoringTransfer}
+                className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 disabled:opacity-50"
+                data-testid="restore-transfer-btn"
+              >
+                {restoringTransfer ? 'Restoring...' : 'Restore Transfer'}
+              </button>
+            )}
+            
+            {/* Show Delete button only for non-deleted transfers */}
+            {!selectedTransfer.is_deleted && (
+              <button 
+                onClick={() => handleDelete(selectedTransfer)} 
+                disabled={deletingTransfer}
+                className="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700 disabled:opacity-50"
+              >
+                {deletingTransfer ? 'Deleting...' : 'Delete'}
+              </button>
+            )}
+            
             <button onClick={() => setSelectedTransfer(null)} className="btn-secondary ml-auto">
               Close
             </button>
           </div>
+          
+          {/* Restore Confirmation Modal */}
+          {showRestoreModal && (
+            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+              <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4 shadow-xl">
+                <h3 className="text-lg font-semibold mb-4">Restore Transfer</h3>
+                <div className="mb-4">
+                  <p className="text-gray-700 mb-3">
+                    Are you sure you want to restore this transfer?
+                  </p>
+                  <div className="bg-blue-50 border border-blue-200 rounded p-3 mb-3">
+                    <p className="text-sm text-blue-800">
+                      <strong>Important:</strong> This will restore the transfer record visibility only. 
+                      No financial transaction will be re-executed.
+                    </p>
+                  </div>
+                  <div className="text-sm text-gray-600 mb-3">
+                    <div><strong>Beneficiary:</strong> {selectedTransfer.beneficiary_name}</div>
+                    <div><strong>Amount:</strong> {formatCurrency(selectedTransfer.amount)}</div>
+                    <div><strong>Will be restored to:</strong> {selectedTransfer.previous_status || selectedTransfer.status}</div>
+                  </div>
+                  <div className="mb-3">
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Reason for restore (optional)
+                    </label>
+                    <textarea
+                      value={restoreReason}
+                      onChange={(e) => setRestoreReason(e.target.value)}
+                      className="w-full p-2 border border-gray-300 rounded text-sm"
+                      placeholder="Enter reason for restoring this transfer..."
+                      rows={2}
+                    />
+                  </div>
+                </div>
+                <div className="flex justify-end gap-3">
+                  <button
+                    onClick={() => {
+                      setShowRestoreModal(false);
+                      setRestoreReason('');
+                    }}
+                    className="px-4 py-2 bg-gray-200 text-gray-700 rounded hover:bg-gray-300"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={handleRestore}
+                    disabled={restoringTransfer}
+                    className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 disabled:opacity-50"
+                    data-testid="confirm-restore-btn"
+                  >
+                    {restoringTransfer ? 'Restoring...' : 'Confirm Restore'}
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
       ) : (
         <>
