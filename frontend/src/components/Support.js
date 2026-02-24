@@ -700,6 +700,7 @@ function TicketDetails({ ticket, onUpdate, onDelete, isAdmin = false, onRefreshT
   const [selectedFiles, setSelectedFiles] = useState([]);
   const [uploadingFiles, setUploadingFiles] = useState(false);
   const fileInputRef = React.useRef(null);
+  const messagesContainerRef = React.useRef(null);
   const { t } = useLanguage();
   const { isDark } = useTheme();
 
@@ -707,6 +708,30 @@ function TicketDetails({ ticket, onUpdate, onDelete, isAdmin = false, onRefreshT
   const MAX_FILES = 5;
   const MAX_FILE_SIZE = 25 * 1024 * 1024; // 25 MB
   const ALLOWED_EXTENSIONS = ['png', 'jpg', 'jpeg', 'gif', 'webp', 'bmp', 'pdf', 'doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx', 'txt', 'rtf', 'odt', 'ods', 'odp', 'csv', 'zip'];
+
+  // Scroll to bottom of messages container
+  const scrollToBottom = React.useCallback(() => {
+    if (messagesContainerRef.current) {
+      // Use setTimeout to ensure DOM is updated before scrolling
+      setTimeout(() => {
+        if (messagesContainerRef.current) {
+          messagesContainerRef.current.scrollTop = messagesContainerRef.current.scrollHeight;
+        }
+      }, 100);
+    }
+  }, []);
+
+  // Scroll to bottom when ticket changes (opening new ticket)
+  useEffect(() => {
+    scrollToBottom();
+  }, [ticket.id, scrollToBottom]);
+
+  // Scroll to bottom when messages count changes (new message sent)
+  useEffect(() => {
+    if (ticket.messages && ticket.messages.length > 0) {
+      scrollToBottom();
+    }
+  }, [ticket.messages?.length, scrollToBottom]);
 
   // Reset edit states when ticket changes
   useEffect(() => {
