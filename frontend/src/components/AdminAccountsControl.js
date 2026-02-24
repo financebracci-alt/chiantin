@@ -126,13 +126,13 @@ export function AdminAccountsControl() {
       {/* Search Bar and Controls */}
       <div className="mb-6 flex flex-wrap items-center gap-4">
         {/* Search Input */}
-        <div className="flex-1 min-w-[300px]">
+        <div className="flex-1 min-w-[300px] relative">
           <input
             type="text"
             placeholder="Search by name, email, IBAN, or account number..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="input-field w-full"
+            className="input-field w-full pr-8"
             data-testid="accounts-search-input"
           />
           {searchQuery && (
