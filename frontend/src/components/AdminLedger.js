@@ -68,7 +68,7 @@ export function EnhancedLedgerTools({ account, onSuccess }) {
       const amountInCents = Math.round(parseFloat(creditForm.amount) * 100);
       
       await api.post(`/admin/accounts/${account.id}/topup`, {
-        amount: amountInCents,
+        amount_cents: amountInCents,  // Fixed: Backend expects amount_cents
         display_type: creditForm.display_type,
         sender_name: creditForm.sender_name || null,
         sender_iban: creditForm.sender_iban || null,
@@ -92,7 +92,12 @@ export function EnhancedLedgerTools({ account, onSuccess }) {
       setActiveOperation(null);
       onSuccess && onSuccess();
     } catch (err) {
-      toast.error(err.response?.data?.detail || 'Credit operation failed');
+      // Handle validation errors (detail can be array) and other errors
+      const errorDetail = err.response?.data?.detail;
+      const errorMsg = Array.isArray(errorDetail) 
+        ? errorDetail.map(e => e.msg).join(', ') 
+        : (errorDetail || 'Credit operation failed');
+      toast.error(errorMsg);
     } finally {
       setLoading(false);
     }
