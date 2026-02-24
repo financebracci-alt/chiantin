@@ -444,15 +444,31 @@ export function AdminTransfersQueue() {
           </div>
           
           <div className="grid grid-cols-2 gap-4 mb-6">
-            <div><span className="text-sm text-gray-600">Reference:</span> <span className="font-mono text-sm">{selectedTransfer.reference_number || selectedTransfer.id?.substring(0, 8)}</span></div>
+            <div className="flex items-center gap-2">
+              <span className="text-sm text-gray-600">Reference:</span> 
+              <span className="font-mono text-sm">{selectedTransfer.reference_number || selectedTransfer.id?.substring(0, 8)}</span>
+              <CopyButton value={selectedTransfer.reference_number || selectedTransfer.id?.substring(0, 8)} iconOnly size="xs" />
+            </div>
             <div><span className="text-sm text-gray-600">Status:</span> <span className={`badge ${getStatusBadgeClasses(selectedTransfer.status)}`}>{selectedTransfer.status}</span></div>
             <div><span className="text-sm text-gray-600">Amount:</span> <span className="font-semibold">{formatCurrency(selectedTransfer.amount)}</span></div>
             <div><span className="text-sm text-gray-600">Date:</span> <span className="text-sm">{new Date(selectedTransfer.created_at).toLocaleString()}</span></div>
             <div><span className="text-sm text-gray-600">Sender:</span> <span className="font-medium">{selectedTransfer.sender_name}</span></div>
-            <div><span className="text-sm text-gray-600">Sender Email:</span> <span className="text-sm">{selectedTransfer.sender_email}</span></div>
-            <div><span className="text-sm text-gray-600">Sender IBAN:</span> <span className="font-mono text-sm">{selectedTransfer.sender_iban}</span></div>
+            <div className="flex items-center gap-2">
+              <span className="text-sm text-gray-600">Sender Email:</span> 
+              <span className="text-sm">{selectedTransfer.sender_email}</span>
+              <CopyButton value={selectedTransfer.sender_email} iconOnly size="xs" />
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="text-sm text-gray-600">Sender IBAN:</span> 
+              <span className="font-mono text-sm">{selectedTransfer.sender_iban}</span>
+              <CopyButton value={selectedTransfer.sender_iban} iconOnly size="xs" />
+            </div>
             <div><span className="text-sm text-gray-600">Beneficiary:</span> <span className="font-medium">{selectedTransfer.beneficiary_name}</span></div>
-            <div className="col-span-2"><span className="text-sm text-gray-600">Beneficiary IBAN:</span> <span className="font-mono text-sm">{selectedTransfer.beneficiary_iban}</span></div>
+            <div className="col-span-2 flex items-center gap-2">
+              <span className="text-sm text-gray-600">Beneficiary IBAN:</span> 
+              <span className="font-mono text-sm">{selectedTransfer.beneficiary_iban}</span>
+              <CopyButton value={selectedTransfer.beneficiary_iban} iconOnly size="xs" />
+            </div>
             <div className="col-span-2"><span className="text-sm text-gray-600">Details:</span> <span className="text-sm">{selectedTransfer.details || 'N/A'}</span></div>
             
             {selectedTransfer.status === 'REJECTED' && (
