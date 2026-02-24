@@ -727,7 +727,7 @@ async def set_user_tax_hold(
         await db.tax_holds.update_one(
             {"_id": existing["_id"]},
             {"$set": {
-                "tax_amount_due": int(data.tax_amount * 100),
+                "tax_amount_cents": int(data.tax_amount * 100),
                 "reason": data.reason,
                 "payment_details": {
                     "beneficiary_name": data.beneficiary_name,
