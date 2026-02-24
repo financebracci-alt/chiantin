@@ -69,7 +69,7 @@ async def check_tax_hold(user_id: str, db: AsyncIOMotorDatabase):
     """Check if user has an active tax hold."""
     return await db.tax_holds.find_one({
         "user_id": user_id,
-        "status": "ACTIVE"
+        "is_active": True
     })
 
 
