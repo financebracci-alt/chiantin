@@ -405,13 +405,15 @@ export function AdminTransfersQueue() {
       
       {/* Tab Navigation */}
       <div className="flex space-x-4 mb-4">
-        {['SUBMITTED', 'COMPLETED', 'REJECTED'].map(tab => (
+        {['SUBMITTED', 'COMPLETED', 'REJECTED', 'DELETED'].map(tab => (
           <button 
             key={tab} 
             onClick={() => handleTabChange(tab)} 
             className={`px-4 py-2 rounded transition-colors ${
               activeTab === tab && !isSearchMode
-                ? 'bg-red-600 text-white' 
+                ? tab === 'DELETED' 
+                  ? 'bg-gray-700 text-white'
+                  : 'bg-red-600 text-white' 
                 : 'bg-gray-100 hover:bg-gray-200 text-gray-700'
             }`}
             data-testid={`tab-${tab.toLowerCase()}`}
