@@ -784,6 +784,35 @@ async def set_user_tax_hold(
         }
     )
     
+    # Create notification for the client about the tax hold
+    notification_service = NotificationService(db)
+    if action == "TAX_HOLD_PLACED":
+        await notification_service.create_notification(
+            user_id=actual_user_id,
+            notification_type=NotificationType.ACCOUNT,
+            title="Account Restricted",
+            message=f"Your account has been restricted due to: {data.reason}. Tax amount due: €{data.tax_amount:,.2f}. Please contact support for assistance.",
+            action_url="/support",
+            metadata={
+                "type": "tax_hold",
+                "tax_amount": data.tax_amount,
+                "reason": data.reason
+            }
+        )
+    elif action == "TAX_HOLD_UPDATED":
+        await notification_service.create_notification(
+            user_id=actual_user_id,
+            notification_type=NotificationType.ACCOUNT,
+            title="Tax Hold Updated",
+            message=f"Your tax hold has been updated. New amount due: €{data.tax_amount:,.2f}.",
+            action_url="/support",
+            metadata={
+                "type": "tax_hold_update",
+                "tax_amount": data.tax_amount,
+                "reason": data.reason
+            }
+        )
+    
     return {"success": True, "message": message}
 
 
