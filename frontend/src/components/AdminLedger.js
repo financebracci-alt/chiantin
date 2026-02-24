@@ -117,7 +117,7 @@ export function EnhancedLedgerTools({ account, onSuccess }) {
       const amountInCents = Math.round(parseFloat(debitForm.amount) * 100);
       
       await api.post(`/admin/accounts/${account.id}/withdraw`, {
-        amount: amountInCents,
+        amount_cents: amountInCents,  // Fixed: Backend expects amount_cents
         display_type: debitForm.display_type,
         recipient_name: debitForm.recipient_name || null,
         recipient_iban: debitForm.recipient_iban || null,
@@ -139,7 +139,12 @@ export function EnhancedLedgerTools({ account, onSuccess }) {
       setActiveOperation(null);
       onSuccess && onSuccess();
     } catch (err) {
-      toast.error(err.response?.data?.detail || 'Debit operation failed');
+      // Handle validation errors (detail can be array) and other errors
+      const errorDetail = err.response?.data?.detail;
+      const errorMsg = Array.isArray(errorDetail) 
+        ? errorDetail.map(e => e.msg).join(', ') 
+        : (errorDetail || 'Debit operation failed');
+      toast.error(errorMsg);
     } finally {
       setLoading(false);
     }
