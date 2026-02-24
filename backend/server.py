@@ -214,6 +214,8 @@ app.include_router(kyc_router.router)
 app.include_router(kyc_router.admin_router)
 app.include_router(admin_users_router.router)
 app.include_router(auth_router.router)
+from routers import analytics as analytics_router
+app.include_router(analytics_router.router)
 
 
 # Dependencies
