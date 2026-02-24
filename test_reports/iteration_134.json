@@ -1,0 +1,83 @@
+{
+  "summary": "P1 BUGFIX SESSION VALIDATED - Support Tickets bugs fixed. Bug A (Thread disappears after admin sends message): FIXED. Bug B (Admin receives notification for own message): FIXED. All regression tests pass.",
+  "backend_issues": {
+    "critical": [],
+    "minor": []
+  },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": []
+  },
+  "test_report_links": [
+    "/app/backend/tests/test_ticket_bugfixes.py",
+    "/app/test_reports/pytest/ticket_bugfixes_results.xml"
+  ],
+  "features_tested": {
+    "bug_a_thread_disappears": {
+      "description": "Thread disappears after admin sends message",
+      "root_cause": "refreshSelectedTicket was fetching from list view endpoint (no messages)",
+      "fix": "Now fetches from /admin/tickets/{id} first to get full ticket details with messages",
+      "frontend_test": "PASS - Messages before send: 5, after send: 6. Thread stays visible.",
+      "backend_test": "PASS - Single ticket endpoint returns full messages array"
+    },
+    "bug_b_admin_self_notification": {
+      "description": "Admin receives notification for own ticket message",
+      "root_cause": "Notification count query used updated_at timestamp",
+      "fix": "Added last_client_message_at field that ONLY updates for client messages",
+      "backend_test": "PASS - notification counts endpoint works correctly",
+      "code_verification": "PASS - add_message only sets last_client_message_at for is_staff=False"
+    },
+    "regression_tests": {
+      "ticket_list_loads": "PASS - 74 tickets displayed",
+      "open_ticket_displays_messages": "PASS - Messages visible in detail panel",
+      "search_tickets": "PASS - Search by client email works",
+      "filter_by_status": "PASS - OPEN, IN_PROGRESS, RESOLVED filters work",
+      "status_change_actions": "PASS - Mark In Progress, Mark Resolved work",
+      "ticket_switching": "PASS - Switching between tickets shows correct messages"
+    },
+    "cross_section_tests": {
+      "users_section": "PASS",
+      "transfers_queue": "PASS",
+      "card_requests": "PASS",
+      "support_tickets_reload": "PASS"
+    }
+  },
+  "action_items": [],
+  "critical_code_review_comments": [
+    "Support.js refreshSelectedTicket correctly fetches /admin/tickets/{id} first before syncing list",
+    "ticket_service.py add_message correctly tracks last_client_message_at only for client messages (is_staff=False)",
+    "notifications.py get_tickets_new correctly uses last_client_message_at instead of updated_at",
+    "Code architecture properly separates list view (optimized, no full messages) from detail view (full messages)"
+  ],
+  "updated_files": [
+    "/app/backend/tests/test_ticket_bugfixes.py"
+  ],
+  "success_rate": {
+    "backend": "100% (13/13 tests passed)",
+    "frontend": "100% (all UI tests passed)"
+  },
+  "test_credentials": {
+    "email": "ashleyalt005@gmail.com",
+    "password": "123456789",
+    "role": "ADMIN"
+  },
+  "seed_data_creation": "Test messages were sent during validation (TEST_BUG_VALIDATION_* prefixed)",
+  "retest_needed": false,
+  "should_main_agent_self_test": false,
+  "context_for_next_testing_agent": "P1 bugfix session complete. Two bugs in support tickets were fixed: 1) Thread no longer disappears after admin sends message - now fetches full ticket details first. 2) Admin no longer receives notification badge for own messages - uses last_client_message_at field. Test file test_ticket_bugfixes.py covers both fixes.",
+  "rca_of_issue": {
+    "bug_a": {
+      "symptom": "Thread/chat panel disappeared after admin sent a message",
+      "root_cause": "refreshSelectedTicket() was calling the list endpoint which returns tickets without full messages array. After updating state, selectedTicket lost its messages data.",
+      "fix": "Changed refreshSelectedTicket to first fetch /admin/tickets/{id} to get full ticket details including messages, then background sync the list separately.",
+      "files_changed": ["frontend/src/components/Support.js"]
+    },
+    "bug_b": {
+      "symptom": "Admin notification badge incremented when admin sent message to a ticket",
+      "root_cause": "The notification count query used updated_at field to find new activity. When admin sent message, updated_at changed, incorrectly counting it as new activity requiring admin attention.",
+      "fix": "Added new field last_client_message_at that ONLY updates when is_staff=False. Notification query now uses this field instead of updated_at.",
+      "files_changed": ["backend/services/ticket_service.py", "backend/routers/notifications.py"]
+    }
+  }
+}
