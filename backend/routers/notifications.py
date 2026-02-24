@@ -183,10 +183,6 @@ async def get_admin_notification_counts(
             ]
         })
     
-    # Log debug info
-    logger.info(f"[BADGE DEBUG] admin_id={admin_id}")
-    logger.info(f"[BADGE DEBUG] last_seen_map={last_seen_map}")
-    
     # Execute all queries in parallel for performance
     results = await asyncio.gather(
         get_users_new(),
@@ -196,8 +192,6 @@ async def get_admin_notification_counts(
         get_tickets_new(),
         return_exceptions=True
     )
-    
-    logger.info(f"[BADGE DEBUG] results={results}")
     
     # Handle any exceptions gracefully
     def safe_result(result, default=0):
