@@ -516,11 +516,12 @@ async def admin_get_accounts_with_users(
         
         accounts.append(account_dict)
     
+    # Response format matching frontend expectations
     return {
-        "ok": True,
-        "data": accounts,
+        "accounts": accounts,  # Frontend expects "accounts" key
         "pagination": {
             "total": total_count,
+            "total_accounts": total_count,  # Frontend also uses this
             "page": page,
             "page_size": page_size,
             "total_pages": total_pages,
