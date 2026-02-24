@@ -135,7 +135,29 @@ export function AdminAccountsControl() {
             className="input-field w-full"
             data-testid="accounts-search-input"
           />
+          {searchQuery && (
+            <button
+              onClick={() => setSearchQuery('')}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+              title="Clear search"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          )}
         </div>
+        
+        {/* Active Filter Indicator */}
+        {searchQuery && (
+          <div className="flex items-center gap-2">
+            <span className="inline-flex items-center gap-1 px-2 py-1 bg-blue-50 text-blue-700 text-xs rounded-full">
+              <span className="font-medium">Search:</span>
+              <span>"{searchQuery}"</span>
+            </span>
+            <ClearFiltersButton onClick={() => setSearchQuery('')} hasActiveFilters={true} />
+          </div>
+        )}
         
         {/* Results Count */}
         <div className="text-sm text-gray-600">
