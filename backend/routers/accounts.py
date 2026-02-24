@@ -393,6 +393,7 @@ async def admin_get_accounts_with_users(
     search: str = None,
     page: int = 1,
     page_size: int = 50,
+    limit: int = None,  # Alias for page_size (frontend compatibility)
     current_user: dict = Depends(require_admin),
     db: AsyncIOMotorDatabase = Depends(get_database)
 ):
@@ -406,9 +407,13 @@ async def admin_get_accounts_with_users(
     Query params:
     - search: Search term (matches IBAN, account number, user email, user name)
     - page: Page number (1-indexed)
-    - page_size: Items per page (20, 50, 100)
+    - page_size/limit: Items per page (20, 50, 100)
     """
     import re
+    
+    # Handle 'limit' param as alias for 'page_size' (frontend compatibility)
+    if limit is not None:
+        page_size = limit
     
     # Validate page_size
     valid_page_sizes = [20, 50, 100]
