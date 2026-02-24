@@ -75,7 +75,9 @@ export function AdminAccountsControl() {
       toast.error('Fill all fields');
       return;
     }
+    if (submitting) return; // Prevent double-click
 
+    setSubmitting(true);
     try {
       const amountInCents = Math.round(parseFloat(formData.amount) * 100);
       const endpoint = operation === 'topup' ? 'topup' : 'withdraw';
@@ -86,6 +88,8 @@ export function AdminAccountsControl() {
       fetchAccounts();
     } catch (err) {
       toast.error(err.response?.data?.detail || 'Operation failed');
+    } finally {
+      setSubmitting(false);
     }
   };
 
