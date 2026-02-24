@@ -226,6 +226,10 @@ from routers import accounts as accounts_router
 app.include_router(accounts_router.router)
 app.include_router(accounts_router.admin_ledger_router)
 app.include_router(accounts_router.admin_accounts_router)
+from routers import transfers as transfers_router
+app.include_router(transfers_router.router)
+app.include_router(transfers_router.admin_router)
+app.include_router(transfers_router.admin_ledger_router)
 
 
 # Dependencies
