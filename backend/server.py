@@ -943,45 +943,10 @@ async def admin_reverse_transaction(
 
 
 # ==================== SPENDING INSIGHTS ====================
-
-@app.get("/api/v1/insights/spending")
-async def get_spending_insights(
-    days: int = 30,
-    period: str = None,
-    current_user: dict = Depends(get_current_user),
-    db: AsyncIOMotorDatabase = Depends(get_database)
-):
-    """Get spending breakdown by category from real ledger data.
-    
-    Args:
-        days: Number of days to look back (7, 30, 90). Ignored if period is set.
-        period: Optional period override. Use 'this_month' for calendar month (same as Overview).
-    
-    When period='this_month', uses the SAME calculation as the Overview "THIS MONTH" widget
-    to ensure consistency.
-    """
-    ledger_engine = LedgerEngine(db)
-    advanced_service = AdvancedBankingService(db, ledger_engine)
-    
-    # If period is 'this_month', use the same logic as monthly-spending for consistency
-    if period == 'this_month':
-        spending = await advanced_service.get_monthly_spending(current_user["id"])
-        return spending
-    
-    breakdown = await advanced_service.get_spending_by_category(current_user["id"], days)
-    return breakdown
-
-
-@app.get("/api/v1/insights/monthly-spending")
-async def get_monthly_spending(
-    current_user: dict = Depends(get_current_user),
-    db: AsyncIOMotorDatabase = Depends(get_database)
-):
-    """Get spending for the current calendar month from real ledger data."""
-    ledger_engine = LedgerEngine(db)
-    advanced_service = AdvancedBankingService(db, ledger_engine)
-    spending = await advanced_service.get_monthly_spending(current_user["id"])
-    return spending
+# NOTE: All insights endpoints moved to routers/insights.py
+# @app.get("/api/v1/insights/spending")
+# @app.get("/api/v1/insights/monthly-spending")
+# ... (see routers/insights.py)
 
 
 # ==================== BANKING WORKFLOWS - CARDS ====================
@@ -997,27 +962,14 @@ async def get_monthly_spending(
 
 
 # ==================== BANKING WORKFLOWS - RECIPIENTS ====================
-
-@app.post("/api/v1/recipients")
-async def create_recipient(
-    data: CreateRecipient,
-    current_user: dict = Depends(get_current_user),
-    db: AsyncIOMotorDatabase = Depends(get_database)
-):
-    """Create saved recipient (IBAN display only)."""
-    workflows = BankingWorkflowsService(db)
-    recipient = await workflows.create_recipient(current_user["id"], data)
-    return {"ok": True, "data": recipient.model_dump()}
+# NOTE: All recipient endpoints moved to routers/recipients.py
+# @app.post("/api/v1/recipients")
+# @app.get("/api/v1/recipients")
+# @app.delete("/api/v1/recipients/{recipient_id}")
+# ... (see routers/recipients.py)
 
 
-@app.get("/api/v1/recipients")
-async def get_recipients(
-    current_user: dict = Depends(get_current_user),
-    db: AsyncIOMotorDatabase = Depends(get_database)
-):
-    """Get user's saved recipients."""
-    workflows = BankingWorkflowsService(db)
-    recipients = await workflows.get_user_recipients(current_user["id"])
+# NOTE: /api/v1/admin/accounts-with-users moved to routers/accounts.py
     return {"ok": True, "data": [r.model_dump() for r in recipients]}
 
 
