@@ -665,13 +665,28 @@ export function AdminTransfersQueue() {
                         </span>
                       </td>
                       <td>
-                        <button 
-                          onClick={() => setSelectedTransfer(t)} 
-                          className="btn-text text-xs"
-                          data-testid={`view-btn-${t.id}`}
-                        >
-                          Open
-                        </button>
+                        <div className="flex gap-2">
+                          <button 
+                            onClick={() => setSelectedTransfer(t)} 
+                            className="btn-text text-xs"
+                            data-testid={`view-btn-${t.id}`}
+                          >
+                            Open
+                          </button>
+                          {/* Row-level Restore button for deleted transfers */}
+                          {t.is_deleted && (
+                            <button 
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                openRowRestoreModal(t);
+                              }}
+                              className="text-xs px-2 py-1 bg-green-100 text-green-700 rounded hover:bg-green-200 transition-colors"
+                              data-testid={`restore-row-btn-${t.id}`}
+                            >
+                              Restore
+                            </button>
+                          )}
+                        </div>
                       </td>
                     </tr>
                   ))
@@ -679,6 +694,62 @@ export function AdminTransfersQueue() {
               </tbody>
             </table>
           </div>
+          
+          {/* Row-level Restore Confirmation Modal */}
+          {rowRestoreTransfer && (
+            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+              <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4 shadow-xl">
+                <h3 className="text-lg font-semibold mb-4">Restore Transfer</h3>
+                <div className="mb-4">
+                  <p className="text-gray-700 mb-3">
+                    Are you sure you want to restore this transfer?
+                  </p>
+                  <div className="bg-blue-50 border border-blue-200 rounded p-3 mb-3">
+                    <p className="text-sm text-blue-800">
+                      <strong>Important:</strong> This will restore the transfer record visibility only. 
+                      No financial transaction will be re-executed.
+                    </p>
+                  </div>
+                  <div className="text-sm text-gray-600 mb-3">
+                    <div><strong>Beneficiary:</strong> {rowRestoreTransfer.beneficiary_name}</div>
+                    <div><strong>Amount:</strong> {formatCurrency(rowRestoreTransfer.amount)}</div>
+                    <div><strong>Will be restored to:</strong> {rowRestoreTransfer.previous_status || rowRestoreTransfer.status}</div>
+                  </div>
+                  <div className="mb-3">
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Reason for restore (optional)
+                    </label>
+                    <textarea
+                      value={restoreReason}
+                      onChange={(e) => setRestoreReason(e.target.value)}
+                      className="w-full p-2 border border-gray-300 rounded text-sm"
+                      placeholder="Enter reason for restoring this transfer..."
+                      rows={2}
+                    />
+                  </div>
+                </div>
+                <div className="flex justify-end gap-3">
+                  <button
+                    onClick={() => {
+                      setRowRestoreTransfer(null);
+                      setRestoreReason('');
+                    }}
+                    className="px-4 py-2 bg-gray-200 text-gray-700 rounded hover:bg-gray-300"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={() => handleRestore(rowRestoreTransfer)}
+                    disabled={restoringTransfer}
+                    className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 disabled:opacity-50"
+                    data-testid="confirm-row-restore-btn"
+                  >
+                    {restoringTransfer ? 'Restoring...' : 'Confirm Restore'}
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
         </>
       )}
     </div>
