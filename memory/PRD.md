@@ -29,6 +29,31 @@ ecommbx is a full-stack EU-licensed digital banking platform built with React fr
 
 ## Recent Changes (February 2025)
 
+### P1 Feature: Admin Transfer Restore (Feb 24, 2025)
+**Feature:** Implemented admin ability to restore soft-deleted transfers.
+
+**Business Rules (CRITICAL):**
+- ✅ Restore ONLY restores record visibility - NO financial re-execution
+- ✅ RBAC: Only SUPER_ADMIN can restore (same as delete)
+- ✅ Audit logging mandatory for all restore actions
+- ✅ Idempotent: Restoring already-active transfer returns safe response
+
+**Backend Implementation:**
+- `POST /api/v1/admin/transfers/{id}/restore` - New restore endpoint
+- `GET /api/v1/admin/transfers?status=DELETED` - Returns soft-deleted transfers
+- `get_deleted_transfers()` - New service method with bulk lookups
+
+**Frontend Implementation:**
+- DELETED tab added to Transfers Queue (dark gray styling)
+- Transfer details show Deletion Information section
+- Restore Transfer button (green) for deleted transfers
+- Confirmation modal with prominent warning about record-only restoration
+
+**Bug Fixed:** Pydantic validation error when frontend sends `reason: null`
+- Changed `reason: str` to `reason: Optional[str]`
+
+**Testing:** 100% pass rate (iteration_131.json) - 14/14 tests passed
+
 ### P1 Backend Refactor: Minor Routers Extraction (Feb 24, 2025)
 **Refactor:** Extracted remaining minor routers from server.py into dedicated modules.
 
