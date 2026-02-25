@@ -3,7 +3,7 @@
 
 **Report Date:** February 24, 2026  
 **Validation Type:** Full Platform Redeploy Readiness  
-**Environment:** Preview (https://ghost-text-ui.preview.emergentagent.com)  
+**Environment:** Preview (https://admin-restore-build.preview.emergentagent.com)  
 **Production Target:** https://ecommbx.group
 
 ---

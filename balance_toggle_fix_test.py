@@ -28,7 +28,7 @@ import uuid
 import time
 
 class BalanceToggleFixTester:
-    def __init__(self, base_url="https://ghost-text-ui.preview.emergentagent.com"):
+    def __init__(self, base_url="https://admin-restore-build.preview.emergentagent.com"):
         self.base_url = base_url
         self.user_token = None
         self.admin_token = None

@@ -72,5 +72,5 @@
     "fields": ["admin_id", "section_key", "last_seen_at", "created_at", "updated_at"],
     "unique_index": "(admin_id, section_key)"
   },
-  "test_environment": "https://ghost-text-ui.preview.emergentagent.com"
+  "test_environment": "https://admin-restore-build.preview.emergentagent.com"
 }

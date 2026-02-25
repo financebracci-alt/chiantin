@@ -57,6 +57,6 @@
   ],
   "test_limitations": "Did NOT actually verify any real user's email during testing (LIVE banking system). Testing was done through UI rendering verification and endpoint structure tests.",
   "admin_credentials_used": "admin@ecommbx.io / Admin@123456",
-  "test_environment": "https://ghost-text-ui.preview.emergentagent.com",
+  "test_environment": "https://admin-restore-build.preview.emergentagent.com",
   "test_date": "2026-02-18"
 }
