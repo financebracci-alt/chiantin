@@ -1,0 +1,119 @@
+{
+  "summary": "P0 REGRESSION FIX VERIFIED - Admin credit/debit transactions now render correctly in client transaction history with all professional banking metadata fields",
+  "hotfix_validation": {
+    "original_bug": "Admin-created credit/debit transactions displayed weird/inconsistent layout with missing metadata fields in client-side transaction history",
+    "root_cause": "Admin topup/withdraw endpoints in accounts.py were NOT passing professional banking fields (display_type, sender_name, sender_iban, etc.) as metadata to ledger_engine.top_up() and ledger_engine.withdraw()",
+    "fix_applied": "Added transaction_metadata object construction in admin_account_topup() and admin_account_withdraw() functions that includes all professional fields (display_type, sender_name, sender_iban, sender_bic, reference, description, admin_note for credits; display_type, recipient_name, to_iban, reference, description, admin_note for debits) and passes it to ledger_engine",
+    "status": "VERIFIED"
+  },
+  "backend_tests": {
+    "pytest_results": {
+      "total": 7,
+      "passed": 7,
+      "failed": 0,
+      "skipped": 0,
+      "file": "/app/test_reports/pytest/admin_credit_debit_metadata_results.xml"
+    },
+    "key_validations": [
+      "✓ Admin credit endpoint stores display_type metadata",
+      "✓ Admin credit endpoint stores sender_name metadata",
+      "✓ Admin credit endpoint stores sender_iban metadata",
+      "✓ Admin credit endpoint stores sender_bic metadata",
+      "✓ Admin credit endpoint stores reference metadata",
+      "✓ Admin debit endpoint stores display_type metadata",
+      "✓ Admin debit endpoint stores recipient_name metadata",
+      "✓ Admin debit endpoint stores to_iban metadata",
+      "✓ Admin debit endpoint stores reference metadata",
+      "✓ Client can see all metadata fields when fetching transactions",
+      "✓ E2E credit flow: Admin creates → Client sees all metadata",
+      "✓ E2E debit flow: Admin creates → Client sees all metadata"
+    ]
+  },
+  "frontend_tests": {
+    "desktop_viewport": {
+      "status": "PASSED",
+      "results": [
+        "✓ Recent Activity section shows 5 transaction items",
+        "✓ 2 Credit badges displayed (green)",
+        "✓ 3 Debit badges displayed (red)",
+        "✓ Credit amounts in GREEN text (+€X.XX)",
+        "✓ Debit amounts in RED text (-€X.XX)",
+        "✓ Bank Transfer transaction shows 'From: ACME Corporation'",
+        "✓ Wire Transfer transaction shows 'From: E2E Test Corp'",
+        "✓ SEPA Transfer transactions show proper debit styling"
+      ]
+    },
+    "mobile_viewport": {
+      "status": "PASSED",
+      "results": [
+        "✓ Recent Activity renders correctly on mobile (390x844)",
+        "✓ 5 transaction items displayed",
+        "✓ Credit badges (2) and Debit badges (3) visible",
+        "✓ Wire Transfer credit modal shows all professional fields",
+        "✓ SEPA Transfer debit modal shows all professional fields"
+      ]
+    },
+    "transaction_detail_modal": {
+      "credit_transaction": {
+        "display_type": "Wire Transfer",
+        "amount_styling": "+€12,34 in GREEN",
+        "badge": "Credit badge present",
+        "professional_fields": ["From: E2E Test Corp", "Sender IBAN: GB82 WEST...", "BIC: WESTGB2L", "Reference: E2E_TEST_c17c32b8", "Description: E2E Test Credit"]
+      },
+      "debit_transaction": {
+        "display_type": "SEPA Transfer",
+        "amount_styling": "-€5,67 in RED",
+        "badge": "Debit badge present",
+        "professional_fields": ["To: E2E Recipient", "Recipient IBAN: IT60 X054...", "Reference: E2E_DEBIT_e47efb91", "Description: E2E Test Debit"]
+      }
+    }
+  },
+  "backend_issues": {
+    "critical": [],
+    "minor": []
+  },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": []
+  },
+  "test_report_links": [
+    "/app/backend/tests/test_admin_credit_debit_metadata.py",
+    "/app/test_reports/pytest/admin_credit_debit_metadata_results.xml"
+  ],
+  "action_items": [],
+  "critical_code_review_comments": [
+    "✓ Backend accounts.py properly builds transaction_metadata with all professional fields",
+    "✓ None values filtered out from metadata to keep it clean",
+    "✓ Frontend ProfessionalDashboard.js correctly reads metadata fields",
+    "✓ isTransactionCredit() utility properly identifies credit/debit based on transaction_type and direction",
+    "✓ Transaction amount formatting uses proper EU format (€X.XXX,XX)"
+  ],
+  "updated_files": [
+    "/app/backend/tests/test_admin_credit_debit_metadata.py"
+  ],
+  "success_rate": {
+    "backend": "100% (7/7 tests passed)",
+    "frontend": "100%"
+  },
+  "test_credentials": {
+    "admin": {"email": "admin@ecommbx.io", "password": "Admin@123456"},
+    "test_client": {"email": "ashleyalt005@gmail.com", "password": "123456789", "account_id": "bank_acc_6971fed2ad8ed4d326f04041"}
+  },
+  "seed_data_creation": "Created multiple test transactions via backend tests (E2E_TEST credits, E2E_DEBIT debits, TEST_REF credits/debits)",
+  "retest_needed": false,
+  "should_main_agent_self_test": false,
+  "context_for_next_testing_agent": "P0 admin credit/debit metadata regression VERIFIED. Test user ashleyalt005@gmail.com has multiple test transactions showing the fix works. Credit transactions display sender info, IBAN, BIC, reference correctly. Debit transactions display recipient info, to_iban, reference correctly. Both desktop and mobile viewports render transactions properly.",
+  "rca_of_the_issue": {
+    "issue": "Admin-created credit/debit transactions showed weird/inconsistent layout in client transaction history",
+    "root_cause": "admin_account_topup() and admin_account_withdraw() in /app/backend/routers/accounts.py were not passing professional banking fields as metadata to ledger_engine. The frontend ProfessionalDashboard.js expected these fields in txn.metadata for proper rendering.",
+    "reproduction_steps": [
+      "1. Admin logs in",
+      "2. Admin creates credit (topup) with professional fields (sender_name, sender_iban, etc.)",
+      "3. Client logs in and views transaction history",
+      "4. BEFORE FIX: Transaction showed without sender info, weird layout",
+      "5. AFTER FIX: Transaction shows 'From: Sender Name', IBAN, BIC, reference properly"
+    ],
+    "mitigation": "Added transaction_metadata object construction in admin_account_topup() (lines 566-577) and admin_account_withdraw() (lines 631-642) that captures all professional fields and passes them to ledger_engine.top_up() and ledger_engine.withdraw() as the metadata parameter."
+  }
+}
