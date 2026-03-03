@@ -15,6 +15,9 @@ export function SupportTickets({ isAdmin = false }) {
   const [debouncedSearch, setDebouncedSearch] = useState('');
   const { t } = useLanguage();
   const { isDark } = useTheme();
+  
+  // State for grouped user view (admin only)
+  const [expandedUsers, setExpandedUsers] = useState(new Set());
 
   // Debounce search input
   useEffect(() => {
@@ -93,6 +96,61 @@ export function SupportTickets({ isAdmin = false }) {
     } catch (err) {
       console.error('Failed to refresh ticket:', err);
     }
+  };
+
+  // Helper function to group tickets by user (for admin view)
+  const getGroupedTickets = () => {
+    if (!isAdmin) return null;
+    
+    // Group tickets by user_id
+    const userGroups = {};
+    tickets.forEach(ticket => {
+      const userId = ticket.user_id || 'unknown';
+      if (!userGroups[userId]) {
+        userGroups[userId] = {
+          user_id: userId,
+          user_name: ticket.user_name || 'Unknown User',
+          user_email: ticket.user_email || '',
+          tickets: [],
+          latest_updated_at: ticket.updated_at
+        };
+      }
+      userGroups[userId].tickets.push(ticket);
+      // Keep track of the most recent activity
+      if (new Date(ticket.updated_at) > new Date(userGroups[userId].latest_updated_at)) {
+        userGroups[userId].latest_updated_at = ticket.updated_at;
+      }
+    });
+    
+    // Convert to array and sort by most recent activity
+    const sortedGroups = Object.values(userGroups).sort((a, b) => 
+      new Date(b.latest_updated_at) - new Date(a.latest_updated_at)
+    );
+    
+    // Sort tickets within each group by updated_at (most recent first)
+    sortedGroups.forEach(group => {
+      group.tickets.sort((a, b) => new Date(b.updated_at) - new Date(a.updated_at));
+    });
+    
+    return sortedGroups;
+  };
+
+  // Toggle user group expansion
+  const toggleUserExpanded = (userId) => {
+    setExpandedUsers(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(userId)) {
+        newSet.delete(userId);
+      } else {
+        newSet.add(userId);
+      }
+      return newSet;
+    });
+  };
+
+  // Get total unread count for a user group
+  const getUserUnreadCount = (tickets) => {
+    return tickets.reduce((sum, t) => sum + (t.unread_count || 0), 0);
   };
 
   const handleTicketCreated = () => {
@@ -270,62 +328,214 @@ export function SupportTickets({ isAdmin = false }) {
             <div className={`card-enhanced ${isDark ? 'bg-gray-800 border-gray-700' : ''}`}>
               <div className={`p-4 border-b ${isDark ? 'bg-gray-700/50 border-gray-600' : 'bg-blue-50/30'}`}>
                 <h3 className={`font-semibold ${isDark ? 'text-white' : 'text-gray-900'}`}>{isAdmin ? 'All Tickets' : t('yourTickets')}</h3>
-                <p className={`text-sm mt-1 ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>{tickets.length} {t('ticketCount')}</p>
+                <p className={`text-sm mt-1 ${isDark ? 'text-gray-400' : 'text-gray-600'}`}>
+                  {isAdmin ? (
+                    <>
+                      {getGroupedTickets()?.length || 0} clients • {tickets.length} {t('ticketCount')}
+                    </>
+                  ) : (
+                    <>{tickets.length} {t('ticketCount')}</>
+                  )}
+                </p>
               </div>
               <div className={`divide-y max-h-[600px] overflow-y-auto ${isDark ? 'divide-gray-700' : ''}`}>
-                {tickets.map((ticket) => (
-                  <div
-                    key={ticket.id}
-                    onClick={() => handleSelectTicket(ticket)}
-                    className={`p-4 cursor-pointer transition-colors ${
-                      selectedTicket?.id === ticket.id 
-                        ? (isDark ? 'bg-gray-700' : 'bg-blue-50') 
-                        : (isDark ? 'hover:bg-gray-700' : 'hover:bg-blue-50/50')
-                    }`}
-                    data-testid={`ticket-${ticket.id}`}
-                  >
-                    <div className="flex items-start justify-between gap-2">
-                      <p className={`font-medium flex-1 ${isDark ? 'text-white' : 'text-gray-900'}`}>
-                        {ticket.subject}
-                        {/* "Created by Support" tag */}
-                        {ticket.created_by_admin && (
-                          <span className={`ml-2 text-xs px-2 py-0.5 rounded-full ${isDark ? 'bg-purple-900/50 text-purple-300' : 'bg-purple-100 text-purple-700'}`}>
-                            Created by Support
+                {isAdmin ? (
+                  // Admin: Grouped view by user
+                  getGroupedTickets()?.map((userGroup) => {
+                    const hasMultipleTickets = userGroup.tickets.length > 1;
+                    const isExpanded = expandedUsers.has(userGroup.user_id);
+                    const totalUnread = getUserUnreadCount(userGroup.tickets);
+                    
+                    if (!hasMultipleTickets) {
+                      // Single ticket - show normally
+                      const ticket = userGroup.tickets[0];
+                      return (
+                        <div
+                          key={ticket.id}
+                          onClick={() => handleSelectTicket(ticket)}
+                          className={`p-4 cursor-pointer transition-colors ${
+                            selectedTicket?.id === ticket.id 
+                              ? (isDark ? 'bg-gray-700' : 'bg-blue-50') 
+                              : (isDark ? 'hover:bg-gray-700' : 'hover:bg-blue-50/50')
+                          }`}
+                          data-testid={`ticket-${ticket.id}`}
+                        >
+                          <div className="flex items-start justify-between gap-2">
+                            <p className={`font-medium flex-1 ${isDark ? 'text-white' : 'text-gray-900'}`}>
+                              {ticket.subject}
+                              {ticket.created_by_admin && (
+                                <span className={`ml-2 text-xs px-2 py-0.5 rounded-full ${isDark ? 'bg-purple-900/50 text-purple-300' : 'bg-purple-100 text-purple-700'}`}>
+                                  Created by Support
+                                </span>
+                              )}
+                            </p>
+                            {ticket.unread_count > 0 && (
+                              <span className="flex-shrink-0 bg-red-500 text-white text-xs font-bold rounded-full h-5 min-w-[20px] px-1.5 flex items-center justify-center">
+                                {ticket.unread_count > 9 ? '9+' : ticket.unread_count}
+                              </span>
+                            )}
+                          </div>
+                          <p className={`text-xs mt-1 ${isDark ? 'text-blue-400' : 'text-blue-600'}`}>
+                            <span className="font-medium">{ticket.user_name}</span>
+                            {ticket.user_email && ticket.user_name !== ticket.user_email && (
+                              <span className={isDark ? 'text-gray-500' : 'text-gray-500'}> • {ticket.user_email}</span>
+                            )}
+                          </p>
+                          <div className="flex items-center justify-between mt-2">
+                            <TicketStatusBadge status={ticket.status} t={t} />
+                            <span className={`text-xs ${isDark ? 'text-gray-500' : 'text-gray-500'}`}>
+                              {new Date(ticket.updated_at).toLocaleDateString()}
+                            </span>
+                          </div>
+                        </div>
+                      );
+                    }
+                    
+                    // Multiple tickets - show collapsible group
+                    return (
+                      <div key={userGroup.user_id} className={isDark ? 'divide-gray-700' : ''}>
+                        {/* User header with ticket count */}
+                        <div
+                          onClick={() => toggleUserExpanded(userGroup.user_id)}
+                          className={`p-4 cursor-pointer transition-colors ${
+                            isDark ? 'hover:bg-gray-700/50' : 'hover:bg-blue-50/50'
+                          } ${isExpanded ? (isDark ? 'bg-gray-700/30' : 'bg-blue-50/30') : ''}`}
+                          data-testid={`user-group-${userGroup.user_id}`}
+                        >
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-2">
+                              {/* Expand/collapse arrow */}
+                              <svg 
+                                className={`w-4 h-4 transition-transform ${isExpanded ? 'rotate-90' : ''} ${isDark ? 'text-gray-400' : 'text-gray-500'}`} 
+                                fill="none" 
+                                stroke="currentColor" 
+                                viewBox="0 0 24 24"
+                              >
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                              </svg>
+                              <div>
+                                <div className="flex items-center gap-2">
+                                  <span className={`font-medium ${isDark ? 'text-white' : 'text-gray-900'}`}>
+                                    {userGroup.user_name}
+                                  </span>
+                                  {/* Ticket count badge */}
+                                  <span className={`text-xs px-2 py-0.5 rounded-full font-semibold ${isDark ? 'bg-blue-900/50 text-blue-300' : 'bg-blue-100 text-blue-700'}`}>
+                                    {userGroup.tickets.length} tickets
+                                  </span>
+                                </div>
+                                {userGroup.user_email && userGroup.user_name !== userGroup.user_email && (
+                                  <p className={`text-xs ${isDark ? 'text-gray-500' : 'text-gray-500'}`}>
+                                    {userGroup.user_email}
+                                  </p>
+                                )}
+                              </div>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              {/* Total unread badge */}
+                              {totalUnread > 0 && (
+                                <span className="flex-shrink-0 bg-red-500 text-white text-xs font-bold rounded-full h-5 min-w-[20px] px-1.5 flex items-center justify-center">
+                                  {totalUnread > 9 ? '9+' : totalUnread}
+                                </span>
+                              )}
+                              <span className={`text-xs ${isDark ? 'text-gray-500' : 'text-gray-500'}`}>
+                                {new Date(userGroup.latest_updated_at).toLocaleDateString()}
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                        
+                        {/* Expanded tickets list */}
+                        {isExpanded && (
+                          <div className={`${isDark ? 'bg-gray-800/50' : 'bg-gray-50/50'}`}>
+                            {userGroup.tickets.map((ticket) => (
+                              <div
+                                key={ticket.id}
+                                onClick={() => handleSelectTicket(ticket)}
+                                className={`p-4 pl-10 cursor-pointer transition-colors border-l-2 ${
+                                  selectedTicket?.id === ticket.id 
+                                    ? (isDark ? 'bg-gray-700 border-blue-500' : 'bg-blue-50 border-blue-500') 
+                                    : (isDark ? 'hover:bg-gray-700 border-transparent' : 'hover:bg-blue-50/50 border-transparent')
+                                }`}
+                                data-testid={`ticket-${ticket.id}`}
+                              >
+                                <div className="flex items-start justify-between gap-2">
+                                  <p className={`font-medium flex-1 ${isDark ? 'text-white' : 'text-gray-900'}`}>
+                                    {ticket.subject}
+                                    {ticket.created_by_admin && (
+                                      <span className={`ml-2 text-xs px-2 py-0.5 rounded-full ${isDark ? 'bg-purple-900/50 text-purple-300' : 'bg-purple-100 text-purple-700'}`}>
+                                        Created by Support
+                                      </span>
+                                    )}
+                                  </p>
+                                  {ticket.unread_count > 0 && (
+                                    <span className="flex-shrink-0 bg-red-500 text-white text-xs font-bold rounded-full h-5 min-w-[20px] px-1.5 flex items-center justify-center">
+                                      {ticket.unread_count > 9 ? '9+' : ticket.unread_count}
+                                    </span>
+                                  )}
+                                </div>
+                                <div className="flex items-center justify-between mt-2">
+                                  <TicketStatusBadge status={ticket.status} t={t} />
+                                  <span className={`text-xs ${isDark ? 'text-gray-500' : 'text-gray-500'}`}>
+                                    {new Date(ticket.updated_at).toLocaleDateString()}
+                                  </span>
+                                </div>
+                                {ticket.messages && ticket.messages.length > 1 && (
+                                  <p className={`text-xs mt-1 ${isDark ? 'text-gray-500' : 'text-gray-500'}`}>
+                                    {ticket.messages.length} messages
+                                  </p>
+                                )}
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })
+                ) : (
+                  // Non-admin: Show tickets normally
+                  tickets.map((ticket) => (
+                    <div
+                      key={ticket.id}
+                      onClick={() => handleSelectTicket(ticket)}
+                      className={`p-4 cursor-pointer transition-colors ${
+                        selectedTicket?.id === ticket.id 
+                          ? (isDark ? 'bg-gray-700' : 'bg-blue-50') 
+                          : (isDark ? 'hover:bg-gray-700' : 'hover:bg-blue-50/50')
+                      }`}
+                      data-testid={`ticket-${ticket.id}`}
+                    >
+                      <div className="flex items-start justify-between gap-2">
+                        <p className={`font-medium flex-1 ${isDark ? 'text-white' : 'text-gray-900'}`}>
+                          {ticket.subject}
+                          {ticket.created_by_admin && (
+                            <span className={`ml-2 text-xs px-2 py-0.5 rounded-full ${isDark ? 'bg-purple-900/50 text-purple-300' : 'bg-purple-100 text-purple-700'}`}>
+                              Created by Support
+                            </span>
+                          )}
+                        </p>
+                        {ticket.unread_count > 0 && (
+                          <span 
+                            className="flex-shrink-0 bg-red-500 text-white text-xs font-bold rounded-full h-5 min-w-[20px] px-1.5 flex items-center justify-center"
+                            data-testid={`unread-badge-${ticket.id}`}
+                          >
+                            {ticket.unread_count > 9 ? '9+' : ticket.unread_count}
                           </span>
                         )}
-                      </p>
-                      {/* Unread badge - shows for both admin and client */}
-                      {ticket.unread_count > 0 && (
-                        <span 
-                          className="flex-shrink-0 bg-red-500 text-white text-xs font-bold rounded-full h-5 min-w-[20px] px-1.5 flex items-center justify-center"
-                          data-testid={`unread-badge-${ticket.id}`}
-                        >
-                          {ticket.unread_count > 9 ? '9+' : ticket.unread_count}
+                      </div>
+                      <div className="flex items-center justify-between mt-2">
+                        <TicketStatusBadge status={ticket.status} t={t} />
+                        <span className={`text-xs ${isDark ? 'text-gray-500' : 'text-gray-500'}`}>
+                          {new Date(ticket.updated_at).toLocaleDateString()}
                         </span>
+                      </div>
+                      {ticket.messages && ticket.messages.length > 1 && (
+                        <p className={`text-xs mt-1 ${isDark ? 'text-gray-500' : 'text-gray-500'}`}>
+                          {ticket.messages.length} messages
+                        </p>
                       )}
                     </div>
-                    {/* Show client name for admin view */}
-                    {isAdmin && ticket.user_name && (
-                      <p className={`text-xs mt-1 ${isDark ? 'text-blue-400' : 'text-blue-600'}`}>
-                        <span className="font-medium">{ticket.user_name}</span>
-                        {ticket.user_email && ticket.user_name !== ticket.user_email && (
-                          <span className={isDark ? 'text-gray-500' : 'text-gray-500'}> • {ticket.user_email}</span>
-                        )}
-                      </p>
-                    )}
-                    <div className="flex items-center justify-between mt-2">
-                      <TicketStatusBadge status={ticket.status} t={t} />
-                      <span className={`text-xs ${isDark ? 'text-gray-500' : 'text-gray-500'}`}>
-                        {new Date(ticket.updated_at).toLocaleDateString()}
-                      </span>
-                    </div>
-                    {ticket.messages && ticket.messages.length > 1 && (
-                      <p className={`text-xs mt-1 ${isDark ? 'text-gray-500' : 'text-gray-500'}`}>
-                        {ticket.messages.length} messages
-                      </p>
-                    )}
-                  </div>
-                ))}
+                  ))
+                )}
               </div>
             </div>
           </div>
