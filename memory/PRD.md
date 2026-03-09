@@ -147,6 +147,14 @@ Full-stack banking application with KYC, transfers, admin panel, and notificatio
 - **Files Modified:** `backend/providers/cloudinary_storage.py`, `frontend/src/components/Support.js`
 - **Testing:** Verified via testing agent (iteration_158) — all tests passed
 
+### Feature: Inline File Viewing in Support Tickets (March 9, 2026)
+- **Requirement:** Clicking a file name opens the file inline in a new tab (e.g., PDF in browser PDF viewer), while the download button saves the file
+- **Problem:** Cloudinary raw files are served with `Content-Disposition: attachment`, forcing browser to download instead of display
+- **Fix (Backend):** Added proxy endpoint `GET /api/v1/tickets/view-file` that fetches from Cloudinary and serves with `Content-Disposition: inline` and correct `Content-Type`. Security: only proxies from configured Cloudinary account, requires auth.
+- **Fix (Frontend):** Changed file name link from `<a href>` to `<button>` with `handleViewFile` handler that fetches via proxy as blob and opens `blob:` URL in new tab. Images still open directly from Cloudinary.
+- **Files Modified:** `backend/routers/tickets.py` (new endpoint at line 95), `frontend/src/components/Support.js` (handleViewFile handler)
+- **Testing:** Verified via testing agent (iteration_159) — 100% pass rate on all 11 backend + all frontend tests
+
 ## Previous Changes (Feb 25, 2026)
 - Fixed client transaction history rendering for admin-created credits/debits
 - Root cause: Admin topup/withdraw not passing professional banking fields as metadata
