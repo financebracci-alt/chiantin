@@ -6,7 +6,7 @@ import pytest
 import requests
 import os
 
-BASE_URL = os.environ.get('REACT_APP_BACKEND_URL', 'https://admin-restore-build.preview.emergentagent.com')
+BASE_URL = os.environ.get('REACT_APP_BACKEND_URL', 'https://file-download-debug.preview.emergentagent.com')
 
 # Test credentials
 TEST_USER_EMAIL = "ashleyalt005@gmail.com"

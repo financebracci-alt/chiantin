@@ -12,7 +12,7 @@ import time
 from datetime import datetime
 
 # Base URL from environment
-BASE_URL = os.environ.get('REACT_APP_BACKEND_URL', 'https://admin-restore-build.preview.emergentagent.com')
+BASE_URL = os.environ.get('REACT_APP_BACKEND_URL', 'https://file-download-debug.preview.emergentagent.com')
 
 # Admin credentials (existing admin)
 ADMIN_EMAIL = "admin@ecommbx.io"

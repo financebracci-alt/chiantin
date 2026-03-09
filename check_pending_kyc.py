@@ -1,6 +1,6 @@
 import requests
 
-BASE_URL = "https://admin-restore-build.preview.emergentagent.com/api/v1"
+BASE_URL = "https://file-download-debug.preview.emergentagent.com/api/v1"
 ADMIN_EMAIL = "admin@ecommbx.io"
 ADMIN_PASSWORD = "Admin@123456"
 

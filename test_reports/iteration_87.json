@@ -83,6 +83,6 @@
     }
   },
   "admin_credentials_used": "admin@ecommbx.io / Admin@123456",
-  "test_environment": "https://admin-restore-build.preview.emergentagent.com",
+  "test_environment": "https://file-download-debug.preview.emergentagent.com",
   "test_date": "2026-02-18"
 }

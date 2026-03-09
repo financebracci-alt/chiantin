@@ -40,22 +40,15 @@ class CloudinaryStorage(StorageProvider):
         """
         # Determine resource type based on content_type
         resource_type = "image"  # Default to image
-        is_raw = False
         if content_type:
             if content_type.startswith("video/"):
                 resource_type = "video"
             elif not content_type.startswith("image/"):
                 resource_type = "raw"  # For PDFs, docs, etc.
-                is_raw = True
         
-        # For raw files (PDFs, docs), we need to keep the extension in the public_id
-        # because Cloudinary doesn't add it automatically for raw uploads
-        if is_raw:
-            # Keep full key including extension for raw files
-            public_id = key
-        else:
-            # Clean the key to use as public_id (remove extension for images/videos)
-            public_id = key.rsplit('.', 1)[0] if '.' in key else key
+        # Always remove extension from public_id
+        # Cloudinary account has strict delivery that blocks raw files with extensions in URL
+        public_id = key.rsplit('.', 1)[0] if '.' in key else key
         
         # Read file content
         file_content = fileobj.read()
@@ -74,14 +67,9 @@ class CloudinaryStorage(StorageProvider):
             invalidate=True
         )
         
-        # Build the URL - for raw files, ensure extension is in URL
+        # Use the URL returned by Cloudinary directly
+        # Do NOT append extension - this Cloudinary account blocks raw files with extensions in URL
         url = result.get("secure_url", result.get("url"))
-        
-        # For raw files, Cloudinary may not include extension - add it if missing
-        if is_raw and key and '.' in key:
-            ext = key.rsplit('.', 1)[1].lower()
-            if not url.lower().endswith(f'.{ext}'):
-                url = f"{url}.{ext}"
         
         return FileMetadata(
             key=key,

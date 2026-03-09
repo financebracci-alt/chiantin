@@ -1,0 +1,70 @@
+{
+  "summary": "PDF/Document Download Fix VERIFIED - Support ticket attachment downloads work correctly with blob-based download and correct filename including extension. All core features tested: client login, admin login, ticket viewing, grouped admin view, attachment display with PDF icon and download button.",
+  "backend_issues": {
+    "critical": [],
+    "minor": [
+      {"endpoint": "/api/v1/users/me", "issue": "404 Not Found - endpoint path may be different", "priority": "LOW"},
+      {"endpoint": "/api/v1/admin/overview", "issue": "404 Not Found - endpoint path may be different", "priority": "LOW"}
+    ]
+  },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": []
+  },
+  "pdf_download_fix_verification": {
+    "status": "PASS",
+    "fix_details": {
+      "backend_cloudinary_storage": "Raw files public_id without extension (prevents 401 ACL block)",
+      "frontend_blob_download": "Fetches file as blob, saves with att.file_name which includes extension"
+    },
+    "test_ticket": {
+      "id": "699c7eb2c8fa4bf3cfa789bb",
+      "subject": "qwe",
+      "user": "Wowza Wowza (ashleyalt005@gmail.com)",
+      "attachment": "test_document.pdf",
+      "attachment_size": "0.3 KB"
+    },
+    "client_view_tests": {
+      "ticket_visible": "PASS - qwe ticket with In Progress status",
+      "attachment_display": "PASS - test_document.pdf with PDF icon",
+      "download_button": "PASS - visible and clickable",
+      "messages_display": "PASS - 3 messages shown"
+    },
+    "admin_view_tests": {
+      "grouped_ticket_view": "PASS - 51 clients, 100 tickets",
+      "ticket_detail": "PASS - shows user email, customer ID",
+      "attachment_display": "PASS - test_document.pdf visible",
+      "admin_actions": "PASS - Mark In Progress, Mark Resolved, Close Ticket, Delete Ticket visible"
+    },
+    "api_tests": {
+      "attachment_url_accessible": "PASS - no 401 ACL blocks",
+      "pdf_download_content": "PASS - file downloadable",
+      "file_name_has_extension": "PASS - file_name includes .pdf extension"
+    }
+  },
+  "test_report_links": [
+    "/app/backend/tests/test_support_download.py",
+    "/app/test_reports/pytest/support_download_results.xml"
+  ],
+  "action_items": [],
+  "critical_code_review_comments": [],
+  "updated_files": [
+    "/app/backend/tests/test_support_download.py"
+  ],
+  "success_rate": {
+    "backend": "85% (11/13 passed - 2 minor endpoint path issues)",
+    "frontend": "100% (all UI tests passed)"
+  },
+  "test_credentials": {
+    "client_email": "ashleyalt005@gmail.com",
+    "client_password": "123456789",
+    "admin_email": "admin@ecommbx.io",
+    "admin_password": "Admin@123456"
+  },
+  "seed_data_creation": "None - using existing test ticket 'qwe' with PDF attachment",
+  "retest_needed": false,
+  "should_main_agent_self_test": false,
+  "context_for_next_testing_agent": "PDF download fix verified in iteration 158. The blob-based download in Support.js correctly saves files with extension from att.file_name. Cloudinary storage strips extension from public_id for raw files to avoid ACL blocks. Test ticket 'qwe' (ID: 699c7eb2c8fa4bf3cfa789bb) has test_document.pdf attachment. Admin grouped ticket view working with 51 clients and 100 tickets.",
+  "deployment_readiness": "READY FOR DEPLOYMENT - PDF download fix verified"
+}

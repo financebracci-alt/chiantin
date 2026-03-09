@@ -1384,48 +1384,8 @@ function TicketDetails({ ticket, onUpdate, onDelete, isAdmin = false, onRefreshT
                         // Get file extension from filename
                         const fileExt = att.file_name.split('.').pop()?.toLowerCase() || '';
                         
-                        // For Cloudinary raw files, we need to handle URLs that were stored without extension
-                        // The file still exists and can be downloaded, but we need proper content-type
-                        const getViewUrl = (url, filename) => {
-                          if (!url || !url.includes('cloudinary.com')) return url;
-                          
-                          const ext = filename.split('.').pop()?.toLowerCase() || '';
-                          const rawExtensions = ['pdf', 'doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx', 'txt', 'csv'];
-                          
-                          // For PDFs and documents on Cloudinary raw storage, 
-                          // use fl_attachment to force proper download with filename
-                          if (rawExtensions.includes(ext) && url.includes('/raw/upload/')) {
-                            // Insert fl_attachment transformation to force download with proper filename
-                            const parts = url.split('/upload/');
-                            if (parts.length === 2) {
-                              const nameWithoutExt = filename.replace(/\.[^/.]+$/, '');
-                              // Use fl_attachment to force browser to download with correct name
-                              return `${parts[0]}/upload/fl_attachment:${encodeURIComponent(nameWithoutExt)}/${parts[1]}`;
-                            }
-                          }
-                          return url;
-                        };
-                        
-                        // For viewing, use the original URL (browser may not display it inline)
-                        // For PDFs, the download approach is better
+                        // For viewing, use the original URL 
                         const viewUrl = att.url;
-                        
-                        // Create download URL - add fl_attachment for Cloudinary to force download
-                        const getDownloadUrl = (url, filename) => {
-                          if (url.includes('cloudinary.com')) {
-                            // Insert fl_attachment transformation
-                            // URL format: https://res.cloudinary.com/cloud/type/upload/v123/path
-                            const parts = url.split('/upload/');
-                            if (parts.length === 2) {
-                              // Use filename for fl_attachment parameter
-                              const nameWithoutExt = filename.replace(/\.[^/.]+$/, '');
-                              return `${parts[0]}/upload/fl_attachment:${encodeURIComponent(nameWithoutExt)}/${parts[1]}`;
-                            }
-                          }
-                          return url;
-                        };
-                        
-                        const downloadUrl = getDownloadUrl(att.url, att.file_name);
                         
                         return (
                           <div
@@ -1485,21 +1445,44 @@ function TicketDetails({ ticket, onUpdate, onDelete, isAdmin = false, onRefreshT
                             </a>
                             
                             {/* Right side: Download button */}
-                            <a
-                              href={downloadUrl}
-                              download={att.file_name}
+                            <button
+                              data-testid={`download-btn-${idx}-${attIdx}`}
                               className={`p-1.5 rounded-lg transition flex-shrink-0 ${
                                 isDark 
                                   ? 'hover:bg-gray-500 text-gray-300 hover:text-white' 
                                   : 'hover:bg-gray-100 text-gray-500 hover:text-gray-700'
                               }`}
                               title="Download file"
-                              onClick={(e) => e.stopPropagation()}
+                              onClick={async (e) => {
+                                e.stopPropagation();
+                                e.preventDefault();
+                                try {
+                                  // Fetch the file as blob
+                                  const response = await fetch(att.url);
+                                  const blob = await response.blob();
+                                  
+                                  // Create download link with correct filename
+                                  const url = window.URL.createObjectURL(blob);
+                                  const a = document.createElement('a');
+                                  a.href = url;
+                                  a.download = att.file_name; // This ensures the file saves with correct extension
+                                  document.body.appendChild(a);
+                                  a.click();
+                                  
+                                  // Cleanup
+                                  window.URL.revokeObjectURL(url);
+                                  document.body.removeChild(a);
+                                } catch (error) {
+                                  console.error('Download failed:', error);
+                                  // Fallback to direct link
+                                  window.open(att.url, '_blank');
+                                }
+                              }}
                             >
                               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
                               </svg>
-                            </a>
+                            </button>
                           </div>
                         );
                       })}
