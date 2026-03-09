@@ -147,6 +147,16 @@ Full-stack banking application with KYC, transfers, admin panel, and notificatio
 - **Files Modified:** `backend/providers/cloudinary_storage.py`, `frontend/src/components/Support.js`
 - **Testing:** Verified via testing agent (iteration_158) — all tests passed
 
+### Critical Bug Fix: Admin-Created Users Cannot Authorize Transfers (March 9, 2026)
+- **Problem:** Users created by admin couldn't authorize transfers — password verification returned "Verification failed" even with correct password
+- **Root Cause:** The `verify-password` endpoint (and several other endpoints) used ObjectId-first lookup for user_id. Admin-created users have 24-char hex **string** IDs that pass ObjectId validation but don't match the string `_id` in MongoDB. The ObjectId query returned None, the except block never ran (no exception thrown), so "User not found" was returned.
+- **Fix:** Updated all affected endpoints to try ObjectId first, but if result is None, also try string lookup:
+  - `backend/routers/auth.py` (verify-password)
+  - `backend/routers/transfers.py` (transfer user lookup)
+  - `backend/services/banking_workflows_service.py` (2 instances - transfer email)
+  - `backend/routers/tickets.py` (ticket user info)
+- **Testing:** Testing agent (iteration_160) — 15/15 tests passed, 100% success rate
+
 ### CORS Fix: Production Login Failed (March 9, 2026)
 - **Problem:** Admin login on production (`ecommbx.online`) shows "Login failed" even with correct credentials
 - **Root Cause:** CORS config had `allow_origins=["*"]` with `allow_credentials=True`. Starlette returns literal `Access-Control-Allow-Origin: *` for non-preflight requests, but browsers reject `*` when `withCredentials: true` (CORS spec requires specific origin).
