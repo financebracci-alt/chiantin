@@ -111,11 +111,6 @@ async def admin_create_user(
     if existing_user:
         raise HTTPException(status_code=400, detail="A user with this email already exists")
     
-    # Check if IBAN is already in use
-    existing_iban = await db.bank_accounts.find_one({"iban": user_data.iban.strip()})
-    if existing_iban:
-        raise HTTPException(status_code=400, detail="This IBAN is already assigned to another account")
-    
     # Validate password length
     if len(user_data.password) < 8:
         raise HTTPException(status_code=400, detail="Password must be at least 8 characters")

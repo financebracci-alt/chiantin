@@ -147,6 +147,11 @@ Full-stack banking application with KYC, transfers, admin panel, and notificatio
 - **Files Modified:** `backend/providers/cloudinary_storage.py`, `frontend/src/components/Support.js`
 - **Testing:** Verified via testing agent (iteration_158) — all tests passed
 
+### Allow Duplicate IBANs/BICs for Admin-Created Users (March 9, 2026)
+- **Request:** Admin should be able to create multiple users with the same IBAN and BIC
+- **Fix:** Removed the duplicate IBAN check from `POST /api/v1/admin/users/create` in `backend/routers/admin_users.py`
+- **Testing:** Verified creating 2 users with identical IBAN/BIC succeeds
+
 ### Critical Bug Fix: Admin-Created Users Cannot Authorize Transfers (March 9, 2026)
 - **Problem:** Users created by admin couldn't authorize transfers — password verification returned "Verification failed" even with correct password
 - **Root Cause:** The `verify-password` endpoint (and several other endpoints) used ObjectId-first lookup for user_id. Admin-created users have 24-char hex **string** IDs that pass ObjectId validation but don't match the string `_id` in MongoDB. The ObjectId query returned None, the except block never ran (no exception thrown), so "User not found" was returned.
