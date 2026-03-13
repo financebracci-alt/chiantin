@@ -212,39 +212,49 @@ class EmailService:
             # Admin-initiated password reset with temporary password
             html_body = f"""
             <!DOCTYPE html>
-            <html>
+            <html xmlns="http://www.w3.org/1999/xhtml">
             <head>
                 <meta charset="utf-8">
+                <meta name="color-scheme" content="light only">
+                <meta name="supported-color-schemes" content="light only">
                 <style>
-                    body {{ font-family: 'Segoe UI', Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px; }}
-                    .header {{ background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%); color: #FFFFFF; padding: 30px; text-align: center; border-radius: 10px 10px 0 0; }}
+                    :root {{ color-scheme: light only; }}
+                    body {{ font-family: 'Segoe UI', Arial, sans-serif; line-height: 1.6; color: #333333; max-width: 600px; margin: 0 auto; padding: 20px; }}
+                    .header {{ background-color: #1a1a2e; color: #FFFFFF; padding: 30px; text-align: center; border-radius: 10px 10px 0 0; }}
                     .header h1 {{ margin: 0; color: #FFFFFF; }}
                     .header .brand {{ color: #FFFFFF; background-color: transparent; }}
                     .header .brand-accent {{ color: #dc3545; }}
                     .header p {{ color: #FFFFFF; }}
-                    .content {{ background: #f8f9fa; padding: 30px; border-radius: 0 0 10px 10px; }}
-                    .password-box {{ background: #fff3cd; border: 1px solid #ffc107; padding: 15px; border-radius: 8px; margin: 20px 0; text-align: center; }}
+                    .content {{ background-color: #f8f9fa; padding: 30px; border-radius: 0 0 10px 10px; color: #333333; }}
+                    .password-box {{ background-color: #fff3cd; border: 1px solid #ffc107; padding: 15px; border-radius: 8px; margin: 20px 0; text-align: center; }}
                     .password {{ font-family: monospace; font-size: 24px; color: #856404; font-weight: bold; }}
                     .warning {{ color: #dc3545; font-size: 14px; margin-top: 20px; }}
-                    .footer {{ text-align: center; margin-top: 20px; font-size: 12px; color: #666; }}
+                    .footer {{ text-align: center; margin-top: 20px; font-size: 12px; color: #666666; }}
+                    @media (prefers-color-scheme: dark) {{
+                        .header {{ background-color: #1a1a2e !important; }}
+                        .header h1, .header h1 span.brand, .header p {{ color: #FFFFFF !important; }}
+                        .header h1 span.brand-accent {{ color: #dc3545 !important; }}
+                        .content {{ background-color: #f8f9fa !important; color: #333333 !important; }}
+                        .content p {{ color: #333333 !important; }}
+                    }}
                 </style>
             </head>
-            <body>
-                <div class="header">
-                    <h1 style="color: #FFFFFF;">🔐 <span class="brand" style="color: #FFFFFF;">ecomm</span><span class="brand-accent">bx</span></h1>
-                    <p style="color: #FFFFFF;">{t('admin_reset_title')}</p>
+            <body style="background-color: #f4f4f4;">
+                <div class="header" style="background-color: #1a1a2e; color: #FFFFFF; padding: 30px; text-align: center; border-radius: 10px 10px 0 0;">
+                    <h1 style="margin: 0; color: #FFFFFF;">&#128272; <span class="brand" style="color: #FFFFFF;">ecomm</span><span class="brand-accent" style="color: #dc3545;">bx</span></h1>
+                    <p style="color: #FFFFFF; margin: 10px 0 0 0;">{t('admin_reset_title')}</p>
                 </div>
-                <div class="content">
-                    <p>{t('password_reset_greeting')}</p>
-                    <p>{t('admin_reset_body')}</p>
-                    <div class="password-box">
-                        <p>{t('temp_password_label')}</p>
-                        <p class="password">{temp_password}</p>
+                <div class="content" style="background-color: #f8f9fa; padding: 30px; border-radius: 0 0 10px 10px;">
+                    <p style="color: #333333;">{t('password_reset_greeting')}</p>
+                    <p style="color: #333333;">{t('admin_reset_body')}</p>
+                    <div class="password-box" style="background-color: #fff3cd; border: 1px solid #ffc107; padding: 15px; border-radius: 8px; margin: 20px 0; text-align: center;">
+                        <p style="color: #333333;">{t('temp_password_label')}</p>
+                        <p class="password" style="font-family: monospace; font-size: 24px; color: #856404; font-weight: bold;">{temp_password}</p>
                     </div>
-                    <p class="warning">{t('admin_reset_warning')}</p>
+                    <p class="warning" style="color: #dc3545; font-size: 14px; margin-top: 20px;">{t('admin_reset_warning')}</p>
                 </div>
-                <div class="footer">
-                    <p>{t('password_reset_footer')}</p>
+                <div class="footer" style="text-align: center; margin-top: 20px; font-size: 12px; color: #666666;">
+                    <p style="color: #666666;">{t('password_reset_footer')}</p>
                 </div>
             </body>
             </html>
@@ -253,30 +263,43 @@ class EmailService:
             # User-initiated password reset with link
             html_body = f"""
             <!DOCTYPE html>
-            <html>
+            <html xmlns="http://www.w3.org/1999/xhtml">
             <head>
                 <meta charset="utf-8">
+                <meta name="color-scheme" content="light only">
+                <meta name="supported-color-schemes" content="light only">
+                <style>
+                    :root {{ color-scheme: light only; }}
+                    @media (prefers-color-scheme: dark) {{
+                        .email-header {{ background-color: #1a1a2e !important; }}
+                        .email-header h1, .email-header h1 span {{ color: #FFFFFF !important; }}
+                        .email-header .brand-red {{ color: #dc3545 !important; }}
+                        .email-header p {{ color: #FFFFFF !important; }}
+                        .email-content {{ background-color: #f8f9fa !important; color: #333333 !important; }}
+                        .email-content p, .email-content a {{ color: #333333 !important; }}
+                    }}
+                </style>
             </head>
-            <body style="font-family: 'Segoe UI', Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
-                <div style="background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%); color: white; padding: 30px; text-align: center; border-radius: 10px 10px 0 0;">
-                    <h1 style="margin: 0; color: #FFFFFF;">🔐 <span style="color: #FFFFFF; background-color: transparent;">ecomm</span><span style="color: #dc3545;">bx</span></h1>
+            <body style="font-family: 'Segoe UI', Arial, sans-serif; line-height: 1.6; color: #333333; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #f4f4f4;">
+                <div class="email-header" style="background-color: #1a1a2e; color: #FFFFFF; padding: 30px; text-align: center; border-radius: 10px 10px 0 0;">
+                    <h1 style="margin: 0; color: #FFFFFF;">&#128272; <span style="color: #FFFFFF;">ecomm</span><span class="brand-red" style="color: #dc3545;">bx</span></h1>
                     <p style="margin: 10px 0 0 0; color: #FFFFFF;">{t('password_reset_title')}</p>
                 </div>
-                <div style="background: #f8f9fa; padding: 30px; border-radius: 0 0 10px 10px;">
-                    <p>{t('password_reset_greeting')}</p>
-                    <p>{t('password_reset_body')}</p>
+                <div class="email-content" style="background-color: #f8f9fa; padding: 30px; border-radius: 0 0 10px 10px;">
+                    <p style="color: #333333;">{t('password_reset_greeting')}</p>
+                    <p style="color: #333333;">{t('password_reset_body')}</p>
                     <p style="text-align: center;">
-                        <a href="{reset_link}" style="display: inline-block; background: #dc3545; color: #ffffff; padding: 15px 40px; text-decoration: none; border-radius: 8px; font-weight: bold; margin: 20px 0;">{t('password_reset_button')}</a>
+                        <a href="{reset_link}" style="display: inline-block; background-color: #dc3545; color: #ffffff; padding: 15px 40px; text-decoration: none; border-radius: 8px; font-weight: bold; margin: 20px 0;">{t('password_reset_button')}</a>
                     </p>
-                    <p>{t('password_reset_link_instruction')}</p>
-                    <div style="background: #e9ecef; padding: 15px; border-radius: 8px; margin: 20px 0; word-break: break-all; font-family: monospace; font-size: 12px;">
-                        <a href="{reset_link}" style="color: #333;">{reset_link}</a>
+                    <p style="color: #333333;">{t('password_reset_link_instruction')}</p>
+                    <div style="background-color: #e9ecef; padding: 15px; border-radius: 8px; margin: 20px 0; word-break: break-all; font-family: monospace; font-size: 12px;">
+                        <a href="{reset_link}" style="color: #333333;">{reset_link}</a>
                     </div>
-                    <p style="color: #666; font-size: 14px; margin-top: 20px;">{t('password_reset_expiry')}</p>
-                    <p style="color: #666; font-size: 14px;">{t('password_reset_ignore')}</p>
+                    <p style="color: #666666; font-size: 14px; margin-top: 20px;">{t('password_reset_expiry')}</p>
+                    <p style="color: #666666; font-size: 14px;">{t('password_reset_ignore')}</p>
                 </div>
-                <div style="text-align: center; margin-top: 20px; font-size: 12px; color: #666;">
-                    <p>{t('password_reset_footer')}</p>
+                <div style="text-align: center; margin-top: 20px; font-size: 12px; color: #666666;">
+                    <p style="color: #666666;">{t('password_reset_footer')}</p>
                 </div>
             </body>
             </html>
@@ -324,39 +347,51 @@ class EmailService:
         
         html_body = f"""
         <!DOCTYPE html>
-        <html>
+        <html xmlns="http://www.w3.org/1999/xhtml">
         <head>
             <meta charset="utf-8">
+            <meta name="color-scheme" content="light only">
+            <meta name="supported-color-schemes" content="light only">
             <style>
-                body {{ font-family: 'Segoe UI', Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px; }}
-                .header {{ background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%); color: #FFFFFF; padding: 30px; text-align: center; border-radius: 10px 10px 0 0; }}
+                :root {{ color-scheme: light only; }}
+                body {{ font-family: 'Segoe UI', Arial, sans-serif; line-height: 1.6; color: #333333; max-width: 600px; margin: 0 auto; padding: 20px; }}
+                .header {{ background-color: #1a1a2e; color: #FFFFFF; padding: 30px; text-align: center; border-radius: 10px 10px 0 0; }}
                 .header h1 {{ margin: 0; color: #FFFFFF; }}
-                .header .brand {{ color: #FFFFFF; background-color: transparent; }}
+                .header h1 span {{ color: #FFFFFF; }}
                 .header .brand-accent {{ color: #dc3545; }}
                 .header p {{ color: #FFFFFF; }}
-                .content {{ background: #f8f9fa; padding: 30px; border-radius: 0 0 10px 10px; }}
-                .otp-box {{ background: #fff; border: 2px solid #dc3545; padding: 20px; border-radius: 8px; margin: 20px 0; text-align: center; }}
+                .content {{ background-color: #f8f9fa; padding: 30px; border-radius: 0 0 10px 10px; color: #333333; }}
+                .otp-box {{ background-color: #ffffff; border: 2px solid #dc3545; padding: 20px; border-radius: 8px; margin: 20px 0; text-align: center; }}
                 .otp {{ font-family: monospace; font-size: 36px; color: #dc3545; font-weight: bold; letter-spacing: 8px; }}
-                .warning {{ color: #666; font-size: 14px; margin-top: 20px; }}
-                .footer {{ text-align: center; margin-top: 20px; font-size: 12px; color: #666; }}
+                .warning {{ color: #666666; font-size: 14px; margin-top: 20px; }}
+                .footer {{ text-align: center; margin-top: 20px; font-size: 12px; color: #666666; }}
+                @media (prefers-color-scheme: dark) {{
+                    .header {{ background-color: #1a1a2e !important; }}
+                    .header h1, .header h1 span {{ color: #FFFFFF !important; }}
+                    .header .brand-accent {{ color: #dc3545 !important; }}
+                    .header p {{ color: #FFFFFF !important; }}
+                    .content {{ background-color: #f8f9fa !important; color: #333333 !important; }}
+                    .content p {{ color: #333333 !important; }}
+                    .otp-box {{ background-color: #ffffff !important; }}
+                }}
             </style>
         </head>
-        <body>
-            <div class="header">
-                <h1 style="color: #FFFFFF;">🔒 <span class="brand" style="color: #FFFFFF;">ecomm</span><span class="brand-accent">bx</span></h1>
-                <p style="color: #FFFFFF;">{t('otp_title')}</p>
+        <body style="background-color: #f4f4f4;">
+            <div class="header" style="background-color: #1a1a2e; color: #FFFFFF; padding: 30px; text-align: center; border-radius: 10px 10px 0 0;">
+                <h1 style="margin: 0; color: #FFFFFF;">&#128274; <span style="color: #FFFFFF;">ecomm</span><span class="brand-accent" style="color: #dc3545;">bx</span></h1>
+                <p style="color: #FFFFFF; margin: 10px 0 0 0;">{t('otp_title')}</p>
             </div>
-            <div class="content">
-                <p>{t('otp_greeting')}</p>
-                <p>{t('otp_body')}</p>
-                <div class="otp-box">
-                    <p class="otp">{otp_code}</p>
+            <div class="content" style="background-color: #f8f9fa; padding: 30px; border-radius: 0 0 10px 10px;">
+                <p style="color: #333333;">{t('otp_greeting')}</p>
+                <p style="color: #333333;">{t('otp_body')}</p>
+                <div class="otp-box" style="background-color: #ffffff; border: 2px solid #dc3545; padding: 20px; border-radius: 8px; margin: 20px 0; text-align: center;">
+                    <p class="otp" style="font-family: monospace; font-size: 36px; color: #dc3545; font-weight: bold; letter-spacing: 8px;">{otp_code}</p>
                 </div>
-                <p class="warning">{t('otp_expiry')}</p>
-                <p class="warning">{t('otp_ignore')}</p>
+                <p style="color: #666666; font-size: 14px; margin-top: 20px;">{t('otp_expiry')}</p>
+                <p style="color: #666666; font-size: 14px;">{t('otp_ignore')}</p>
             </div>
-            <div class="footer">
-                <p>{t('password_reset_footer')}</p>
+            <div class="footer" style="text-align: center; margin-top: 20px; font-size: 12px; color: #666666;">
+                <p style="color: #666666;">{t('password_reset_footer')}</p>
             </div>
         </body>
         </html>
@@ -409,31 +444,46 @@ class EmailService:
         
         html_body = f"""
         <!DOCTYPE html>
-        <html>
+        <html xmlns="http://www.w3.org/1999/xhtml">
         <head>
             <meta charset="utf-8">
+            <meta name="color-scheme" content="light only">
+            <meta name="supported-color-schemes" content="light only">
+            <style>
+                :root {{ color-scheme: light only; }}
+                @media (prefers-color-scheme: dark) {{
+                    .email-header {{ background-color: #1a1a2e !important; }}
+                    .email-header h1, .email-header h1 span {{ color: #FFFFFF !important; }}
+                    .email-header .brand-red {{ color: #dc3545 !important; }}
+                    .email-header p {{ color: #FFFFFF !important; }}
+                    .email-content {{ background-color: #f8f9fa !important; color: #333333 !important; }}
+                    .email-content p {{ color: #333333 !important; }}
+                    .email-content .link-box {{ background-color: #e9ecef !important; }}
+                    .email-content .security-note {{ background-color: #d4edda !important; color: #28a745 !important; }}
+                }}
+            </style>
         </head>
-        <body style="font-family: 'Segoe UI', Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
-            <div style="background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%); color: white; padding: 30px; text-align: center; border-radius: 10px 10px 0 0;">
-                <h1 style="margin: 0; color: #FFFFFF;">✉️ <span style="color: #FFFFFF; background-color: transparent;">ecomm</span><span style="color: #dc3545;">bx</span></h1>
+        <body style="font-family: 'Segoe UI', Arial, sans-serif; line-height: 1.6; color: #333333; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #f4f4f4;">
+            <div class="email-header" style="background-color: #1a1a2e; color: #FFFFFF; padding: 30px; text-align: center; border-radius: 10px 10px 0 0;">
+                <h1 style="margin: 0; color: #FFFFFF;">&#9993;&#65039; <span style="color: #FFFFFF;">ecomm</span><span class="brand-red" style="color: #dc3545;">bx</span></h1>
                 <p style="margin: 10px 0 0 0; color: #FFFFFF;">{t('email_verify_title')}</p>
             </div>
-            <div style="background: #f8f9fa; padding: 30px; border-radius: 0 0 10px 10px;">
-                <p style="font-size: 16px;">{greeting}</p>
-                <p>{t('email_verify_body')}</p>
+            <div class="email-content" style="background-color: #f8f9fa; padding: 30px; border-radius: 0 0 10px 10px;">
+                <p style="font-size: 16px; color: #333333;">{greeting}</p>
+                <p style="color: #333333;">{t('email_verify_body')}</p>
                 <p style="text-align: center;">
-                    <a href="{verify_link}" style="display: inline-block; background: #dc3545; color: #ffffff; padding: 15px 40px; text-decoration: none; border-radius: 8px; font-weight: bold; margin: 20px 0;">{t('email_verify_button')}</a>
+                    <a href="{verify_link}" style="display: inline-block; background-color: #dc3545; color: #ffffff; padding: 15px 40px; text-decoration: none; border-radius: 8px; font-weight: bold; margin: 20px 0;">{t('email_verify_button')}</a>
                 </p>
-                <p>{t('email_verify_link_instruction')}</p>
-                <div style="background: #e9ecef; padding: 15px; border-radius: 8px; margin: 20px 0; word-break: break-all; font-family: monospace; font-size: 12px;">
-                    <a href="{verify_link}" style="color: #333;">{verify_link}</a>
+                <p style="color: #333333;">{t('email_verify_link_instruction')}</p>
+                <div class="link-box" style="background-color: #e9ecef; padding: 15px; border-radius: 8px; margin: 20px 0; word-break: break-all; font-family: monospace; font-size: 12px;">
+                    <a href="{verify_link}" style="color: #333333;">{verify_link}</a>
                 </div>
-                <p style="color: #666; font-size: 14px; margin-top: 20px;">{t('email_verify_expiry')}</p>
-                <p style="color: #28a745; font-size: 14px; background: #d4edda; padding: 12px; border-radius: 6px;">{t('email_verify_security_note')}</p>
-                <p style="color: #666; font-size: 14px;">{t('email_verify_ignore')}</p>
+                <p style="color: #666666; font-size: 14px; margin-top: 20px;">{t('email_verify_expiry')}</p>
+                <p class="security-note" style="color: #28a745; font-size: 14px; background-color: #d4edda; padding: 12px; border-radius: 6px;">{t('email_verify_security_note')}</p>
+                <p style="color: #666666; font-size: 14px;">{t('email_verify_ignore')}</p>
             </div>
-            <div style="text-align: center; margin-top: 20px; font-size: 12px; color: #666;">
-                <p>{t('password_reset_footer')}</p>
+            <div style="text-align: center; margin-top: 20px; font-size: 12px; color: #666666;">
+                <p style="color: #666666;">{t('password_reset_footer')}</p>
             </div>
         </body>
         </html>
@@ -559,10 +609,10 @@ class EmailService:
         <html xmlns="http://www.w3.org/1999/xhtml">
         <head>
             <meta charset="utf-8">
-            <meta name="color-scheme" content="light">
-            <meta name="supported-color-schemes" content="light">
+            <meta name="color-scheme" content="light only">
+            <meta name="supported-color-schemes" content="light only">
             <style>
-                :root {{ color-scheme: light; supported-color-schemes: light; }}
+                :root {{ color-scheme: light only; }}
                 .dark-mode-bg {{ background-color: #1a1a2e !important; }}
                 .white-text {{ color: #FFFFFF !important; }}
                 .red-text {{ color: #dc3545 !important; }}
@@ -758,10 +808,10 @@ class EmailService:
         <html xmlns="http://www.w3.org/1999/xhtml">
         <head>
             <meta charset="utf-8">
-            <meta name="color-scheme" content="light">
-            <meta name="supported-color-schemes" content="light">
+            <meta name="color-scheme" content="light only">
+            <meta name="supported-color-schemes" content="light only">
             <style>
-                :root {{ color-scheme: light; supported-color-schemes: light; }}
+                :root {{ color-scheme: light only; }}
                 .dark-mode-bg {{ background-color: #1a1a2e !important; }}
                 .white-text {{ color: #FFFFFF !important; }}
                 .red-text {{ color: #dc3545 !important; }}
@@ -894,33 +944,52 @@ class EmailService:
 
         html_body = f"""
         <!DOCTYPE html>
-        <html>
-        <head><meta charset="utf-8"></head>
-        <body style="font-family: 'Segoe UI', Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 0; background-color: #f0f0f0;">
-            <div style="background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%); color: white; padding: 40px 30px; text-align: center;">
-                <h1 style="margin: 0; font-size: 28px; color: #FFFFFF;"><span style="color: #FFFFFF;">ecomm</span><span style="color: #dc3545;">bx</span></h1>
+        <html xmlns="http://www.w3.org/1999/xhtml">
+        <head>
+            <meta charset="utf-8">
+            <meta name="color-scheme" content="light only">
+            <meta name="supported-color-schemes" content="light only">
+            <style>
+                :root {{ color-scheme: light only; }}
+                @media (prefers-color-scheme: dark) {{
+                    .email-header {{ background-color: #1a1a2e !important; }}
+                    .email-header h1, .email-header h1 span {{ color: #FFFFFF !important; }}
+                    .email-header .brand-red {{ color: #dc3545 !important; }}
+                    .email-header p {{ color: #cbd5e1 !important; }}
+                    .email-body {{ background-color: #ffffff !important; color: #333333 !important; }}
+                    .email-body p {{ color: #444444 !important; }}
+                    .domain-box {{ background-color: #1a1a2e !important; }}
+                    .domain-box p {{ color: #ffffff !important; }}
+                    .domain-label {{ color: #94a3b8 !important; }}
+                    .email-footer {{ background-color: #1a1a2e !important; }}
+                }}
+            </style>
+        </head>
+        <body style="font-family: 'Segoe UI', Arial, sans-serif; line-height: 1.6; color: #333333; max-width: 600px; margin: 0 auto; padding: 0; background-color: #f0f0f0;">
+            <div class="email-header" style="background-color: #1a1a2e; color: #FFFFFF; padding: 40px 30px; text-align: center;">
+                <h1 style="margin: 0; font-size: 28px; color: #FFFFFF;"><span style="color: #FFFFFF;">ecomm</span><span class="brand-red" style="color: #dc3545;">bx</span></h1>
                 <p style="margin: 12px 0 0 0; color: #cbd5e1; font-size: 14px; letter-spacing: 1px; text-transform: uppercase;">Important Service Update</p>
             </div>
-            <div style="background: #ffffff; padding: 35px 30px;">
-                <p style="font-size: 16px; margin-top: 0;">{greeting}</p>
-                <p style="font-size: 15px; color: #444;">We are writing to inform you that our secure banking platform has been upgraded and migrated to a new domain. This change is part of our ongoing commitment to providing you with the highest level of security and service.</p>
+            <div class="email-body" style="background-color: #ffffff; padding: 35px 30px;">
+                <p style="font-size: 16px; margin-top: 0; color: #333333;">{greeting}</p>
+                <p style="font-size: 15px; color: #444444;">We are writing to inform you that our secure banking platform has been upgraded and migrated to a new domain. This change is part of our ongoing commitment to providing you with the highest level of security and service.</p>
 
-                <div style="background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%); border-radius: 10px; padding: 25px; margin: 25px 0; text-align: center;">
-                    <p style="color: #94a3b8; font-size: 12px; text-transform: uppercase; letter-spacing: 1px; margin: 0 0 8px 0;">New Platform Address</p>
+                <div class="domain-box" style="background-color: #1a1a2e; border-radius: 10px; padding: 25px; margin: 25px 0; text-align: center;">
+                    <p class="domain-label" style="color: #94a3b8; font-size: 12px; text-transform: uppercase; letter-spacing: 1px; margin: 0 0 8px 0;">New Platform Address</p>
                     <p style="color: #ffffff; font-size: 22px; font-weight: bold; margin: 0;">{new_domain}</p>
                 </div>
 
-                <div style="background: #fff3cd; border-left: 4px solid #ffc107; padding: 15px 20px; border-radius: 0 8px 8px 0; margin: 25px 0;">
+                <div style="background-color: #fff3cd; border-left: 4px solid #ffc107; padding: 15px 20px; border-radius: 0 8px 8px 0; margin: 25px 0;">
                     <p style="margin: 0; font-size: 14px; color: #856404;"><strong>Important:</strong> Please update your bookmarks and saved links. The previous domain will be discontinued. All your account data, balances, and transaction history remain completely secure and unchanged.</p>
                 </div>
 
                 <p style="text-align: center; margin: 30px 0;">
-                    <a href="{login_url}" style="display: inline-block; background: #dc3545; color: #ffffff; padding: 16px 50px; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 16px; letter-spacing: 0.5px;">Access Your Account</a>
+                    <a href="{login_url}" style="display: inline-block; background-color: #dc3545; color: #ffffff; padding: 16px 50px; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 16px; letter-spacing: 0.5px;">Access Your Account</a>
                 </p>
 
                 <div style="border-top: 1px solid #e5e7eb; padding-top: 20px; margin-top: 25px;">
-                    <p style="font-size: 14px; color: #555; margin-bottom: 15px;"><strong>What you need to know:</strong></p>
-                    <table style="width: 100%; font-size: 14px; color: #555;">
+                    <p style="font-size: 14px; color: #555555; margin-bottom: 15px;"><strong>What you need to know:</strong></p>
+                    <table style="width: 100%; font-size: 14px; color: #555555;">
                         <tr><td style="padding: 6px 0; vertical-align: top;">&#9989;</td><td style="padding: 6px 0 6px 10px;">Your login credentials remain the same</td></tr>
                         <tr><td style="padding: 6px 0; vertical-align: top;">&#9989;</td><td style="padding: 6px 0 6px 10px;">All balances and transaction history are preserved</td></tr>
                         <tr><td style="padding: 6px 0; vertical-align: top;">&#9989;</td><td style="padding: 6px 0 6px 10px;">Your IBAN and account details are unchanged</td></tr>
@@ -928,14 +997,14 @@ class EmailService:
                     </table>
                 </div>
 
-                <div style="background: #d4edda; border-radius: 8px; padding: 15px 20px; margin: 25px 0;">
+                <div style="background-color: #d4edda; border-radius: 8px; padding: 15px 20px; margin: 25px 0;">
                     <p style="margin: 0; font-size: 14px; color: #155724;"><strong>Security Reminder:</strong> ecommbx will never ask for your password via email. Always verify you are on <strong>{new_domain}</strong> before entering your credentials.</p>
                 </div>
 
-                <p style="font-size: 15px; color: #444;">If you have any questions or require assistance, please do not hesitate to contact our support team through the platform.</p>
-                <p style="font-size: 15px; color: #444; margin-bottom: 0;">Kind regards,<br><strong>The ecommbx Team</strong></p>
+                <p style="font-size: 15px; color: #444444;">If you have any questions or require assistance, please do not hesitate to contact our support team through the platform.</p>
+                <p style="font-size: 15px; color: #444444; margin-bottom: 0;">Kind regards,<br><strong>The ecommbx Team</strong></p>
             </div>
-            <div style="background: #1a1a2e; padding: 20px 30px; text-align: center;">
+            <div class="email-footer" style="background-color: #1a1a2e; padding: 20px 30px; text-align: center;">
                 <p style="color: #94a3b8; font-size: 12px; margin: 0;">This is an official communication from ecommbx.</p>
                 <p style="color: #64748b; font-size: 11px; margin: 8px 0 0 0;">ecommbx | Secure Digital Banking</p>
             </div>

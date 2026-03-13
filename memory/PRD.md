@@ -33,6 +33,13 @@ A full-stack banking application (React frontend + FastAPI backend + MongoDB) th
    - Fixed role check bug (lowercase vs uppercase `ADMIN`)
    - Fixed user query filter for non-admin users
 
+2. **Dark Mode Email Fix (DONE):** Fixed all 7 email templates to render correctly in dark mode email clients.
+   - Added `color-scheme: light only` meta tags to prevent dark mode color inversions
+   - Added CSS `@media (prefers-color-scheme: dark)` overrides with `!important`
+   - Replaced gradient backgrounds with solid `background-color` for reliability
+   - Added explicit inline `color` styles to all text elements
+   - Templates fixed: verification, password reset (admin + user), OTP, transfer confirmation, transfer rejection, domain change notification
+
 ## Previously Completed (Prior Sessions)
 - File viewing in new tab (Cloudinary proxy)
 - Production login CORS fix
