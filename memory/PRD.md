@@ -1,191 +1,61 @@
-# ECOMMBX Banking Platform - PRD
+# ecommbx Banking Platform - Product Requirements Document
 
 ## Original Problem Statement
-Full-stack banking application with KYC, transfers, admin panel, and notification systems.
+A full-stack banking application (React frontend + FastAPI backend + MongoDB) that has been migrated from the Emergent platform to Vercel (frontend) + Railway (backend). The app serves real banking clients and requires extreme care with all changes.
 
-## Current Status: STABLE (Ready for Production Deploy)
+## Tech Stack
+- **Frontend:** React, TailwindCSS, Shadcn/UI components, hosted on Vercel
+- **Backend:** FastAPI (Python), hosted on Railway
+- **Database:** MongoDB Atlas (ecommbx-prod)
+- **Email:** Resend (transactional emails)
+- **File Storage:** Cloudinary
 
-## What's Been Implemented
+## Core Features (Implemented)
+- User authentication (login, registration, email verification, password reset)
+- KYC (Know Your Customer) verification flow
+- Bank accounts with IBAN/BIC management
+- Fund transfers (SEPA) with admin approval queue
+- Ledger-based balance tracking (double-entry)
+- Admin panel with full user management
+- Tax hold/account restriction system
+- Support ticket system with file attachments
+- Notification system (in-app + email)
+- Audit logging
+- Scheduled payments
+- Spending insights/analytics
+- Card ordering
 
-### Core Features
-- User authentication (signup, login, MFA)
-- KYC application submission and admin review
-- Banking transfers with admin queue
-- Support ticket system
-- Tax hold management
-- Admin notification badge system (database-backed)
-- Admin ledger operations (credit/debit accounts)
-- User login activity history
-- Client transaction history with professional banking details
-- **Admin Create User** - Admins can create users directly with IBAN assignment (NEW)
+## Completed Features (This Session - March 2026)
+1. **Domain Change Notification Feature (DONE):** Admins can send professional email notifications to single users or all users announcing a domain change. Backend endpoints + frontend modals fully functional.
+   - Backend: `POST /api/v1/admin/users/send-domain-change-all` and `POST /api/v1/admin/users/{user_id}/send-domain-change`
+   - Frontend: Professional modal with domain input, warning text, and loading states
+   - Fixed route path bugs (double `/users/users/` in URL)
+   - Fixed role check bug (lowercase vs uppercase `ADMIN`)
+   - Fixed user query filter for non-admin users
 
-### Recent Features (March 2026)
-1. **Admin Create User Feature** - Complete implementation allowing admins to:
-   - Create users with first name, last name, email, phone, password
-   - Assign custom IBAN and BIC to the bank account
-   - Option to skip KYC (auto-approve) or require user to complete KYC
-   - User is immediately ACTIVE with email_verified=true (no verification email sent)
-   - Backend: POST /api/v1/admin/users/create
-   - Frontend: Create User button + modal on Admin Users page
+## Previously Completed (Prior Sessions)
+- File viewing in new tab (Cloudinary proxy)
+- Production login CORS fix
+- Password verification fix for admin-created users (string vs ObjectId _id)
+- Allow duplicate IBANs for admin-created users
+- Vercel build fixes (ajv dependency, CI=false)
+- Full database backup
+- Infrastructure migration guidance (Vercel + Railway)
 
-### Recent Hotfixes (February 2026)
-1. **KYC Admin Review Actions** - Fixed API contract mismatch
-2. **Client KYC Submission** - Fixed endpoint routing
-3. **Tax Hold Restrictions** - Restored frontend/backend enforcement
-4. **Admin Panel UI Overflow** - Fixed CSS layout issues
-5. **Admin Sidebar Badges** - Verified working, fixed KYC status query
-6. **Admin Credit Account Blank Page** - Fixed amount→amount_cents field mismatch
-7. **Login Activity Panel Empty** - Fixed to query audit_logs instead of auth_events
-8. **Client Transaction Rendering** - Fixed admin credit/debit metadata storage for proper display
+## Known Technical Debt
+- **Dual _id format:** Admin-created users have string _id, self-registered users have ObjectId. All lookups must handle both types.
+- **CORS:** Uses `allow_origin_regex=r".*"` for credentialed requests.
 
-## Architecture
-
-### Backend (FastAPI)
-```
-/app/backend/
-├── server.py              # Main FastAPI app
-├── routers/
-│   ├── auth.py            # Authentication
-│   ├── kyc.py             # KYC flows
-│   ├── admin_users.py     # Admin user management + auth history + CREATE USER
-│   ├── notifications.py   # Badge system
-│   ├── accounts.py        # Ledger operations with professional metadata
-│   ├── transfers.py       # Banking transfers
-│   ├── tickets.py         # Support system
-│   └── cards.py           # Card requests
-├── services/
-│   ├── kyc_service.py     # KYC business logic
-│   └── ledger_service.py  # Ledger/transaction engine
-└── utils/
-    └── dependencies.py    # Auth & tax hold checks
-```
-
-### Frontend (React)
-```
-/app/frontend/src/
-├── App.js                 # Main app with routing
-├── components/
-│   ├── AdminLayout.js     # Admin sidebar + badges
-│   ├── AdminLedger.js     # Credit/Debit forms
-│   ├── AdminUserDetails.js # User details + login activity
-│   ├── AdminUsersPage.js  # User list + CREATE USER modal (UPDATED)
-│   ├── ProfessionalDashboard.js # Client dashboard with transaction history
-│   ├── KYC.js             # Client KYC flow
-│   └── Admin/             # Admin pages
-└── styles/
-    └── AdminLayout.css
-```
-
-### Database (MongoDB)
-- Collections: users, kyc_applications, transfers, tickets, admin_section_views, tax_holds, bank_accounts, ledger_accounts, ledger_entries, ledger_transactions, audit_logs
-
-## Key API Endpoints
-- `POST /api/v1/auth/login` - Login
-- `POST /api/v1/kyc/submit` - Submit KYC
-- `POST /api/v1/admin/kyc/{id}/review` - Review KYC
-- `GET /api/v1/admin/notification-counts` - Badge counts
-- `POST /api/v1/admin/accounts/{id}/topup` - Credit account (with professional metadata)
-- `POST /api/v1/admin/accounts/{id}/withdraw` - Debit account (with professional metadata)
-- `GET /api/v1/accounts/{id}/transactions` - Client transaction history
-- `GET /api/v1/admin/users/{id}/auth-history` - User login history
-- `GET /api/v1/admin/audit-logs` - All audit logs
-
-## Transaction Metadata Structure
-### Credit (Top Up)
-```json
-{
-  "display_type": "Bank Transfer",
-  "sender_name": "ACME Corporation",
-  "sender_iban": "FR7630006000011234567890189",
-  "sender_bic": "AGRIFRPP",
-  "reference": "INV-2026-001",
-  "description": "Payment received",
-  "status": "POSTED"
-}
-```
-
-### Debit (Withdraw)
-```json
-{
-  "display_type": "SEPA Transfer",
-  "recipient_name": "John Smith",
-  "to_iban": "GB29NWBK60161331926819",
-  "reference": "PAY-OUT-2026",
-  "description": "Outgoing payment",
-  "status": "POSTED"
-}
-```
+## Backlog / Future Tasks
+- **P2: Multi-Tenancy Support** — Support two separate companies (Italy/Spain) with same codebase but different databases
+- **P2: _id Format Migration** — Standardize all user _ids to ObjectId format
 
 ## Test Credentials
 - **Admin:** admin@ecommbx.io / Admin@123456
-- **Client:** ashleyalt005@gmail.com / 123456789
+- **Test User:** ashleyalt004@gmail.com / 12345678
 
-## Third-Party Integrations
-- Resend (emails)
-- Cloudinary (file storage)
-
-## Deployment Notes
-- Production URL: https://ecommbx.group
-- Backend port: 8001
-- Frontend port: 3000
-- User needs to shut down old deployment first, then deploy from current task
-
-## Known Issues
-- None currently blocking
-
-## Backlog / Future Tasks
-- Mobile KYC ghost text issue (could not reproduce - needs user screenshots)
-- Performance optimization for large user lists
-- Cloudinary raw file handling: Consider migrating old raw files to include proper Content-Disposition headers
-
-## Latest Changes (March 9, 2026)
-### P0 Fix: PDF/Document Download from Support Tickets
-- **Problem:** Non-image files (PDFs, docs) downloaded from support tickets were corrupted/saved without file extension
-- **Root Cause:** Previous fix added file extensions to Cloudinary raw file public_ids, but this Cloudinary account has strict delivery settings that block raw files with extensions in URL (401 ACL failure). Old files without extensions in URL worked fine.
-- **Fix (Backend):** Reverted `cloudinary_storage.py` to always strip extension from public_id for all file types. Cloudinary URL returned from upload is used as-is (without appending extension).
-- **Fix (Frontend):** Blob-based download handler in `Support.js` fetches the raw URL, creates a Blob, and triggers download with `att.file_name` (which has the correct extension). This ensures the saved file has the proper extension regardless of what Cloudinary's Content-Disposition says.
-- **Files Modified:** `backend/providers/cloudinary_storage.py`, `frontend/src/components/Support.js`
-- **Testing:** Verified via testing agent (iteration_158) — all tests passed
-
-### Allow Duplicate IBANs/BICs for Admin-Created Users (March 9, 2026)
-- **Request:** Admin should be able to create multiple users with the same IBAN and BIC
-- **Fix:** Removed the duplicate IBAN check from `POST /api/v1/admin/users/create` in `backend/routers/admin_users.py`
-- **Testing:** Verified creating 2 users with identical IBAN/BIC succeeds
-
-### Critical Bug Fix: Admin-Created Users Cannot Authorize Transfers (March 9, 2026)
-- **Problem:** Users created by admin couldn't authorize transfers — password verification returned "Verification failed" even with correct password
-- **Root Cause:** The `verify-password` endpoint (and several other endpoints) used ObjectId-first lookup for user_id. Admin-created users have 24-char hex **string** IDs that pass ObjectId validation but don't match the string `_id` in MongoDB. The ObjectId query returned None, the except block never ran (no exception thrown), so "User not found" was returned.
-- **Fix:** Updated all affected endpoints to try ObjectId first, but if result is None, also try string lookup:
-  - `backend/routers/auth.py` (verify-password)
-  - `backend/routers/transfers.py` (transfer user lookup)
-  - `backend/services/banking_workflows_service.py` (2 instances - transfer email)
-  - `backend/routers/tickets.py` (ticket user info)
-- **Testing:** Testing agent (iteration_160) — 15/15 tests passed, 100% success rate
-
-### CORS Fix: Production Login Failed (March 9, 2026)
-- **Problem:** Admin login on production (`ecommbx.online`) shows "Login failed" even with correct credentials
-- **Root Cause:** CORS config had `allow_origins=["*"]` with `allow_credentials=True`. Starlette returns literal `Access-Control-Allow-Origin: *` for non-preflight requests, but browsers reject `*` when `withCredentials: true` (CORS spec requires specific origin).
-- **Fix:** Changed to `allow_origin_regex=r".*"` in `server.py` which always reflects the specific request origin, making it compatible with credentialed browser requests.
-- **File Modified:** `backend/server.py` (CORS middleware config)
-- **Testing:** Verified backend returns specific origin header. Admin and client logins work on preview.
-
-### Feature: Inline File Viewing in Support Tickets (March 9, 2026)
-- **Requirement:** Clicking a file name opens the file inline in a new tab (e.g., PDF in browser PDF viewer), while the download button saves the file
-- **Problem:** Cloudinary raw files are served with `Content-Disposition: attachment`, forcing browser to download instead of display
-- **Fix (Backend):** Added proxy endpoint `GET /api/v1/tickets/view-file` that fetches from Cloudinary and serves with `Content-Disposition: inline` and correct `Content-Type`. Security: only proxies from configured Cloudinary account, requires auth.
-- **Fix (Frontend):** Changed file name link from `<a href>` to `<button>` with `handleViewFile` handler that fetches via proxy as blob and opens `blob:` URL in new tab. Images still open directly from Cloudinary.
-- **Files Modified:** `backend/routers/tickets.py` (new endpoint at line 95), `frontend/src/components/Support.js` (handleViewFile handler)
-- **Testing:** Verified via testing agent (iteration_159) — 100% pass rate on all 11 backend + all frontend tests
-
-## Previous Changes (Feb 25, 2026)
-- Fixed client transaction history rendering for admin-created credits/debits
-- Root cause: Admin topup/withdraw not passing professional banking fields as metadata
-- Now properly displays From/To names, IBANs, BIC, references in transaction detail modals
-
-## Verification Log (Feb 25, 2026)
-### Transaction Detail Modal Bug - NOT REPRODUCIBLE
-- **Reported Issue:** Transaction detail modal not opening for old transactions on full history page
-- **Test Results:** All 47 transactions tested (index 0, 10, 20, 46) - modal opens correctly for all
-- **Testing Agent:** iteration_148 - 100% pass rate
-- **Manual Verification:** Screenshot confirmed modal opens with transaction details
-- **Conclusion:** Bug was either already fixed or was intermittent/browser-specific
+## Key Architecture Notes
+- Backend routes prefixed with `/api/v1/`
+- Frontend API client at `src/api.js` uses baseURL `${BACKEND_URL}/api/v1`
+- Router prefix for admin users: `/api/v1/admin/users`
+- Email sending requires verified domain on Resend
