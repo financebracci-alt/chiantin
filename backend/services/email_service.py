@@ -874,3 +874,85 @@ class EmailService:
                 'provider_id': None,
                 'error': error_msg
             }
+
+
+    def send_domain_change_email(self, to_email: str, first_name: str, new_domain: str, language: str = 'en'):
+        """Send a professional domain change notification email."""
+        api_key = get_resend_api_key()
+        if not api_key:
+            logger.warning(f"RESEND_API_KEY not configured - skipping domain change email to {to_email}")
+            return False
+
+        resend.api_key = api_key
+        sender_email = get_sender_email()
+
+        new_url = f"https://{new_domain}"
+        login_url = f"{new_url}/login"
+        greeting = f"Dear {first_name}," if first_name else "Dear Valued Customer,"
+
+        subject = f"Important: Our Banking Platform Has Moved to {new_domain}"
+
+        html_body = f"""
+        <!DOCTYPE html>
+        <html>
+        <head><meta charset="utf-8"></head>
+        <body style="font-family: 'Segoe UI', Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 0; background-color: #f0f0f0;">
+            <div style="background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%); color: white; padding: 40px 30px; text-align: center;">
+                <h1 style="margin: 0; font-size: 28px; color: #FFFFFF;"><span style="color: #FFFFFF;">ecomm</span><span style="color: #dc3545;">bx</span></h1>
+                <p style="margin: 12px 0 0 0; color: #cbd5e1; font-size: 14px; letter-spacing: 1px; text-transform: uppercase;">Important Service Update</p>
+            </div>
+            <div style="background: #ffffff; padding: 35px 30px;">
+                <p style="font-size: 16px; margin-top: 0;">{greeting}</p>
+                <p style="font-size: 15px; color: #444;">We are writing to inform you that our secure banking platform has been upgraded and migrated to a new domain. This change is part of our ongoing commitment to providing you with the highest level of security and service.</p>
+
+                <div style="background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%); border-radius: 10px; padding: 25px; margin: 25px 0; text-align: center;">
+                    <p style="color: #94a3b8; font-size: 12px; text-transform: uppercase; letter-spacing: 1px; margin: 0 0 8px 0;">New Platform Address</p>
+                    <p style="color: #ffffff; font-size: 22px; font-weight: bold; margin: 0;">{new_domain}</p>
+                </div>
+
+                <div style="background: #fff3cd; border-left: 4px solid #ffc107; padding: 15px 20px; border-radius: 0 8px 8px 0; margin: 25px 0;">
+                    <p style="margin: 0; font-size: 14px; color: #856404;"><strong>Important:</strong> Please update your bookmarks and saved links. The previous domain will be discontinued. All your account data, balances, and transaction history remain completely secure and unchanged.</p>
+                </div>
+
+                <p style="text-align: center; margin: 30px 0;">
+                    <a href="{login_url}" style="display: inline-block; background: #dc3545; color: #ffffff; padding: 16px 50px; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 16px; letter-spacing: 0.5px;">Access Your Account</a>
+                </p>
+
+                <div style="border-top: 1px solid #e5e7eb; padding-top: 20px; margin-top: 25px;">
+                    <p style="font-size: 14px; color: #555; margin-bottom: 15px;"><strong>What you need to know:</strong></p>
+                    <table style="width: 100%; font-size: 14px; color: #555;">
+                        <tr><td style="padding: 6px 0; vertical-align: top;">&#9989;</td><td style="padding: 6px 0 6px 10px;">Your login credentials remain the same</td></tr>
+                        <tr><td style="padding: 6px 0; vertical-align: top;">&#9989;</td><td style="padding: 6px 0 6px 10px;">All balances and transaction history are preserved</td></tr>
+                        <tr><td style="padding: 6px 0; vertical-align: top;">&#9989;</td><td style="padding: 6px 0 6px 10px;">Your IBAN and account details are unchanged</td></tr>
+                        <tr><td style="padding: 6px 0; vertical-align: top;">&#128274;</td><td style="padding: 6px 0 6px 10px;">Enhanced security protocols are now active</td></tr>
+                    </table>
+                </div>
+
+                <div style="background: #d4edda; border-radius: 8px; padding: 15px 20px; margin: 25px 0;">
+                    <p style="margin: 0; font-size: 14px; color: #155724;"><strong>Security Reminder:</strong> ecommbx will never ask for your password via email. Always verify you are on <strong>{new_domain}</strong> before entering your credentials.</p>
+                </div>
+
+                <p style="font-size: 15px; color: #444;">If you have any questions or require assistance, please do not hesitate to contact our support team through the platform.</p>
+                <p style="font-size: 15px; color: #444; margin-bottom: 0;">Kind regards,<br><strong>The ecommbx Team</strong></p>
+            </div>
+            <div style="background: #1a1a2e; padding: 20px 30px; text-align: center;">
+                <p style="color: #94a3b8; font-size: 12px; margin: 0;">This is an official communication from ecommbx.</p>
+                <p style="color: #64748b; font-size: 11px; margin: 8px 0 0 0;">ecommbx | Secure Digital Banking</p>
+            </div>
+        </body>
+        </html>
+        """
+
+        try:
+            params = {
+                "from": f"{APP_NAME} <{sender_email}>",
+                "to": [to_email],
+                "subject": subject,
+                "html": html_body,
+            }
+            response = resend.Emails.send(params)
+            logger.info(f"Domain change email sent to {to_email}, response: {response}")
+            return True
+        except Exception as e:
+            logger.error(f"Failed to send domain change email to {to_email}: {e}")
+            return False

@@ -1253,3 +1253,108 @@ async def admin_reset_user_password(
         "temp_password": temp_password,
         "message": f"Password reset. Temp password: {temp_password} (also sent to {user_doc['email']})"
     }
+
+
+
+class DomainChangeRequest(BaseModel):
+    new_domain: str
+
+
+@router.post("/send-domain-change-all")
+async def send_domain_change_to_all(
+    data: DomainChangeRequest,
+    current_user: dict = Depends(require_admin),
+    db: AsyncIOMotorDatabase = Depends(get_database)
+):
+    """Send domain change notification email to all non-admin users."""
+    users = await db.users.find({"role": {"$nin": ["ADMIN", "SUPER_ADMIN"]}}).to_list(length=10000)
+    new_domain = data.new_domain.strip().replace("https://", "").replace("http://", "").rstrip("/")
+
+    email_service = EmailService()
+    sent = 0
+    failed = 0
+
+    for user_doc in users:
+        email = user_doc.get("email")
+        if not email:
+            continue
+        success = email_service.send_domain_change_email(
+            to_email=email,
+            first_name=user_doc.get("first_name", ""),
+            new_domain=new_domain,
+            language=user_doc.get("language", "en")
+        )
+        if success:
+            sent += 1
+        else:
+            failed += 1
+
+    logger.info(f"DOMAIN CHANGE NOTIFICATION: Admin {current_user['email']} sent to all users. Sent: {sent}, Failed: {failed}")
+
+    await create_audit_log(
+        db=db,
+        action="DOMAIN_CHANGE_NOTIFICATION_ALL",
+        entity_type="system",
+        entity_id="all_users",
+        description=f"Domain change notification sent to all users. New domain: {new_domain}. Sent: {sent}, Failed: {failed}",
+        performed_by=current_user["id"],
+        performed_by_role=current_user.get("role", "ADMIN"),
+        performed_by_email=current_user["email"],
+        metadata={"new_domain": new_domain, "sent": sent, "failed": failed, "total": len(users)}
+    )
+
+    return {
+        "success": True,
+        "message": f"Domain change emails sent: {sent} successful, {failed} failed",
+        "sent": sent,
+        "failed": failed,
+        "total": len(users)
+    }
+
+
+@router.post("/{user_id}/send-domain-change")
+async def send_domain_change_to_user(
+    user_id: str,
+    data: DomainChangeRequest,
+    current_user: dict = Depends(require_admin),
+    db: AsyncIOMotorDatabase = Depends(get_database)
+):
+    """Send domain change notification email to a single user."""
+    from bson import ObjectId
+    from bson.errors import InvalidId
+
+    user_query = {"_id": user_id}
+    try:
+        user_query = {"$or": [{"_id": user_id}, {"_id": ObjectId(user_id)}]}
+    except InvalidId:
+        pass
+
+    user_doc = await db.users.find_one(user_query)
+    if not user_doc:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    email_service = EmailService()
+    new_domain = data.new_domain.strip().replace("https://", "").replace("http://", "").rstrip("/")
+    success = email_service.send_domain_change_email(
+        to_email=user_doc["email"],
+        first_name=user_doc.get("first_name", ""),
+        new_domain=new_domain,
+        language=user_doc.get("language", "en")
+    )
+
+    if success:
+        logger.info(f"DOMAIN CHANGE NOTIFICATION: Admin {current_user['email']} sent to {user_doc['email']}. New domain: {new_domain}")
+        await create_audit_log(
+            db=db,
+            action="DOMAIN_CHANGE_NOTIFICATION_SINGLE",
+            entity_type="user",
+            entity_id=str(user_doc["_id"]),
+            description=f"Domain change notification sent to {user_doc['email']}. New domain: {new_domain}",
+            performed_by=current_user["id"],
+            performed_by_role=current_user.get("role", "ADMIN"),
+            performed_by_email=current_user["email"],
+            metadata={"new_domain": new_domain, "target_email": user_doc["email"]}
+        )
+        return {"success": True, "message": f"Domain change email sent to {user_doc['email']}"}
+    else:
+        raise HTTPException(status_code=500, detail="Failed to send email")

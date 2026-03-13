@@ -70,5 +70,5 @@
     "fix": "Changed to localStorage.getItem('access_token')",
     "impact": "Badge manager was not initializing because token was null"
   },
-  "test_environment": "https://file-download-debug.preview.emergentagent.com"
+  "test_environment": "https://user-alert-system-2.preview.emergentagent.com"
 }

@@ -72,5 +72,5 @@
     "fields": ["admin_id", "section_key", "last_seen_at", "created_at", "updated_at"],
     "unique_index": "(admin_id, section_key)"
   },
-  "test_environment": "https://file-download-debug.preview.emergentagent.com"
+  "test_environment": "https://user-alert-system-2.preview.emergentagent.com"
 }

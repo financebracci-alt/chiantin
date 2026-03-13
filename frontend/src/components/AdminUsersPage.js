@@ -87,6 +87,12 @@ function AdminUsersPage({ user }) {
   const [editingNotes, setEditingNotes] = useState(false);
   const [savingNotes, setSavingNotes] = useState(false);
 
+  // ==================== DOMAIN CHANGE NOTIFICATION STATE ====================
+  const [showDomainChangeModal, setShowDomainChangeModal] = useState(false);
+  const [domainChangeNewDomain, setDomainChangeNewDomain] = useState('');
+  const [domainChangeLoading, setDomainChangeLoading] = useState(false);
+  const [domainChangeTargetUserId, setDomainChangeTargetUserId] = useState(null); // null = all users
+
   // ==================== CREATE USER STATE ====================
   const [showCreateUserModal, setShowCreateUserModal] = useState(false);
   const [createUserLoading, setCreateUserLoading] = useState(false);
@@ -377,6 +383,38 @@ function AdminUsersPage({ user }) {
     }
   };
 
+  // ==================== DOMAIN CHANGE NOTIFICATION ====================
+  const openDomainChangeModal = (userId = null) => {
+    setDomainChangeTargetUserId(userId);
+    setDomainChangeNewDomain('');
+    setShowDomainChangeModal(true);
+  };
+
+  const handleSendDomainChange = async () => {
+    const newDomain = domainChangeNewDomain.trim();
+    if (!newDomain) {
+      toast.error('Please enter the new domain');
+      return;
+    }
+
+    setDomainChangeLoading(true);
+    try {
+      let response;
+      if (domainChangeTargetUserId) {
+        response = await api.post(`/admin/users/${domainChangeTargetUserId}/send-domain-change`, { new_domain: newDomain });
+      } else {
+        response = await api.post('/admin/users/send-domain-change-all', { new_domain: newDomain });
+      }
+      toast.success(response.data.message);
+      setShowDomainChangeModal(false);
+      setDomainChangeNewDomain('');
+    } catch (err) {
+      toast.error(err.response?.data?.detail || 'Failed to send domain change notification');
+    } finally {
+      setDomainChangeLoading(false);
+    }
+  };
+
   const resetCreateUserModal = () => {
     setShowCreateUserModal(false);
     setCreateUserError('');
@@ -554,6 +592,16 @@ function AdminUsersPage({ user }) {
             </svg>
             Create User
           </button>
+          <button
+            onClick={() => openDomainChangeModal(null)}
+            className="px-4 py-2 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition flex items-center gap-2"
+            data-testid="send-domain-change-all-btn"
+          >
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+            </svg>
+            Notify Domain Change
+          </button>
         </div>
       </div>
 
@@ -698,6 +746,7 @@ function AdminUsersPage({ user }) {
               handleSaveNotes={handleSaveNotes}
               EnhancedLedgerTools={EnhancedLedgerTools}
               formatCurrency={formatCurrency}
+              openDomainChangeModal={openDomainChangeModal}
             />
           ) : (
             <AdminUsersTable users={filteredUsers} loading={loading} onSelectUser={viewUserDetails} selectedUser={selectedUser} toast={toast} />
@@ -1310,6 +1359,87 @@ function AdminUsersPage({ user }) {
                   </>
                 ) : (
                   <span>Create User</span>
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Domain Change Notification Modal */}
+      {showDomainChangeModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4" onClick={() => setShowDomainChangeModal(false)}>
+          <div className="bg-white rounded-xl shadow-2xl w-full max-w-md mx-4 p-6" onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-center justify-between mb-6">
+              <div className="flex items-center space-x-3">
+                <div className="p-2 bg-blue-100 rounded-lg">
+                  <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                  </svg>
+                </div>
+                <h3 className="text-xl font-bold text-gray-900">
+                  {domainChangeTargetUserId ? 'Notify User' : 'Notify All Users'}
+                </h3>
+              </div>
+              <button
+                onClick={() => setShowDomainChangeModal(false)}
+                className="text-gray-400 hover:text-gray-600 transition"
+              >
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+
+            <div className={`p-3 rounded-lg mb-4 ${domainChangeTargetUserId ? 'bg-blue-50 border border-blue-200' : 'bg-amber-50 border border-amber-200'}`}>
+              <p className={`text-sm ${domainChangeTargetUserId ? 'text-blue-800' : 'text-amber-800'}`}>
+                {domainChangeTargetUserId
+                  ? `This will send a domain change notification email to the selected user.`
+                  : `This will send a domain change notification email to ALL clients. Please double-check the new domain before proceeding.`
+                }
+              </p>
+            </div>
+
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">New Domain *</label>
+                <input
+                  type="text"
+                  value={domainChangeNewDomain}
+                  onChange={(e) => setDomainChangeNewDomain(e.target.value)}
+                  placeholder="e.g., eu-ecommbx.com"
+                  className="input-field w-full"
+                  data-testid="domain-change-new-domain-input"
+                  autoComplete="off"
+                  autoFocus
+                />
+                <p className="text-xs text-gray-500 mt-1">Enter the domain without https:// (e.g., eu-ecommbx.com)</p>
+              </div>
+            </div>
+
+            <div className="mt-6 flex space-x-3">
+              <button
+                onClick={() => setShowDomainChangeModal(false)}
+                className="flex-1 px-4 py-2.5 border border-gray-300 text-gray-700 font-medium rounded-lg hover:bg-gray-50 transition"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleSendDomainChange}
+                disabled={domainChangeLoading || !domainChangeNewDomain.trim()}
+                className="flex-1 px-4 py-2.5 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 disabled:opacity-50 transition flex items-center justify-center space-x-2"
+                data-testid="domain-change-send-btn"
+              >
+                {domainChangeLoading ? (
+                  <>
+                    <svg className="w-4 h-4 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" className="opacity-25" />
+                      <path d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" fill="currentColor" className="opacity-75" />
+                    </svg>
+                    <span>Sending...</span>
+                  </>
+                ) : (
+                  <span>{domainChangeTargetUserId ? 'Send Notification' : 'Send to All Users'}</span>
                 )}
               </button>
             </div>

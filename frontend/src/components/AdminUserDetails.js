@@ -70,7 +70,8 @@ function AdminUserDetails({
   savingNotes,
   handleSaveNotes,
   EnhancedLedgerTools,
-  formatCurrency
+  formatCurrency,
+  openDomainChangeModal
 }) {
   if (!selectedUser) return null;
 
@@ -247,6 +248,17 @@ function AdminUserDetails({
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
               </svg>
               <span>Clear Notifications</span>
+            </button>
+            <button
+              onClick={() => openDomainChangeModal(selectedUser.user.id)}
+              className="px-3 py-1 text-sm border border-blue-400 text-blue-600 rounded hover:bg-blue-50 flex items-center space-x-1"
+              data-testid="send-domain-change-btn"
+              title="Send domain change notification to this user"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+              </svg>
+              <span>Notify Domain Change</span>
             </button>
           </div>
         </div>

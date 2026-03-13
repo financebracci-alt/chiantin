@@ -103,7 +103,7 @@
     }
   },
   "admin_credentials_used": "admin@ecommbx.io / Admin@123456",
-  "test_environment": "https://file-download-debug.preview.emergentagent.com",
+  "test_environment": "https://user-alert-system-2.preview.emergentagent.com",
   "test_date": "2026-02-18",
   "test_duration": "~10 minutes",
   "browser_tests_passed": [
