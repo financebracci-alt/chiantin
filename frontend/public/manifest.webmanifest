@@ -1,6 +1,6 @@
 {
-  "name": "ecommbx - Digital Banking",
-  "short_name": "ecommbx",
+  "name": "Chiantin - Digital Banking",
+  "short_name": "Chiantin",
   "id": "/",
   "start_url": "/",
   "scope": "/",
@@ -43,7 +43,7 @@
       "sizes": "512x512",
       "type": "image/png",
       "form_factor": "narrow",
-      "label": "ecommbx Mobile Banking"
+      "label": "Chiantin Mobile Banking"
     }
   ],
   "shortcuts": [
