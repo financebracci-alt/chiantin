@@ -1,0 +1,436 @@
+/* Project Atlas - App Specific Styles (Professional Banking) */
+
+/* Remove all gradient backgrounds */
+body {
+  background: #FFFFFF !important;
+}
+
+/* Overview Balance Card */
+/* Overview Card */
+.overview-card {
+  background: white;
+  border: 1px solid #EAEAEA;
+  border-radius: 12px;
+  padding: 20px;
+  margin-bottom: 24px;
+}
+
+/* Dark mode: Keep overview card light for contrast against dark page background */
+.dark .overview-card {
+  background: white;
+  border-color: #E5E7EB;
+}
+
+@media (min-width: 640px) {
+  .overview-card {
+    padding: 32px;
+  }
+}
+
+.overview-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: #757575;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+}
+
+/* In dark mode, keep label readable on white overview card */
+.dark .overview-label {
+  color: #757575;
+}
+
+.overview-label::before {
+  content: '';
+  width: 3px;
+  height: 12px;
+  background: #D32F2F;
+  display: inline-block;
+  margin-right: 8px;
+}
+
+/* Balance display with responsive sizing */
+.balance-large {
+  font-size: 32px;
+  font-weight: 700;
+  color: #212121;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.2;
+}
+
+/* In dark mode, balance on overview card should remain dark for readability on white background */
+/* The overview card stays white, so text must be dark */
+.dark .overview-card .balance-large {
+  color: #212121;
+}
+
+/* For other contexts where balance-large might be on dark backgrounds */
+.dark .balance-large {
+  color: #212121;
+}
+
+@media (min-width: 640px) {
+  .balance-large {
+    font-size: 48px;
+  }
+}
+
+.balance-small {
+  font-size: 13px;
+  color: #757575;
+  margin-top: 4px;
+}
+
+/* In dark mode, keep label readable on white overview card */
+.dark .overview-card .balance-small {
+  color: #757575;
+}
+
+.dark .balance-small {
+  color: #757575;
+}
+
+@media (min-width: 640px) {
+  .balance-small {
+    font-size: 14px;
+  }
+}
+
+/* Stat Tiles Grid */
+/* Stat Tiles Grid - Responsive */
+.stat-tiles-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+@media (min-width: 640px) {
+  .stat-tiles-grid {
+    gap: 16px;
+  }
+}
+
+@media (min-width: 1024px) {
+  .stat-tiles-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+/* Dashboard Grid */
+/* Dashboard Grid - Stack on Mobile */
+.dashboard-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 24px;
+  margin-bottom: 80px; /* Space for mobile bottom tabs */
+}
+
+@media (min-width: 1024px) {
+  .dashboard-grid {
+    grid-template-columns: 2fr 1fr;
+    margin-bottom: 48px;
+  }
+}
+
+/* Account List Item */
+.account-item {
+  display: block;
+  padding: 16px;
+  border: 1px solid #EAEAEA;
+  border-radius: 8px;
+  margin-bottom: 12px;
+  transition: all 0.15s;
+  background-color: white;
+}
+
+.dark .account-item {
+  border-color: #374151;
+  background-color: #1f2937;
+}
+
+.account-item:hover {
+  border-color: #D32F2F;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.04);
+}
+
+.dark .account-item:hover {
+  border-color: #EF5350;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+/* Transaction List */
+.transaction-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 0;
+  border-bottom: 1px solid #F5F5F5;
+}
+
+.transaction-item:last-child {
+  border-bottom: none;
+}
+
+.transaction-item:hover {
+  background: #FAFAFA;
+  margin: 0 -16px;
+  padding-left: 16px;
+  padding-right: 16px;
+}
+
+/* Admin Sidebar */
+.admin-layout {
+  display: flex;
+  min-height: 100vh;
+}
+
+.admin-sidebar {
+  width: 240px;
+  background: white;
+  border-right: 1px solid #EAEAEA;
+  position: fixed;
+  height: 100vh;
+  overflow-y: auto;
+}
+
+.admin-content {
+  margin-left: 240px;
+  flex: 1;
+  background: white;
+  min-height: 100vh;
+  /* Fix: Use box-sizing and explicit width to prevent overflow */
+  box-sizing: border-box;
+  width: calc(100vw - 240px);
+  max-width: calc(100vw - 240px);
+  min-width: 0; /* Critical: Allow flex child to shrink below content size */
+  overflow-x: hidden; /* Contain any internal overflow - table has its own scroll */
+}
+
+/* Smooth section content transitions - prevents layout shift during section switch */
+.admin-section-content {
+  min-height: calc(100vh - 140px); /* Account for header and padding */
+  position: relative;
+}
+
+.sidebar-nav-item {
+  display: flex;
+  align-items: center;
+  padding: 12px 16px;
+  margin: 4px 8px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  color: #616161;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.sidebar-nav-item:hover {
+  background: #FAFAFA;
+  color: #212121;
+}
+
+.sidebar-nav-item-active {
+  background: #FFEBEE;
+  color: #D32F2F;
+  border-left: 3px solid #D32F2F;
+  margin-left: 8px;
+  padding-left: 13px;
+}
+
+/* Mobile Bottom Tabs */
+@media (max-width: 768px) {
+  .admin-sidebar {
+    display: none;
+  }
+  
+  .admin-content {
+    margin-left: 0;
+    padding-bottom: 70px;
+  }
+  
+  .bottom-tabs-mobile {
+    display: flex;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: white;
+    border-top: 1px solid #EAEAEA;
+    height: 56px;
+    justify-content: space-around;
+    z-index: 100;
+  }
+  
+  .bottom-tab-item {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    color: #9E9E9E;
+    font-size: 11px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: color 0.15s;
+  }
+  
+  .bottom-tab-item-active {
+    color: #D32F2F;
+  }
+}
+
+/* Loading Skeletons */
+.skeleton-text {
+  height: 16px;
+  background: linear-gradient(90deg, #F5F5F5 25%, #EEEEEE 50%, #F5F5F5 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+  border-radius: 4px;
+}
+
+.skeleton-card {
+  height: 120px;
+  background: linear-gradient(90deg, #F5F5F5 25%, #EEEEEE 50%, #F5F5F5 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+  border-radius: 12px;
+}
+
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+/* Empty States */
+.empty-state {
+  text-align: center;
+  padding: 48px 24px;
+  color: #9E9E9E;
+}
+
+.empty-state-icon {
+  font-size: 48px;
+  margin-bottom: 16px;
+  opacity: 0.3;
+}
+
+.empty-state-text {
+  font-size: 14px;
+  color: #757575;
+  margin-bottom: 16px;
+}
+
+/* Detail Drawer */
+.drawer-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.3);
+  z-index: 40;
+}
+
+.drawer {
+  position: fixed;
+  right: 0;
+  top: 0;
+  height: 100vh;
+  width: 480px;
+  background: white;
+  border-left: 1px solid #EAEAEA;
+  box-shadow: -4px 0 12px rgba(0, 0, 0, 0.08);
+  z-index: 50;
+  overflow-y: auto;
+  transform: translateX(100%);
+  transition: transform 0.3s ease;
+}
+
+.drawer-open {
+  transform: translateX(0);
+}
+
+/* Amount Display */
+.amount-positive {
+  color: #2E7D32;
+  font-weight: 600;
+}
+
+.amount-negative {
+  color: #C62828;
+  font-weight: 600;
+}
+
+.amount-neutral {
+  color: #757575;
+  font-weight: 600;
+}
+
+/* KYC Progress Steps */
+.progress-steps {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 32px;
+}
+
+.progress-step {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex: 1;
+  position: relative;
+}
+
+.progress-step-circle {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 2px solid #E0E0E0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: white;
+  font-weight: 600;
+  font-size: 14px;
+  color: #9E9E9E;
+  z-index: 1;
+}
+
+.progress-step-active .progress-step-circle {
+  border-color: #D32F2F;
+  background: #D32F2F;
+  color: white;
+}
+
+.progress-step-complete .progress-step-circle {
+  border-color: #2E7D32;
+  background: #2E7D32;
+  color: white;
+}
+
+.progress-step-line {
+  position: absolute;
+  top: 16px;
+  left: 50%;
+  width: 100%;
+  height: 2px;
+  background: #E0E0E0;
+  z-index: 0;
+}
+
+.progress-step-active .progress-step-line,
+.progress-step-complete .progress-step-line {
+  background: #D32F2F;
+}
+
+/* Remove all blue gradients and replace with solid */
+.hero-gradient,
+.page-background,
+.balance-card,
+.card-blue-accent,
+.header-gradient {
+  background: white !important;
+}

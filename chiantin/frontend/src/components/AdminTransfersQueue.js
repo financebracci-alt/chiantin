@@ -1,0 +1,797 @@
+// Admin Transfers Queue with Pagination
+import React, { useState, useEffect, useCallback, useRef } from 'react';
+import { useSearchParams } from 'react-router-dom';
+import api from '../api';
+import { useToast } from './Toast';
+import { formatCurrency } from '../utils/currency';
+import { getStatusBadgeClasses } from '../utils/transactions';
+import { CopyButton, EmptyState, ClearFiltersButton } from './AdminUIComponents';
+
+export function AdminTransfersQueue() {
+  const toast = useToast();
+  // Use ref to keep toast stable and prevent fetchTransfers from being recreated
+  const toastRef = useRef(toast);
+  toastRef.current = toast;
+  
+  // Track if this is initial mount to avoid showing skeleton on fast loads
+  const isInitialMount = useRef(true);
+  
+  const [searchParams, setSearchParams] = useSearchParams();
+  
+  // Initialize state from URL params
+  const getInitialTab = () => {
+    const urlTab = searchParams.get('tab');
+    return ['SUBMITTED', 'COMPLETED', 'REJECTED', 'DELETED'].includes(urlTab) ? urlTab : 'SUBMITTED';
+  };
+  const getInitialPage = () => {
+    const urlPage = parseInt(searchParams.get('page'));
+    return !isNaN(urlPage) && urlPage > 0 ? urlPage : 1;
+  };
+  const getInitialPageSize = () => {
+    const urlSize = parseInt(searchParams.get('pageSize'));
+    return [20, 50, 100].includes(urlSize) ? urlSize : 20;
+  };
+  const getInitialSearch = () => searchParams.get('search') || '';
+  
+  const [activeTab, setActiveTabInternal] = useState(getInitialTab);
+  const [transfers, setTransfers] = useState([]);
+  const [selectedTransfer, setSelectedTransfer] = useState(null);
+  // Start with loading false to prevent skeleton flash on initial mount
+  // The skeleton will show only after a brief delay if data is still loading
+  const [loading, setLoading] = useState(false);
+  const [showSkeleton, setShowSkeleton] = useState(false);
+  const [rejectReason, setRejectReason] = useState('');
+  const [editingRejectReason, setEditingRejectReason] = useState(false);
+  const [editedRejectReason, setEditedRejectReason] = useState('');
+  const [savingRejectReason, setSavingRejectReason] = useState(false);
+  const [deletingTransfer, setDeletingTransfer] = useState(false);
+  const [restoringTransfer, setRestoringTransfer] = useState(false);
+  const [showRestoreModal, setShowRestoreModal] = useState(false);
+  const [restoreReason, setRestoreReason] = useState('');
+  const [rowRestoreTransfer, setRowRestoreTransfer] = useState(null); // For row-level restore
+  
+  // Search state
+  const [searchQuery, setSearchQuery] = useState(getInitialSearch);
+  const [debouncedSearch, setDebouncedSearch] = useState(getInitialSearch);
+  const [isSearchMode, setIsSearchMode] = useState(!!getInitialSearch());
+  
+  // Track previous search to prevent unnecessary URL updates
+  const prevSearchRef = useRef(getInitialSearch());
+  
+  // Pagination state
+  const [currentPage, setCurrentPageInternal] = useState(getInitialPage);
+  const [pageSize, setPageSizeInternal] = useState(getInitialPageSize);
+  const [pagination, setPagination] = useState({
+    total: 0,
+    page: 1,
+    page_size: 20,
+    total_pages: 1,
+    has_next: false,
+    has_prev: false
+  });
+
+  // Update URL when state changes
+  const updateUrlParams = useCallback((updates) => {
+    const newParams = new URLSearchParams(searchParams);
+    // Keep the section param (sidebar uses 'ledger' for Transfers Queue)
+    if (!newParams.has('section')) {
+      newParams.set('section', 'ledger');
+    }
+    Object.entries(updates).forEach(([key, value]) => {
+      if (value === null || value === undefined || value === '' || (key === 'page' && value === 1) || (key === 'pageSize' && value === 20) || (key === 'tab' && value === 'SUBMITTED')) {
+        newParams.delete(key);
+      } else {
+        newParams.set(key, value);
+      }
+    });
+    setSearchParams(newParams, { replace: true });
+  }, [searchParams, setSearchParams]);
+
+  // Wrapper functions to update state and URL
+  const setActiveTab = useCallback((tab) => {
+    setActiveTabInternal(tab);
+    setCurrentPageInternal(1);
+    updateUrlParams({ tab, page: null, search: null });
+  }, [updateUrlParams]);
+
+  const setCurrentPage = useCallback((page) => {
+    setCurrentPageInternal(page);
+    updateUrlParams({ page });
+  }, [updateUrlParams]);
+
+  const setPageSize = useCallback((size) => {
+    setPageSizeInternal(size);
+    setCurrentPageInternal(1);
+    updateUrlParams({ pageSize: size, page: null });
+  }, [updateUrlParams]);
+
+  // Debounce search input - only update URL when search actually changes
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      // Only update if search value actually changed
+      if (searchQuery !== prevSearchRef.current) {
+        setDebouncedSearch(searchQuery);
+        prevSearchRef.current = searchQuery;
+        if (searchQuery) {
+          updateUrlParams({ search: searchQuery, page: null });
+        } else {
+          updateUrlParams({ search: null });
+        }
+      }
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [searchQuery, updateUrlParams]);
+
+  // Reset page when search, tab, or page size changes
+  useEffect(() => {
+    if (currentPage !== 1) {
+      setCurrentPageInternal(1);
+    }
+  }, [debouncedSearch, activeTab, pageSize]);
+
+  // Delayed skeleton - only show after 150ms to prevent flash on fast loads
+  useEffect(() => {
+    let timer;
+    if (loading) {
+      timer = setTimeout(() => setShowSkeleton(true), 150);
+    } else {
+      setShowSkeleton(false);
+    }
+    return () => clearTimeout(timer);
+  }, [loading]);
+
+  const fetchTransfers = useCallback(async () => {
+    setLoading(true);
+    try {
+      const params = new URLSearchParams({
+        page: currentPage.toString(),
+        page_size: pageSize.toString()
+      });
+      
+      // If searching, search across ALL statuses
+      if (debouncedSearch.trim()) {
+        params.append('search', debouncedSearch.trim());
+        setIsSearchMode(true);
+      } else {
+        params.append('status', activeTab);
+        setIsSearchMode(false);
+      }
+      
+      const response = await api.get(`/admin/transfers?${params.toString()}`);
+      setTransfers(response.data.data || []);
+      
+      if (response.data.pagination) {
+        setPagination(response.data.pagination);
+      }
+    } catch (err) {
+      toastRef.current.error('Failed to load transfers');
+      setTransfers([]);
+    } finally {
+      setLoading(false);
+      isInitialMount.current = false;
+    }
+  }, [activeTab, debouncedSearch, currentPage, pageSize]);
+
+  useEffect(() => {
+    setSelectedTransfer(null);
+    fetchTransfers();
+  }, [fetchTransfers]);
+
+  const handleApprove = async (transfer) => {
+    try {
+      await api.post(`/admin/transfers/${transfer.id}/approve`);
+      toast.success('Transfer approved successfully');
+      setSelectedTransfer(null);
+      fetchTransfers();
+    } catch (err) {
+      toast.error('Failed to approve: ' + (err.response?.data?.detail || err.message));
+    }
+  };
+
+  const handleReject = async (transfer) => {
+    if (!rejectReason.trim()) {
+      toast.error('Please enter a rejection reason');
+      return;
+    }
+    try {
+      await api.post(`/admin/transfers/${transfer.id}/reject`, { reason: rejectReason });
+      toast.success('Transfer rejected');
+      setSelectedTransfer(null);
+      setRejectReason('');
+      fetchTransfers();
+    } catch (err) {
+      toast.error('Failed to reject: ' + (err.response?.data?.detail || err.message));
+    }
+  };
+
+  const handleUpdateRejectReason = async () => {
+    if (!editedRejectReason.trim()) {
+      toast.error('Please enter a rejection reason');
+      return;
+    }
+    setSavingRejectReason(true);
+    try {
+      await api.patch(`/admin/transfers/${selectedTransfer.id}/reject-reason`, { reason: editedRejectReason });
+      toast.success('Rejection reason updated');
+      setSelectedTransfer(prev => ({...prev, reject_reason: editedRejectReason}));
+      setEditingRejectReason(false);
+      fetchTransfers();
+    } catch (err) {
+      toast.error('Failed to update: ' + (err.response?.data?.detail || err.message));
+    } finally {
+      setSavingRejectReason(false);
+    }
+  };
+
+  const handleDelete = async (transfer) => {
+    if (!window.confirm(`Are you sure you want to delete this transfer?\n\nBeneficiary: ${transfer.beneficiary_name}\nAmount: €${(transfer.amount / 100).toFixed(2)}\n\nThe transfer will be marked as deleted and removed from the queue.`)) {
+      return;
+    }
+    setDeletingTransfer(true);
+    try {
+      await api.delete(`/admin/transfers/${transfer.id}`);
+      toastRef.current.success('Transfer deleted');
+      setSelectedTransfer(null);
+      fetchTransfers();
+    } catch (err) {
+      toastRef.current.error('Failed to delete: ' + (err.response?.data?.detail || err.message));
+    } finally {
+      setDeletingTransfer(false);
+    }
+  };
+
+  // Handle restore transfer (for soft-deleted transfers only)
+  // Supports both detail view and row-level restore
+  const handleRestore = async (transferToRestore = null) => {
+    const transfer = transferToRestore || rowRestoreTransfer || selectedTransfer;
+    if (!transfer) return;
+    
+    setRestoringTransfer(true);
+    try {
+      const response = await api.post(`/admin/transfers/${transfer.id}/restore`, {
+        reason: restoreReason || null
+      });
+      
+      toastRef.current.success(
+        `Transfer restored successfully. Status: ${response.data.restored_status || 'Previous status'}`
+      );
+      setSelectedTransfer(null);
+      setShowRestoreModal(false);
+      setRowRestoreTransfer(null);
+      setRestoreReason('');
+      fetchTransfers();
+    } catch (err) {
+      const errorMsg = err.response?.data?.detail || err.message;
+      toastRef.current.error('Failed to restore: ' + errorMsg);
+    } finally {
+      setRestoringTransfer(false);
+    }
+  };
+
+  // Open row-level restore modal
+  const openRowRestoreModal = (transfer) => {
+    setRowRestoreTransfer(transfer);
+    setRestoreReason('');
+  };
+
+  const handleTabChange = (newTab) => {
+    setActiveTab(newTab);
+    setSelectedTransfer(null);
+  };
+
+  const handlePageChange = (newPage) => {
+    if (newPage >= 1 && newPage <= pagination.total_pages) {
+      setCurrentPage(newPage);
+    }
+  };
+
+  const handlePageSizeChange = (newSize) => {
+    setPageSize(newSize);
+  };
+
+  // Calculate showing range
+  const getShowingRange = () => {
+    if (pagination.total === 0) return { start: 0, end: 0 };
+    const start = ((pagination.page || currentPage) - 1) * (pagination.page_size || pageSize) + 1;
+    const end = Math.min(start + transfers.length - 1, pagination.total);
+    return { start, end };
+  };
+
+  const showingRange = getShowingRange();
+
+  return (
+    <div>
+      <h2 className="text-2xl font-semibold mb-6">Transfers Queue</h2>
+      
+      {/* Search Bar */}
+      <div className="mb-6">
+        <div className="relative">
+          <input
+            type="text"
+            placeholder="Search by beneficiary, sender, email, IBAN, reference... (searches ALL statuses)"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="w-full px-4 py-2 pr-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
+            data-testid="search-input"
+          />
+          {searchQuery && (
+            <button
+              onClick={() => setSearchQuery('')}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+              title="Clear search"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          )}
+        </div>
+        {isSearchMode && (
+          <div className="flex items-center gap-2 mt-2">
+            <span className="inline-flex items-center gap-1 px-2 py-1 bg-blue-50 text-blue-700 text-xs rounded-full">
+              <span className="font-medium">Search:</span>
+              <span>"{debouncedSearch}"</span>
+            </span>
+            <span className="text-sm text-blue-600">
+              Found {pagination.total} result(s) across ALL transfers
+            </span>
+            <ClearFiltersButton onClick={() => setSearchQuery('')} hasActiveFilters={true} />
+          </div>
+        )}
+      </div>
+      
+      {/* Pagination Controls - TOP (Professional Admin Style) */}
+      <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mb-4 pb-4 border-b border-gray-200">
+        <div className="flex items-center gap-4">
+          <span className="text-sm text-gray-600">
+            {isSearchMode 
+              ? `Found ${pagination.total} results matching "${debouncedSearch}"`
+              : `Showing ${showingRange.start}–${showingRange.end} of ${pagination.total} transfers`
+            }
+          </span>
+          <div className="flex items-center gap-2">
+            <span className="text-sm text-gray-600">Show:</span>
+            <select
+              value={pageSize}
+              onChange={(e) => handlePageSizeChange(Number(e.target.value))}
+              className="border border-gray-300 rounded px-2 py-1 text-sm"
+              data-testid="page-size-select"
+            >
+              <option value={20}>20</option>
+              <option value={50}>50</option>
+              <option value={100}>100</option>
+            </select>
+            <span className="text-sm text-gray-600">per page</span>
+          </div>
+        </div>
+        
+        {pagination.total_pages > 1 && (
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => handlePageChange(1)}
+              disabled={!pagination.has_prev}
+              className={`px-3 py-1 text-sm rounded ${
+                pagination.has_prev 
+                  ? 'bg-gray-200 hover:bg-gray-300 text-gray-700' 
+                  : 'bg-gray-100 text-gray-400 cursor-not-allowed'
+              }`}
+              data-testid="pagination-first"
+            >
+              First
+            </button>
+            <button
+              onClick={() => handlePageChange(currentPage - 1)}
+              disabled={!pagination.has_prev}
+              className={`px-3 py-1 text-sm rounded ${
+                pagination.has_prev 
+                  ? 'bg-gray-200 hover:bg-gray-300 text-gray-700' 
+                  : 'bg-gray-100 text-gray-400 cursor-not-allowed'
+              }`}
+              data-testid="pagination-prev"
+            >
+              Previous
+            </button>
+            
+            <span className="px-3 py-1 text-sm text-gray-700">
+              Page {pagination.page || currentPage} of {pagination.total_pages}
+            </span>
+            
+            <button
+              onClick={() => handlePageChange(currentPage + 1)}
+              disabled={!pagination.has_next}
+              className={`px-3 py-1 text-sm rounded ${
+                pagination.has_next 
+                  ? 'bg-gray-200 hover:bg-gray-300 text-gray-700' 
+                  : 'bg-gray-100 text-gray-400 cursor-not-allowed'
+              }`}
+              data-testid="pagination-next"
+            >
+              Next
+            </button>
+            <button
+              onClick={() => handlePageChange(pagination.total_pages)}
+              disabled={!pagination.has_next}
+              className={`px-3 py-1 text-sm rounded ${
+                pagination.has_next 
+                  ? 'bg-gray-200 hover:bg-gray-300 text-gray-700' 
+                  : 'bg-gray-100 text-gray-400 cursor-not-allowed'
+              }`}
+              data-testid="pagination-last"
+            >
+              Last
+            </button>
+          </div>
+        )}
+      </div>
+      
+      {/* Tab Navigation */}
+      <div className="flex space-x-4 mb-4">
+        {['SUBMITTED', 'COMPLETED', 'REJECTED', 'DELETED'].map(tab => (
+          <button 
+            key={tab} 
+            onClick={() => handleTabChange(tab)} 
+            className={`px-4 py-2 rounded transition-colors ${
+              activeTab === tab && !isSearchMode
+                ? tab === 'DELETED' 
+                  ? 'bg-gray-700 text-white'
+                  : 'bg-red-600 text-white' 
+                : 'bg-gray-100 hover:bg-gray-200 text-gray-700'
+            }`}
+            data-testid={`tab-${tab.toLowerCase()}`}
+          >
+            {tab}
+          </button>
+        ))}
+      </div>
+      
+      {showSkeleton ? (
+        <div className="skeleton-card h-64"></div>
+      ) : selectedTransfer ? (
+        <div className="card p-6">
+          <div className="flex justify-between items-start mb-4">
+            <h3 className="text-lg font-semibold">Transfer Details</h3>
+            <button onClick={() => setSelectedTransfer(null)} className="text-gray-600 hover:text-gray-900 text-xl">×</button>
+          </div>
+          
+          <div className="grid grid-cols-2 gap-4 mb-6">
+            <div className="flex items-center gap-2">
+              <span className="text-sm text-gray-600">Reference:</span> 
+              <span className="font-mono text-sm">{selectedTransfer.reference_number || selectedTransfer.id?.substring(0, 8)}</span>
+              <CopyButton value={selectedTransfer.reference_number || selectedTransfer.id?.substring(0, 8)} iconOnly size="xs" />
+            </div>
+            <div><span className="text-sm text-gray-600">Status:</span> <span className={`badge ${getStatusBadgeClasses(selectedTransfer.status)}`}>{selectedTransfer.status}</span></div>
+            <div><span className="text-sm text-gray-600">Amount:</span> <span className="font-semibold">{formatCurrency(selectedTransfer.amount)}</span></div>
+            <div><span className="text-sm text-gray-600">Date:</span> <span className="text-sm">{new Date(selectedTransfer.created_at).toLocaleString()}</span></div>
+            <div><span className="text-sm text-gray-600">Sender:</span> <span className="font-medium">{selectedTransfer.sender_name}</span></div>
+            <div className="flex items-center gap-2">
+              <span className="text-sm text-gray-600">Sender Email:</span> 
+              <span className="text-sm">{selectedTransfer.sender_email}</span>
+              <CopyButton value={selectedTransfer.sender_email} iconOnly size="xs" />
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="text-sm text-gray-600">Sender IBAN:</span> 
+              <span className="font-mono text-sm">{selectedTransfer.sender_iban}</span>
+              <CopyButton value={selectedTransfer.sender_iban} iconOnly size="xs" />
+            </div>
+            <div><span className="text-sm text-gray-600">Beneficiary:</span> <span className="font-medium">{selectedTransfer.beneficiary_name}</span></div>
+            <div className="col-span-2 flex items-center gap-2">
+              <span className="text-sm text-gray-600">Beneficiary IBAN:</span> 
+              <span className="font-mono text-sm">{selectedTransfer.beneficiary_iban}</span>
+              <CopyButton value={selectedTransfer.beneficiary_iban} iconOnly size="xs" />
+            </div>
+            <div className="col-span-2"><span className="text-sm text-gray-600">Details:</span> <span className="text-sm">{selectedTransfer.details || 'N/A'}</span></div>
+            
+            {selectedTransfer.status === 'REJECTED' && (
+              <div className="col-span-2 bg-red-50 p-3 rounded border border-red-200">
+                <div className="flex justify-between items-start">
+                  <div>
+                    <span className="text-sm text-gray-600 font-medium">Rejection Reason:</span>
+                    {editingRejectReason ? (
+                      <div className="mt-2">
+                        <textarea
+                          value={editedRejectReason}
+                          onChange={(e) => setEditedRejectReason(e.target.value)}
+                          className="w-full p-2 border border-gray-300 rounded text-sm"
+                          rows={2}
+                        />
+                        <div className="flex gap-2 mt-2">
+                          <button
+                            onClick={handleUpdateRejectReason}
+                            disabled={savingRejectReason}
+                            className="px-3 py-1 bg-blue-600 text-white text-sm rounded hover:bg-blue-700 disabled:opacity-50"
+                          >
+                            {savingRejectReason ? 'Saving...' : 'Save'}
+                          </button>
+                          <button
+                            onClick={() => {
+                              setEditingRejectReason(false);
+                              setEditedRejectReason(selectedTransfer.reject_reason || '');
+                            }}
+                            className="px-3 py-1 bg-gray-200 text-gray-700 text-sm rounded hover:bg-gray-300"
+                          >
+                            Cancel
+                          </button>
+                        </div>
+                      </div>
+                    ) : (
+                      <p className="text-red-700 text-sm mt-1">{selectedTransfer.reject_reason || 'No reason provided'}</p>
+                    )}
+                  </div>
+                  {!editingRejectReason && (
+                    <button
+                      onClick={() => {
+                        setEditedRejectReason(selectedTransfer.reject_reason || '');
+                        setEditingRejectReason(true);
+                      }}
+                      className="text-sm text-blue-600 hover:text-blue-800"
+                    >
+                      Edit
+                    </button>
+                  )}
+                </div>
+              </div>
+            )}
+          </div>
+          
+          {/* Deletion Info (for deleted transfers) */}
+          {selectedTransfer.is_deleted && (
+            <div className="col-span-2 bg-gray-100 p-3 rounded border border-gray-300 mt-4">
+              <div className="font-medium text-gray-700 mb-2">Deletion Information</div>
+              <div className="grid grid-cols-2 gap-2 text-sm">
+                <div><span className="text-gray-600">Deleted At:</span> {selectedTransfer.deleted_at ? new Date(selectedTransfer.deleted_at).toLocaleString() : 'Unknown'}</div>
+                <div><span className="text-gray-600">Deleted By:</span> {selectedTransfer.deleted_by_email || 'Unknown'}</div>
+                <div><span className="text-gray-600">Previous Status:</span> <span className="font-medium">{selectedTransfer.previous_status || selectedTransfer.status}</span></div>
+              </div>
+            </div>
+          )}
+          
+          {/* Action Buttons */}
+          <div className="flex flex-wrap gap-3 pt-4 border-t border-gray-200">
+            {selectedTransfer.status === 'SUBMITTED' && !selectedTransfer.is_deleted && (
+              <>
+                <button onClick={() => handleApprove(selectedTransfer)} className="btn-primary">
+                  Approve
+                </button>
+                <div className="flex-1">
+                  <input
+                    type="text"
+                    placeholder="Rejection reason..."
+                    value={rejectReason}
+                    onChange={(e) => setRejectReason(e.target.value)}
+                    className="input-field text-sm"
+                  />
+                </div>
+                <button onClick={() => handleReject(selectedTransfer)} className="bg-orange-600 text-white px-4 py-2 rounded hover:bg-orange-700">
+                  Reject
+                </button>
+              </>
+            )}
+            
+            {/* Show Restore button for deleted transfers */}
+            {selectedTransfer.is_deleted && (
+              <button 
+                onClick={() => setShowRestoreModal(true)} 
+                disabled={restoringTransfer}
+                className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 disabled:opacity-50"
+                data-testid="restore-transfer-btn"
+              >
+                {restoringTransfer ? 'Restoring...' : 'Restore Transfer'}
+              </button>
+            )}
+            
+            {/* Show Delete button only for non-deleted transfers */}
+            {!selectedTransfer.is_deleted && (
+              <button 
+                onClick={() => handleDelete(selectedTransfer)} 
+                disabled={deletingTransfer}
+                className="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700 disabled:opacity-50"
+              >
+                {deletingTransfer ? 'Deleting...' : 'Delete'}
+              </button>
+            )}
+            
+            <button onClick={() => setSelectedTransfer(null)} className="btn-secondary ml-auto">
+              Close
+            </button>
+          </div>
+          
+          {/* Restore Confirmation Modal */}
+          {showRestoreModal && (
+            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+              <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4 shadow-xl">
+                <h3 className="text-lg font-semibold mb-4">Restore Transfer</h3>
+                <div className="mb-4">
+                  <p className="text-gray-700 mb-3">
+                    Are you sure you want to restore this transfer?
+                  </p>
+                  <div className="bg-blue-50 border border-blue-200 rounded p-3 mb-3">
+                    <p className="text-sm text-blue-800">
+                      <strong>Important:</strong> This will restore the transfer record visibility only. 
+                      No financial transaction will be re-executed.
+                    </p>
+                  </div>
+                  <div className="text-sm text-gray-600 mb-3">
+                    <div><strong>Beneficiary:</strong> {selectedTransfer.beneficiary_name}</div>
+                    <div><strong>Amount:</strong> {formatCurrency(selectedTransfer.amount)}</div>
+                    <div><strong>Will be restored to:</strong> {selectedTransfer.previous_status || selectedTransfer.status}</div>
+                  </div>
+                  <div className="mb-3">
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Reason for restore (optional)
+                    </label>
+                    <textarea
+                      value={restoreReason}
+                      onChange={(e) => setRestoreReason(e.target.value)}
+                      className="w-full p-2 border border-gray-300 rounded text-sm"
+                      placeholder="Enter reason for restoring this transfer..."
+                      rows={2}
+                    />
+                  </div>
+                </div>
+                <div className="flex justify-end gap-3">
+                  <button
+                    onClick={() => {
+                      setShowRestoreModal(false);
+                      setRestoreReason('');
+                    }}
+                    className="px-4 py-2 bg-gray-200 text-gray-700 rounded hover:bg-gray-300"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={() => handleRestore(selectedTransfer)}
+                    disabled={restoringTransfer}
+                    className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 disabled:opacity-50"
+                    data-testid="confirm-restore-btn"
+                  >
+                    {restoringTransfer ? 'Restoring...' : 'Confirm Restore'}
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+      ) : (
+        <>
+          {/* Table */}
+          <div className="table-wrapper">
+            <table className="table-main">
+              <thead>
+                <tr>
+                  <th>Date</th>
+                  <th>Sender</th>
+                  <th>Beneficiary</th>
+                  <th>Amount</th>
+                  <th>Status</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody>
+                {transfers.length === 0 ? (
+                  <tr>
+                    <td colSpan="6">
+                      <EmptyState 
+                        title={isSearchMode ? 'No results found' : `No ${activeTab.toLowerCase()} transfers`}
+                        description={isSearchMode 
+                          ? `No transfers match "${debouncedSearch}"` 
+                          : activeTab === 'DELETED' 
+                            ? 'No deleted transfers to display'
+                            : `No transfers with ${activeTab} status`
+                        }
+                        action={isSearchMode ? (
+                          <button onClick={() => setSearchQuery('')} className="btn-text text-sm">
+                            Clear search
+                          </button>
+                        ) : null}
+                      />
+                    </td>
+                  </tr>
+                ) : (
+                  transfers.map(t => (
+                    <tr key={t.id} className="hover:bg-gray-50">
+                      <td className="text-xs">{new Date(t.created_at).toLocaleString()}</td>
+                      <td>
+                        <div className="font-medium text-sm">{t.sender_name}</div>
+                        <div className="text-xs text-gray-500">{t.sender_email}</div>
+                      </td>
+                      <td>
+                        <div className="font-medium text-sm">{t.beneficiary_name}</div>
+                        <div className="text-xs text-gray-500 font-mono">{t.beneficiary_iban?.substring(0, 12)}...</div>
+                      </td>
+                      <td className="font-semibold">{formatCurrency(t.amount)}</td>
+                      <td>
+                        <span className={`badge ${getStatusBadgeClasses(t.status)}`}>
+                          {t.status}
+                        </span>
+                      </td>
+                      <td>
+                        <div className="flex gap-2">
+                          <button 
+                            onClick={() => setSelectedTransfer(t)} 
+                            className="btn-text text-xs"
+                            data-testid={`view-btn-${t.id}`}
+                          >
+                            Open
+                          </button>
+                          {/* Row-level Restore button for deleted transfers */}
+                          {t.is_deleted && (
+                            <button 
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                openRowRestoreModal(t);
+                              }}
+                              className="text-xs px-2 py-1 bg-green-100 text-green-700 rounded hover:bg-green-200 transition-colors"
+                              data-testid={`restore-row-btn-${t.id}`}
+                            >
+                              Restore
+                            </button>
+                          )}
+                        </div>
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          </div>
+          
+          {/* Row-level Restore Confirmation Modal */}
+          {rowRestoreTransfer && (
+            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+              <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4 shadow-xl">
+                <h3 className="text-lg font-semibold mb-4">Restore Transfer</h3>
+                <div className="mb-4">
+                  <p className="text-gray-700 mb-3">
+                    Are you sure you want to restore this transfer?
+                  </p>
+                  <div className="bg-blue-50 border border-blue-200 rounded p-3 mb-3">
+                    <p className="text-sm text-blue-800">
+                      <strong>Important:</strong> This will restore the transfer record visibility only. 
+                      No financial transaction will be re-executed.
+                    </p>
+                  </div>
+                  <div className="text-sm text-gray-600 mb-3">
+                    <div><strong>Beneficiary:</strong> {rowRestoreTransfer.beneficiary_name}</div>
+                    <div><strong>Amount:</strong> {formatCurrency(rowRestoreTransfer.amount)}</div>
+                    <div><strong>Will be restored to:</strong> {rowRestoreTransfer.previous_status || rowRestoreTransfer.status}</div>
+                  </div>
+                  <div className="mb-3">
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Reason for restore (optional)
+                    </label>
+                    <textarea
+                      value={restoreReason}
+                      onChange={(e) => setRestoreReason(e.target.value)}
+                      className="w-full p-2 border border-gray-300 rounded text-sm"
+                      placeholder="Enter reason for restoring this transfer..."
+                      rows={2}
+                    />
+                  </div>
+                </div>
+                <div className="flex justify-end gap-3">
+                  <button
+                    onClick={() => {
+                      setRowRestoreTransfer(null);
+                      setRestoreReason('');
+                    }}
+                    className="px-4 py-2 bg-gray-200 text-gray-700 rounded hover:bg-gray-300"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={() => handleRestore(rowRestoreTransfer)}
+                    disabled={restoringTransfer}
+                    className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 disabled:opacity-50"
+                    data-testid="confirm-row-restore-btn"
+                  >
+                    {restoringTransfer ? 'Restoring...' : 'Confirm Restore'}
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+        </>
+      )}
+    </div>
+  );
+}
