@@ -11,7 +11,7 @@ from typing import Optional, Dict, Any
 import io
 
 class KYCFlowTester:
-    def __init__(self, base_url="https://user-alert-system-2.preview.emergentagent.com"):
+    def __init__(self, base_url="https://bank-staging.preview.emergentagent.com"):
         self.base_url = base_url
         self.admin_token = None
         self.user_token = None

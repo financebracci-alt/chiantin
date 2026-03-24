@@ -18,7 +18,7 @@ import time
 from datetime import datetime
 
 # Use the public URL from environment
-BASE_URL = os.environ.get('REACT_APP_BACKEND_URL', 'https://user-alert-system-2.preview.emergentagent.com').rstrip('/')
+BASE_URL = os.environ.get('REACT_APP_BACKEND_URL', 'https://bank-staging.preview.emergentagent.com').rstrip('/')
 
 # Test credentials
 TEST_EMAIL = "ashleyalt005@gmail.com"

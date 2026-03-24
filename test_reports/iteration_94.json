@@ -56,7 +56,7 @@
     "test_user": "ashleyalt005@gmail.com / 123456789",
     "admin": "admin@ecommbx.io / Admin@123456"
   },
-  "test_environment": "https://user-alert-system-2.preview.emergentagent.com",
+  "test_environment": "https://bank-staging.preview.emergentagent.com",
   "test_date": "2026-02-20",
   "email_verification": {
     "rejection_email_sent_flag": "TRUE after successful rejection",

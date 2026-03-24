@@ -88,5 +88,5 @@
     "completed_transfers": 5,
     "pages_with_20_per_page": 2
   },
-  "test_environment": "https://user-alert-system-2.preview.emergentagent.com"
+  "test_environment": "https://bank-staging.preview.emergentagent.com"
 }

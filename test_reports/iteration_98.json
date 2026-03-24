@@ -86,7 +86,7 @@
     "delete_confirm": "[data-testid='delete-confirm']",
     "delete_cancel": "[data-testid='delete-cancel']"
   },
-  "test_environment": "https://user-alert-system-2.preview.emergentagent.com",
+  "test_environment": "https://bank-staging.preview.emergentagent.com",
   "current_state": {
     "pending_card_requests": 9,
     "fulfilled_card_requests": "some (tab tested)",

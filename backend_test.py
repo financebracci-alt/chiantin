@@ -14,7 +14,7 @@ import uuid
 import time
 
 class SmartNotificationCountingTester:
-    def __init__(self, base_url="https://user-alert-system-2.preview.emergentagent.com"):
+    def __init__(self, base_url="https://bank-staging.preview.emergentagent.com"):
         self.base_url = base_url
         self.admin_token = None
         self.test_admin_user_id = None
