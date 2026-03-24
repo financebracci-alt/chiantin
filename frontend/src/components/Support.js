@@ -1299,7 +1299,7 @@ function TicketDetails({ ticket, onUpdate, onDelete, isAdmin = false, onRefreshT
           >
             <div className="flex items-center justify-between mb-2">
               <span className={`text-sm font-medium ${isDark ? 'text-white' : 'text-gray-900'}`}>
-                {msg.is_staff ? 'ECOMMBX' : msg.sender_name}
+                {msg.is_staff ? 'CHIANTIN' : msg.sender_name}
                 {msg.is_staff && (
                   <span className="ml-2 text-xs bg-blue-600 text-white px-2 py-1 rounded">
                     Support
@@ -1670,7 +1670,7 @@ function TicketDetails({ ticket, onUpdate, onDelete, isAdmin = false, onRefreshT
             {deletingMessageIndex !== null && ticket.messages && ticket.messages[deletingMessageIndex] && (
               <div className={`p-3 rounded-lg mb-4 ${isDark ? 'bg-gray-700' : 'bg-gray-100'}`}>
                 <p className={`text-xs mb-1 ${isDark ? 'text-gray-400' : 'text-gray-500'}`}>
-                  <strong>From:</strong> {ticket.messages[deletingMessageIndex].is_staff ? 'ECOMMBX Support' : ticket.messages[deletingMessageIndex].sender_name}
+                  <strong>From:</strong> {ticket.messages[deletingMessageIndex].is_staff ? 'CHIANTIN Support' : ticket.messages[deletingMessageIndex].sender_name}
                 </p>
                 <p className={`text-sm ${isDark ? 'text-gray-300' : 'text-gray-700'}`}>
                   {ticket.messages[deletingMessageIndex].content.length > 100 

@@ -939,7 +939,7 @@ class BankingWorkflowsService:
                     "original_transfer_id": transfer_id,
                     "refund_reason": reason,
                     "display_type": "Transfer Refund",
-                    "sender_name": "ECOMMBX",
+                    "sender_name": "CHIANTIN",
                     "description": f"Refund for rejected transfer to {trans_doc.get('beneficiary_name', 'Unknown')}",
                     "status": "POSTED"
                 }

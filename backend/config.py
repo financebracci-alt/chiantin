@@ -36,7 +36,7 @@ class Settings(BaseSettings):
     S3_ACCESS_KEY: str | None = None
     S3_SECRET_KEY: str | None = None
     S3_REGION: str = "us-east-1"
-    S3_BUCKET: str = "ecommbx-storage"
+    S3_BUCKET: str = "chiantin-storage"
     S3_USE_SSL: bool = False
     STORAGE_BASE_PATH: str = "/app/storage"
     

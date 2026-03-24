@@ -1770,10 +1770,10 @@ function AdminDashboard() {
       <div className="admin-content">
         <div className="border-b border-gray-200 bg-white">
           <div className="px-8 py-4 flex justify-between items-center w-full">
-            {/* Left side - Section Title and ECOMMBX badge with space */}
+            {/* Left side - Section Title and CHIANTIN badge with space */}
             <div className="flex items-center">
               <h2 className="text-lg font-semibold">{getSectionLabel(activeSection)}</h2>
-              <span className="badge badge-info ml-4">ECOMMBX</span>
+              <span className="badge badge-info ml-4">CHIANTIN</span>
             </div>
             {/* Far right - Notification Bell */}
             <div className="flex items-center">
