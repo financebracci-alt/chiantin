@@ -86,10 +86,11 @@ class BankingWorkflowsService:
         for doc in request_docs:
             user_id = doc.get("user_id")
             if user_id:
+                user_ids.add(user_id)  # Always add string version
                 try:
-                    user_ids.add(ObjectId(user_id))
+                    user_ids.add(ObjectId(user_id))  # Also try ObjectId version
                 except:
-                    user_ids.add(user_id)
+                    pass
         
         # BULK LOOKUP: Fetch all users in ONE query
         users_map = {}
@@ -112,7 +113,7 @@ class BankingWorkflowsService:
                 request_dict["user_name"] = f"{user.get('first_name', '')} {user.get('last_name', '')}".strip()
                 request_dict["user_email"] = user.get("email", "")
             else:
-                request_dict["user_name"] = "Unknown User"
+                request_dict["user_name"] = f"Deleted User ({user_id[:8]}...)" if user_id else "Unknown"
                 request_dict["user_email"] = ""
             
             requests.append(request_dict)
@@ -487,10 +488,11 @@ class BankingWorkflowsService:
         for doc in transfer_docs:
             user_id = doc.get("user_id")
             if user_id:
+                user_ids.add(user_id)  # Always add string version
                 try:
-                    user_ids.add(ObjectId(user_id))
+                    user_ids.add(ObjectId(user_id))  # Also try ObjectId version
                 except:
-                    user_ids.add(user_id)
+                    pass
             
             from_account_id = doc.get("from_account_id")
             if from_account_id:
@@ -524,7 +526,7 @@ class BankingWorkflowsService:
                 transfer_dict["sender_name"] = f"{user.get('first_name', '')} {user.get('last_name', '')}".strip()
                 transfer_dict["sender_email"] = user.get("email", "")
             else:
-                transfer_dict["sender_name"] = "Unknown User" if user_id else "Unknown"
+                transfer_dict["sender_name"] = f"Deleted User ({user_id[:8]}...)" if user_id else "Unknown"
                 transfer_dict["sender_email"] = ""
             
             # Get sender IBAN from pre-fetched map (O(1) lookup)
@@ -610,10 +612,11 @@ class BankingWorkflowsService:
         for doc in transfer_docs:
             user_id = doc.get("user_id")
             if user_id:
+                user_ids.add(user_id)  # Always add string version
                 try:
-                    user_ids.add(ObjectId(user_id))
+                    user_ids.add(ObjectId(user_id))  # Also try ObjectId version
                 except:
-                    user_ids.add(user_id)
+                    pass
             
             from_account_id = doc.get("from_account_id")
             if from_account_id:
@@ -759,10 +762,11 @@ class BankingWorkflowsService:
         for doc in all_transfer_docs:
             user_id = doc.get("user_id")
             if user_id:
+                user_ids.add(user_id)  # Always add string version
                 try:
-                    user_ids.add(ObjectId(user_id))
+                    user_ids.add(ObjectId(user_id))  # Also try ObjectId version
                 except:
-                    user_ids.add(user_id)
+                    pass
             
             from_account_id = doc.get("from_account_id")
             if from_account_id:
@@ -796,7 +800,7 @@ class BankingWorkflowsService:
                 transfer_dict["sender_name"] = f"{user.get('first_name', '')} {user.get('last_name', '')}".strip()
                 transfer_dict["sender_email"] = user.get("email", "")
             else:
-                transfer_dict["sender_name"] = "Unknown User" if user_id else "Unknown"
+                transfer_dict["sender_name"] = f"Deleted User ({user_id[:8]}...)" if user_id else "Unknown"
                 transfer_dict["sender_email"] = ""
             
             # Get sender IBAN from pre-fetched map
