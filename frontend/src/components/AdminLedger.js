@@ -33,7 +33,8 @@ export function EnhancedLedgerTools({ account, onSuccess }) {
     sender_bic: '',
     reference: '',
     description: '',
-    admin_note: ''
+    admin_note: '',
+    transaction_date: ''
   });
 
   // Professional debit form data
@@ -75,7 +76,8 @@ export function EnhancedLedgerTools({ account, onSuccess }) {
         sender_bic: creditForm.sender_bic || null,
         reference: creditForm.reference || null,
         description: creditForm.description || null,
-        admin_note: creditForm.admin_note || null
+        admin_note: creditForm.admin_note || null,
+        transaction_date: creditForm.transaction_date || null
       });
       
       toast.success(`${formatEuroAmount(parseFloat(creditForm.amount))} credited to account`);
@@ -87,7 +89,8 @@ export function EnhancedLedgerTools({ account, onSuccess }) {
         sender_bic: '',
         reference: '',
         description: '',
-        admin_note: ''
+        admin_note: '',
+        transaction_date: ''
       });
       setActiveOperation(null);
       onSuccess && onSuccess();
@@ -323,6 +326,18 @@ export function EnhancedLedgerTools({ account, onSuccess }) {
                 ))}
               </select>
             </div>
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Transaction Date</label>
+            <input
+              type="date"
+              value={creditForm.transaction_date}
+              onChange={(e) => setCreditForm({ ...creditForm, transaction_date: e.target.value })}
+              className="w-full px-3 py-2 border border-gray-300 rounded-md"
+              data-testid="credit-transaction-date"
+            />
+            <p className="text-xs text-gray-500 mt-1">Date the money was received. Leave empty to use today's date.</p>
           </div>
 
           <div className="border-t pt-4">

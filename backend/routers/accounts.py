@@ -81,6 +81,7 @@ class AdminTopUpRequest(BaseModel):
     sender_bic: Optional[str] = None
     reference: Optional[str] = None
     admin_note: Optional[str] = None
+    transaction_date: Optional[str] = None  # YYYY-MM-DD format, date money was received
 
 
 class AdminWithdrawRequest(BaseModel):
@@ -577,6 +578,16 @@ async def admin_account_topup(
     # Remove None values to keep metadata clean
     transaction_metadata = {k: v for k, v in transaction_metadata.items() if v is not None}
     
+    # Parse custom transaction date if provided
+    custom_value_date = None
+    if data.transaction_date:
+        try:
+            from datetime import datetime, timezone
+            parsed = datetime.strptime(data.transaction_date, "%Y-%m-%d")
+            custom_value_date = parsed.replace(hour=12, minute=0, second=0, tzinfo=timezone.utc)
+        except ValueError:
+            raise HTTPException(status_code=400, detail="Invalid transaction_date format. Use YYYY-MM-DD")
+    
     ledger_engine = LedgerEngine(db)
     txn = await ledger_engine.top_up(
         user_account_id=account["ledger_account_id"],
@@ -584,7 +595,8 @@ async def admin_account_topup(
         external_id=f"admin_topup_{uuid.uuid4()}",
         reason=data.description or "Admin credit",
         performed_by=current_user["id"],
-        metadata=transaction_metadata
+        metadata=transaction_metadata,
+        value_date=custom_value_date
     )
     
     # Audit

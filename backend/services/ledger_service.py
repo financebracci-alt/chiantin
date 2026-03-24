@@ -141,7 +141,8 @@ class LedgerEngine:
         external_id: Optional[str] = None,
         reason: Optional[str] = None,
         performed_by: Optional[str] = None,
-        metadata: Optional[dict] = None
+        metadata: Optional[dict] = None,
+        value_date: Optional[datetime] = None
     ) -> LedgerTransaction:
         """Post a transaction with entries."""
         # Check idempotency
@@ -175,7 +176,7 @@ class LedgerEngine:
                 )
         
         # Create transaction
-        txn = LedgerTransaction(
+        txn_kwargs = dict(
             transaction_type=transaction_type,
             status=TransactionStatus.POSTED,
             external_id=external_id,
@@ -183,6 +184,10 @@ class LedgerEngine:
             performed_by=performed_by,
             metadata=metadata or {}
         )
+        if value_date:
+            txn_kwargs["value_date"] = value_date
+            txn_kwargs["created_at"] = value_date
+        txn = LedgerTransaction(**txn_kwargs)
         
         txn_dict = txn.model_dump()
         txn_dict["_id"] = txn.id
@@ -215,7 +220,8 @@ class LedgerEngine:
         external_id: Optional[str] = None,
         reason: str = "Sandbox top-up",
         performed_by: Optional[str] = None,
-        metadata: Optional[dict] = None
+        metadata: Optional[dict] = None,
+        value_date: Optional[datetime] = None
     ) -> LedgerTransaction:
         """Add funds to user account."""
         # Get or create sandbox funding account
@@ -235,7 +241,8 @@ class LedgerEngine:
             external_id=external_id,
             reason=reason,
             performed_by=performed_by,
-            metadata=metadata
+            metadata=metadata,
+            value_date=value_date
         )
     
     async def withdraw(
